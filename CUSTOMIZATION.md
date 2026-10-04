@@ -106,3 +106,16 @@ MediabunnyのMPL-2.0本文、ソース提供情報と未改変の `mediabunny-1.
 - JavaScript・HTTP・consoleの重大エラーなし。LICENSE・第三者表示・vendorファイルは元ソースとSHA256一致。
 - テスト素材・保存JSON・動画・スクリーンショット・検証スクリプトは公開リポジトリに含めていません。
 - 長時間・4K出力、別OS、実ユーザー素材、全演出組み合わせの受入確認は未実施です。
+
+## Published Validation — 2026-10-04
+
+GitHub Repository: https://github.com/takashige2026/synthia-layer-studio
+
+Web App: https://takashige2026.github.io/synthia-layer-studio/
+
+- GitHub APIでPublic・非Fork・`main`・Pages `main / root`・`built`を確認。
+- 配信URL上でWindowsのChrome・Edgeを使用し、ローカル検証と同じSRT・編集・タイムライン・ガチャ・JSON・画像／動画背景・合成音源・スペアナの操作を確認。
+- 公開環境でも2秒・854×480・24fpsのマット＋フロント、フロント単独、タイトル・AAC音声付き簡易MP4を保存し、動画フレームのデコードを確認。
+- 日本語・英語・サブディレクトリの言語リンク、Google Fontsのファイル取得、canonical・og:url・og:titleを確認。
+- JavaScript、console、HTTPエラーと通信失敗は検出されませんでした。
+- テスト素材は合成データのみで、公開リポジトリへアップロードしていません。
