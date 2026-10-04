@@ -1,0 +1,148 @@
+# SYNTHIA Layer Studio
+
+Browser-based subtitle animations, subtitle layers and lyric videos. Desktop Chrome / Edge recommended.
+
+## Credits
+
+SYNTHIA Layer Studio is based on [JIZURA by hakoniwa](https://github.com/852wa/JIZURA) and [JIZURA Layer Studio modifications by cityedge](https://github.com/cityedge/jizura_layer_studio).
+The original authors do not maintain SYNTHIA. Their copyright notices and the MIT License are retained.
+Mediabunny retains MPL-2.0; its license and unchanged source distribution remain in `vendor/`.
+See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Web App
+
+[日本語 / Japanese](https://takashige2026.github.io/synthia-layer-studio/) · [English](https://takashige2026.github.io/synthia-layer-studio/en/)
+
+Repository: https://github.com/takashige2026/synthia-layer-studio
+
+[ローカル版 / Local edition](index.html)
+
+## Updating
+
+1. Edit source files in `app/` or `src/`.
+2. Run `python build.py` to regenerate the Japanese and English editions.
+3. Run `node dev/layer_test.js`, `node dev/filler_test.js`, `node dev/simple_export_test.js` and related tests; verify the app in a browser.
+4. Run `python tools/package_release.py` to keep a release ZIP (`dist/` is excluded from Git).
+5. Run `git add .`, `git commit -m "fix: describe the change"`, then `git push`.
+6. GitHub Pages updates automatically from `main / (root)`. Recheck the live URL.
+
+This independent repository does not automatically synchronize upstream updates. Compare changes and manually adopt only what is needed. See [CUSTOMIZATION.md](CUSTOMIZATION.md).
+
+**Animated subtitle layers · SYNTHIA customization · v1.5.0**
+
+**Motion library…** saves a subtitle’s motion for previewing and applying to new lyrics. Export/import the shared collection as dedicated JSON. [Instructions](user_guide.en.md#motion-library)
+
+Grayscale alpha matte export supports adjustable background-color opacity, optional decorative number/time hiding, and themes for Auto-compose and cue draws. Choose No theme, Lyric video, Kinetic, Japanese, Horror, Pop or Ballad; change one cue's direction and use 9 to restore the global taste.
+
+**User themes…** lets you create and edit independent style/mood weights. Select one and press 1 to apply it to the current cue. Themes support a browser-wide library, project JSON and dedicated theme JSON export/import. [User-theme instructions](user_guide.en.md#creating-and-transferring-user-themes)
+
+Subtitle draw **9 / Global taste** clears local choices and redraws the current cue within the latest globally applied settings.
+
+Edit SRT part breaks in the subtitle summary: Enter adds a separator above the cue at its start, otherwise below, and Backspace/Delete removes a blank separator. Text and timing stay protected; Undo and JSON persistence are supported.
+
+Subtitle draws: **1 Everything / 2 Style / 3 Mood / 4 Performance / 5 Colors / 6 Fine-tune / 7 Fonts / 9 Global taste / 0 Random**. Random explores compatible combinations outside style/mood preferences, with limits on effect density. After Random, use 2–5 or 7 to replace specific groups or 6 to return to the retained base settings. Global controls offer coherent Fonts, whole Palette changes including the main color, and the original Palette fine-tune. Use **Export front MP4 only** to skip matte generation and encoding when you do not need a matte.
+
+[Open English app](en/index.html) · [日本語](README.md) · **[Detailed user manual](user_guide.en.md)** · [Quick workflow](docs/LAYER_WORKFLOW.en.md) · [Manual publication](docs/PUBLISHING.en.md)
+
+Create a subtitle front on black and a binary or grayscale matte as two synchronized, silent MP4 files for compositing over another video.
+
+An optional [simple video export](user_guide.en.md#exporting-a-simple-video) combines an image or video background, spectrum, subtitles and optional audio into one MP4.
+
+This is an **unofficial derivative of [JIZURA by hakoniwa](https://github.com/852wa/JIZURA)**, adapted by cityedge for subtitle layer production. The original author does not maintain this edition. Thanks to the original effect engine and community translations.
+
+Use Add subtitle at start, Add after and Delete in the SRT editor to add/remove normal cues; Ctrl+Z undoes changes. Empty text keeps a silent slot. Ideographic spaces are valid text; ASCII spaces separate groups. Invalid times block export until corrected.
+
+## Quick start
+
+After importing SRT, use **Add fillers…** to generate editable placeholders in intros, interludes and outros. Defaults enable all types (Whitespace 3, Lyrics 8, Timestamp 2, Symbols 1, Custom text 0). Custom text accepts user-entered text and is initially empty and require at least 5 seconds after subtracting a 0.3-second pre-gap and 0.5-second post-gap. Configure types, weights, duration and margins in the dialog. Regeneration replaces edited fillers too, while preserving normal subtitles and their effects. See [Filler subtitles](docs/LAYER_WORKFLOW.en.md#filler-subtitles).
+
+1. Download the repository files and open `en/index.html` in desktop Chrome / Edge. GitHub's source viewer does not execute the app; use the published Pages URL if available.
+2. Import a UTF-8 SRT or type subtitles.
+3. Auto-compose effects, then adjust individual lines.
+4. Load a preview background and optionally generate a spectrum from audio or import spectrum footage.
+5. Export the MP4 pair. Allow multiple downloads when prompted, or use the individual save links.
+
+For a finished video with background, audio and title, open Simple video settings… to check duration, audio and title, then Export simple video MP4. See [title settings](user_guide.en.md#title-settings).
+
+User guide and About / rights dialogs are available in the app. The interface supports Japanese (`index.html`) and English (`en/index.html`), selectable from the top language menu. This does not restrict subtitle text languages or fonts.
+
+## Create spectrum videos
+
+The built-in spectrum scans the whole song to choose a frequency range including 250–4,000 Hz. Auto range shows the result, fixed throughout playback. FFT sizes, level handling and pulse processing remain unchanged.
+
+The app can also generate 64 bars from the loaded song. Choose **Generate from audio** under Spectrum source, then adjust sensitivity, pulse strength, return time and top/bottom colors. The gradient is fixed to the maximum height. Preview, pair export and simple export share the same motion. See [Built-in spectrum](user_guide.en.md#generating-from-audio).
+
+[Audio Spectrum Overlay Maker](https://github.com/cityedge/audio-spectrum-overlay-maker) is a tool developed by cityedge for creating spectrum videos to import into this app. Use it to prepare your spectrum footage.
+
+## Features
+
+On desktop, the whole center pane scrolls vertically with a permanent scrollbar. Card changes preserve preview size and the scroll offset from the pane top. Detailed technique choices expand downward; scroll the center pane to choose them. The wheel over the timeline zooms it. Mobile mode retains page scrolling.
+
+Simple export supports image and video backgrounds. Use [transitions retaining the previous cut](user_guide.en.md#transitions-that-retain-the-previous-subtitle) and [opacity controls](user_guide.en.md#opacity-and-background-color-opacity) to shape the composite. See [CHANGELOG.md](CHANGELOG.md) for release history.
+
+The retained JIZURA effects engine works alongside this edition's layer tools. The [user manual](user_guide.en.md) explains controls, workflows and limits.
+
+| Task | Features and instructions |
+|---|---|
+| Prepare text | [Editable SRT cues](user_guide.en.md#importing-and-editing-srt), [direct input, LRC and markup](user_guide.en.md#typing-subtitles-directly) |
+| Follow music | [Beat analysis, BPM and tap sync](user_guide.en.md#audio-and-timing), [timeline zoom, seek and line/cut looping](user_guide.en.md#playback-and-timeline) |
+| Explore proposals | [Auto-compose, Shuffle, partial rerolls and look history](user_guide.en.md#auto-compose-and-shuffle) |
+| Refine typography | [Styles, three font roles and installed PC fonts](user_guide.en.md#styles-and-fonts), [colors](user_guide.en.md#colors) |
+| Control motion | [Motion, glitch, chromatic offset, ornaments, density, texture, HUD, cadence, unity and typesetting](user_guide.en.md#effects) |
+| Choose techniques | [Ten candidate groups, sets and locks](user_guide.en.md#choosing-techniques), [individual line/cut replacement](user_guide.en.md#editing-individual-lines-and-cuts) |
+| Work over footage | [Preview background and display modes](user_guide.en.md#preview-background-and-display-modes), [center-clear layout](user_guide.en.md#leaving-the-center-clear) |
+| Fill instrumental gaps | [Editable fillers, durations, weights and timestamp tags](user_guide.en.md#filler-subtitles) |
+| Add a spectrum | [Optional matte, pair selection, position, scale and frame synchronization](user_guide.en.md#compositing-a-spectrum-video) |
+| Deliver and resume | [MP4 pairs/ranges](user_guide.en.md#exporting-mp4), [external compositing](user_guide.en.md#compositing-in-a-video-editor), [JSON projects](user_guide.en.md#saving-and-resuming) |
+
+Layer-production specifications:
+
+- Import SRT as an editable starting point. Click the timeline to seek; drag start handles, type start times or use ±0.1s shifts to retime cues while preserving their duration. Edit text and end times in the cue editor. Tap synchronization is available only without SRT.
+- Image/video preview backgrounds, excluded from pair exports.
+- Original text colours, graphics, ornaments and transitions.
+- Choose None, Generate from audio or External video as the spectrum source. External footage accepts an optional matching matte; without it, only RGB 000000 is transparent.
+- Spectrum defaults: 65% frame width, 3% left/bottom margins; adjustable position and independent scales.
+- Always remove exterior bloom added by post-processing; preserve text, graphics, sparks and interior brightness changes.
+- Two direct silent MP4 downloads; matte filename adds `_matte_dark`.
+- 480p, 540p, 720p, 1360×766, 900p, 1080p, 1440p and 4K presets; actual dimensions depend on aspect ratio.
+- Project JSON save/restore.
+
+Duration automatically follows the longest subtitle, spectrum, decoded audio or video background when materials are loaded or changed, and remains manually editable. Audio counts even with Exclude audio checked. Background videos start at timeline zero and hold their final frame after ending. Their audio is ignored; only the separately loaded song is included. Both generated and external spectra can be used with video backgrounds. PNG and After Effects output are not provided.
+
+Simple video settings… contains duration, Exclude audio and title controls. Titles support font, bold/italic, color, outline, position, translucent black backing, whole-video or start/end timing, and one-second in/out fades. Title text is in front; its backing is directly above the background. Inspect the composite with the dialog time slider. Settings persist in JSON and do not affect layer exports.
+
+## Composite, save and compatibility
+
+New projects default to 30fps and 15 drawings/s. Spectrum export selects decoded frames by presentation timestamp; see the user guide for frame correspondence and legacy project settings.
+
+Apply the matte with Darken, then the front with Lighten. Align both videos in time and size. For alpha-based compositing, white matte means transparent and black means opaque. Binary mode uses a binary matte. Alpha mode exports premultiplied RGB and a continuous inverse grayscale matte: result = front + background*(matte/255). Multiply the background by the matte, then add the front; do not apply alpha to the front again. Darken/Lighten is for binary pairs only. Lossy MP4 may introduce small color/edge changes. If Add is unavailable, use [Difference with two white layers](user_guide.en.md#when-add-is-unavailable-but-difference-is-available).
+
+Selected media stays in the browser; fonts are loaded from Google Fonts. Settings/subtitles are autosaved locally; save project JSON explicitly too. Background, spectrum and song files are not embedded: reselect them when reopening.
+
+MP4 needs WebCodecs and H.264 encoding support. Desktop Chrome / Edge is recommended; availability varies by browser/OS. Long/4K exports are not thoroughly verified; start with a short range.
+
+## Build and manual publication
+
+Use Python 3.10+ (standard library only); replace `python` with your environment's executable.
+
+```text
+python build.py
+node dev/layer_test.js
+node dev/filler_test.js
+node dev/simple_export_test.js
+python tools/package_release.py
+```
+
+The bundle is generated under `dist/`. Upload the contents of its `upload/` folder to an independent repository following the [publication guide](docs/PUBLISHING.en.md). No Fork, git push or upstream synchronization is required.
+
+When updating from layer.13 / layer.14, also delete the obsolete GitHub files listed in the release folder's `DELETE_FROM_REPOSITORY.txt`. Uploading replacements does not delete old files.
+
+Source lives in `src/`; UI, translations and notices in `app/`; the MP4 library in `vendor/`. Each generated HTML includes application code and license notices. See [workflow details](docs/LAYER_WORKFLOW.en.md) and [change history](CHANGELOG.md).
+
+## Rights
+
+The original and derivative are [MIT licensed](LICENSE). Preserve original copyright and license text when redistributing. See [third-party notices](THIRD_PARTY_NOTICES.md).
+
+Exported videos do not require an application MIT credit. Check the rights and terms of your lyrics, music, images, videos, fonts and other material separately. The software is provided without warranty.
+
+Bundled Mediabunny 1.60.0 is separately licensed under MPL-2.0. Its unmodified source distribution and license are included in `vendor/`.
