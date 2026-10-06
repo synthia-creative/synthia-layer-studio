@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 NAME = 'SYNTHIA Layer Studio'
-SITE_URL = 'https://takashige2026.github.io/synthia-layer-studio'
+SITE_URL = 'https://synthia-creative.github.io/synthia-layer-studio'
 
 
 def read(name):
