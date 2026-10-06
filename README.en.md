@@ -11,9 +11,9 @@ See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Web App
 
-[日本語 / Japanese](https://takashige2026.github.io/synthia-layer-studio/) · [English](https://takashige2026.github.io/synthia-layer-studio/en/)
+[日本語 / Japanese](https://synthia-creative.github.io/synthia-layer-studio/) · [English](https://synthia-creative.github.io/synthia-layer-studio/en/)
 
-Repository: https://github.com/takashige2026/synthia-layer-studio
+Repository: https://github.com/synthia-creative/synthia-layer-studio
 
 [ローカル版 / Local edition](index.html)
 

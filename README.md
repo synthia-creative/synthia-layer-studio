@@ -11,9 +11,9 @@ See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Web App
 
-[日本語 / Japanese](https://takashige2026.github.io/synthia-layer-studio/) · [English](https://takashige2026.github.io/synthia-layer-studio/en/)
+[日本語 / Japanese](https://synthia-creative.github.io/synthia-layer-studio/) · [English](https://synthia-creative.github.io/synthia-layer-studio/en/)
 
-Repository: https://github.com/takashige2026/synthia-layer-studio
+Repository: https://github.com/synthia-creative/synthia-layer-studio
 
 [ローカル版 / Local edition](index.html)
 
@@ -45,7 +45,7 @@ SRT読み込み後の「字幕」欄でパート区切りを手動編集でき�
 
 字幕単位ガチャは **1：全体／2：スタイル／3：雰囲気／4：演出／5：配色／6：微調整／7：書体／9：全体のテイスト／0：ランダム**。全体側の「ここだけ変える」では、雰囲気に沿う「書体」、主カラーも変える「配色」、従来の「配色微調整」を使い分けられます。マットが不要な場合は「フロントだけ MP4を出力」で生成・エンコードの負荷を減らせます。
 
-[公開アプリを開く](https://takashige2026.github.io/synthia-layer-studio/) · [ローカル版](index.html) · [English](README.en.md) · **[詳細ユーザーマニュアル](user_guide.md)** · [短い利用ガイド](docs/LAYER_WORKFLOW.md) · [手動公開の手順](docs/PUBLISHING.md)
+[公開アプリを開く](https://synthia-creative.github.io/synthia-layer-studio/) · [ローカル版](index.html) · [English](README.en.md) · **[詳細ユーザーマニュアル](user_guide.md)** · [短い利用ガイド](docs/LAYER_WORKFLOW.md) · [手動公開の手順](docs/PUBLISHING.md)
 
 他の動画へ重ねる「黒背景の字幕フロント」と「二値／グレーマット」を、同じサイズ・fps・フレーム数の2本のMP4として作るブラウザアプリです。
 

@@ -74,7 +74,7 @@ python tools/package_release.py
 
 ## Deploy
 
-GitHub Pages: `main / root`。公開先: https://takashige2026.github.io/synthia-layer-studio/ / Repository: https://github.com/takashige2026/synthia-layer-studio
+GitHub Pages: `main / root`。公開先: https://synthia-creative.github.io/synthia-layer-studio/ / Repository: https://github.com/synthia-creative/synthia-layer-studio
 
 ## 今後の更新
 
@@ -109,9 +109,9 @@ MediabunnyのMPL-2.0本文、ソース提供情報と未改変の `mediabunny-1.
 
 ## Published Validation — 2026-10-04
 
-GitHub Repository: https://github.com/takashige2026/synthia-layer-studio
+GitHub Repository: https://github.com/synthia-creative/synthia-layer-studio
 
-Web App: https://takashige2026.github.io/synthia-layer-studio/
+Web App: https://synthia-creative.github.io/synthia-layer-studio/
 
 - GitHub APIでPublic・非Fork・`main`・Pages `main / root`・`built`を確認。
 - 配信URL上でWindowsのChrome・Edgeを使用し、ローカル検証と同じSRT・編集・タイムライン・ガチャ・JSON・画像／動画背景・合成音源・スペアナの操作を確認。
