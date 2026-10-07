@@ -3,7 +3,7 @@
 'use strict';
 // IDs include legacy controls; explicit element constructors below stay typed.
 const $ = id => /** @type {any} */ (document.getElementById(id)), tr = J.layerText;
-const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
+const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],motionEditing:['段階別モーション','Staged motion'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
 J.studioElement = (tag, text, id) => { const e=document.createElement(tag); if(text!=null)e.textContent=text;if(id)e.id=id;return e; };
 J.studioButton = (id, ja, en, action) => {const e=J.studioElement('button',tr(ja,en),id);e.type='button';e.addEventListener('click',()=>{if(J.ui.exporting||J.layerSession.busy)return;try{const result=action();if(result?.catch)result.catch(error=>J.uiApi.toast(error.message));}catch(error){J.uiApi.toast(error.message);}});return e;};
 J.studioChanged = () => {J.uiApi.syncUI();J.uiApi.replan();J.uiApi.flushSave();};

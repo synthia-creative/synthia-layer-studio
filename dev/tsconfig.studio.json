@@ -20,6 +20,8 @@
     "../src/13h_timing_ui.js",
     "../src/13i_character_ui.js",
     "../src/11zz_yfonts.js",
-    "../src/13j_font_ui.js"
+    "../src/13j_font_ui.js",
+    "../src/11zz_zmotion.js",
+    "../src/13k_motion_ui.js"
   ]
 }

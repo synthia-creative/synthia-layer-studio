@@ -39041,13 +39041,14 @@ J.parseMotionLibrary = data => {
 (() => {
 'use strict';
 const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
-J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
+J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'motionEditing', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
 J.normalizeStudio = value => ({
   flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
   tapGap: finite(value?.tapGap, 0, 0, 1000),
   blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
   characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
   fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
+  motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
@@ -39137,6 +39138,19 @@ J.restoreStudioFonts=async files=>{for(const f of J.normalizeStudioFonts(files))
 const plan=J.plan;J.plan=(project,audio)=>{for(const f of J.normalizeStudioFonts(project.studio?.fontFiles))register(f);return plan(project,audio);};
 const ensure=J.ensureFonts;J.ensureFonts=async(text,keys)=>{await J.restoreStudioFonts(J.ui?.project?.studio?.fontFiles);return ensure(text,keys);};
 J.importStudioFont=async(file,project)=>{if(!/\.(ttf|otf|woff2?)$/i.test(file.name)||file.size>8*1024*1024)throw new Error(J.layerText('TTF/OTF/WOFF/WOFF2（8MB以下）を選択してください。','Choose TTF/OTF/WOFF/WOFF2 (up to 8 MB).'));const epoch=J.projectSessionEpoch,bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));const f={key:'local_import_'+crypto.randomUUID().replace(/-/g,'_'),label:file.name,data:btoa(binary)};J.studioFontBytes(f.data);if(project.studio.fontFiles.length>=8)throw new Error('Maximum 8 imported fonts');if(J.normalizeStudioFonts([...project.studio.fontFiles,f]).length!==project.studio.fontFiles.length+1)throw new Error('Font data limit reached');await J.restoreStudioFonts([f]);if(epoch!==J.projectSessionEpoch||project!==J.ui.project)return null;J.uiApi.pushEdit();project.studio.fontFiles.push(f);project.userFonts.push({key:f.key,label:f.label,family:'Synthia_'+f.key,weight:400});for(const role of Object.keys(J.ui.plan.style.fonts))project.fonts[role]=f.key;J.studioChanged();return f;};
+})();
+
+(() => {
+'use strict';
+const clamp=(v,d,lo=0,hi=1)=>Number.isFinite(v)?Math.max(lo,Math.min(hi,v)):d;
+J.STUDIO_PRESETS={Minimal:['blur','still','blur',.2],Pop:['pop','breathe','shrink',.65],Rock:['drop','jitter','scatter',.8],Cyber:['type','glitchtick','blur',.65],Emotional:['blur','drift','blur',.35],Elegant:['wipe','still','blur',.25],Dark:['blur','breathe','blur',.35],Impact:['pop','jitter','scatter',.95],Glitch:['scramble','glitchtick','flicker',.8],Cinematic:['zoom','drift','shrink',.5]};
+J.STUDIO_CONTROLS=['calm','impact','sharpness','speed','spread','shake','glitch'];
+J.studioMotionRow=v=>({enter:J.ENTER[v?.enter]?v.enter:'',hold:J.HOLD[v?.hold]?v.hold:'',exit:J.EXIT[v?.exit]?v.exit:'',intensity:clamp(v?.intensity,.5)});
+J.normalizeStudioMotion=v=>{const controls={};for(const key of J.STUDIO_CONTROLS)controls[key]=clamp(v?.controls?.[key],key==='speed'?50:0,0,100);const rows={};for(const [key,row]of Object.entries(v?.rows||{}).slice(0,20000))if(/^line-\d+$|^cue-.{1,100}$/.test(key))rows[key]=J.studioMotionRow(row);return{preset:Object.hasOwn(J.STUDIO_PRESETS,v?.preset)?v.preset:'Minimal',controls,rows};};
+J.studioPreset=(name)=>{const recipe=J.STUDIO_PRESETS[name]||J.STUDIO_PRESETS.Minimal;return J.studioMotionRow({enter:recipe[0],hold:recipe[1],exit:recipe[2],intensity:recipe[3]});};
+const planner=J.plan;J.plan=(project,audio)=>{const plan=planner(project,audio);if(!J.studioOn(project,'motionEditing'))return plan;for(const cut of plan.cuts){const line=plan.lines.find(l=>l.index===cut.line);if(!line||line.interlude)continue;const row=plan.studio.motion.rows[J.studioLineKey(line)];if(!row)continue;for(const [stage,table]of[['enter',J.ENTER],['hold',J.HOLD],['exit',J.EXIT]]){const def=table[row[stage]];if(def&&(!def.maxChars||[...cut.text].length<=def.maxChars)&&(!def.minDur||cut.dur>=def.minDur))cut[stage]=row[stage];}const speed=.5+plan.studio.motion.controls.speed/100;cut.inDur=Math.min(cut.dur/2,cut.inDur/speed);cut.outDur=Math.min(cut.dur/2,cut.outDur/speed);cut.studioMotion=row;}return plan;};
+const make=J.Renderer.prototype.makeEnv;J.Renderer.prototype.makeEnv=function(ctx,plan,cut,sc,opt){const env=make.call(this,ctx,plan,cut,sc,opt);if(plan.studio?.flags.motionEditing&&cut?.studioMotion){const row=cut.studioMotion,c=plan.studio.motion.controls,amt=row.intensity*(1-c.calm/125);env.fx={...env.fx,motion:amt*(.5+c.impact/100),glitch:(env.fx.glitch||0)*c.glitch/100};env.studioAmount=amt;}return env;};
+const draw=J.drawItem;J.drawItem=(env,it)=>{if(!env.cut?.studioMotion||!env.plan.studio?.flags.motionEditing||env.inLayer||it._studioMotion||!env.cut.text.includes(it.text))return draw(env,it);const c=env.plan.studio.motion.controls,a=env.studioAmount||0,old=it.charFn,phase=Math.sin(env.t*(2+c.speed/10)),pulse=1+.035*a*phase*c.impact/100;return draw(env,{...it,_studioMotion:true,sx:(it.sx||1)*pulse,sy:(it.sy||1)*pulse,blur:(it.blur||0)*(1-c.sharpness/100),charFn:(i,g,n)=>{const t=old?.(i,g,n)||{};return{...t,dx:(t.dx||0)+(i-(n-1)/2)*a*c.spread/10,dy:(t.dy||0)+Math.sin(env.t*14+i)*a*c.shake/10,rot:(t.rot||0)+phase*a*c.impact/30};}});};
 })();
 
 /* English labels are applied after all expression packs register, before the editor starts.
@@ -42919,7 +42933,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 'use strict';
 // IDs include legacy controls; explicit element constructors below stay typed.
 const $ = id => /** @type {any} */ (document.getElementById(id)), tr = J.layerText;
-const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
+const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],motionEditing:['段階別モーション','Staged motion'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
 J.studioElement = (tag, text, id) => { const e=document.createElement(tag); if(text!=null)e.textContent=text;if(id)e.id=id;return e; };
 J.studioButton = (id, ja, en, action) => {const e=J.studioElement('button',tr(ja,en),id);e.type='button';e.addEventListener('click',()=>{if(J.ui.exporting||J.layerSession.busy)return;try{const result=action();if(result?.catch)result.catch(error=>J.uiApi.toast(error.message));}catch(error){J.uiApi.toast(error.message);}});return e;};
 J.studioChanged = () => {J.uiApi.syncUI();J.uiApi.replan();J.uiApi.flushSave();};
@@ -42982,6 +42996,15 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (() => {
 'use strict';
 function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('advancedFont','フォントファイル読込','Import font files'),file=el('input',null,'studioFontFile');file.type='file';file.accept='.ttf,.otf,.woff,.woff2';const label=el('label',tr('フォントを選択 / ここへドロップ','Choose a font / drop here'));label.className='studio-font-drop';label.append(file);root.append(label);const status=el('p',null,'studioFontStatus');status.setAttribute('role','status');root.append(status,el('p',tr('追加したフォント本体はプロジェクトJSONに含まれます。最大8書体・各8MB・合計約18MB。既存の「PCのフォントから選ぶ」も引き続き使えます。','Imported font data is embedded in project JSON. Up to 8 fonts, 8 MB each, about 18 MB total. The installed PC font picker remains available.')));let busy=false;const load=async f=>{if(!f||busy)return;busy=true;file.disabled=true;try{const added=await J.importStudioFont(f,J.ui.project);status.textContent=added?added.label+' ✓':'';}catch(e){status.textContent=e.message;J.uiApi.toast(e.message);}finally{busy=false;file.disabled=false;file.value='';}};file.addEventListener('change',()=>load(file.files?.[0]));label.addEventListener('dragover',e=>e.preventDefault());label.addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files[0]);});J.syncLayerUI();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
+(() => {
+'use strict';
+function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('motionEditing','IN / HOLD / OUT・演出強度','IN / HOLD / OUT / intensity'),line=el('select',null,'studioMotionLine'),preset=el('select',null,'studioPreset'),fields={};root.append(line,preset);for(const name of Object.keys(J.STUDIO_PRESETS)){const o=el('option',name);o.value=name;preset.append(o);}for(const [name,table]of[['enter',J.ENTER],['hold',J.HOLD],['exit',J.EXIT]]){const label=el('label',name.toUpperCase()),select=el('select',null,'studioMotion-'+name);select.append(el('option',tr('既存のおまかせ','Existing auto')));for(const [key,d]of Object.entries(table)){const o=el('option',d.name||key);o.value=key;select.append(o);}select.options[0].value='';label.append(select);fields[name]=select;root.append(label);select.addEventListener('change',()=>save());}const intensity=el('input',null,'studioMotionIntensity');intensity.type='range';intensity.min='0';intensity.max='1';intensity.step='.01';const il=el('label','Intensity 0–1');il.append(intensity);root.append(il);intensity.addEventListener('change',()=>save());const labels=['落ち着き / Calm','インパクト / Impact','切れ味 / Sharpness','スピード / Speed','広がり / Spread','揺れ / Shake','グリッチ / Glitch'];const controls={};for(const [i,key]of J.STUDIO_CONTROLS.entries()){const label=el('label',labels[i]),input=el('input',null,'studioControl-'+key);input.type='range';input.min='0';input.max='100';input.step='1';label.append(input);controls[key]=input;root.append(label);input.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.motion.controls[key]=+input.value;J.studioChanged();});}
+ const selected=()=>J.ui.plan.lines.find(l=>J.studioLineKey(l)===line.value),save=()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.rows[line.value]=J.studioMotionRow({enter:fields.enter.value,hold:fields.hold.value,exit:fields.exit.value,intensity:+intensity.value});J.studioChanged();};
+ root.append(J.studioButton('studioApplyPreset','選択行にプリセットを適用','Apply preset to selected line',()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.preset=preset.value;J.ui.project.studio.motion.rows[line.value]=J.studioPreset(preset.value);J.studioChanged();}));
+ const sync=()=>{const value=line.value,lines=J.ui.plan.lines.filter(l=>l.text);line.replaceChildren(...lines.map(l=>{const o=el('option',`${l.index+1}: ${l.text.slice(0,32)}`);o.value=J.studioLineKey(l);return o;}));if(lines.some(l=>J.studioLineKey(l)===value))line.value=value;const m=J.ui.project.studio.motion,row=J.studioMotionRow(m.rows[line.value]);for(const k in fields)fields[k].value=row[k];intensity.value=String(row.intensity);for(const k in controls)controls[k].value=String(m.controls[k]);preset.value=m.preset;};line.addEventListener('change',()=>{sync();const l=selected();if(l)J.uiApi.seek(l.start+Math.min(.5,(l.end-l.start)/2));});const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 

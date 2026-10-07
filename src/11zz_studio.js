@@ -2,13 +2,14 @@
 (() => {
 'use strict';
 const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
-J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
+J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'motionEditing', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
 J.normalizeStudio = value => ({
   flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
   tapGap: finite(value?.tapGap, 0, 0, 1000),
   blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
   characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
   fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
+  motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
