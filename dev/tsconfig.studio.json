@@ -30,6 +30,8 @@
     "../src/11zz_zytimeline.js",
     "../src/13n_timeline_ui.js",
     "../src/11zz_zzexport.js",
-    "../src/13o_export_ui.js"
+    "../src/13o_export_ui.js",
+    "../src/11zz_zzzrecovery.js",
+    "../src/13p_recovery_ui.js"
   ]
 }

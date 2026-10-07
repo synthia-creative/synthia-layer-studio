@@ -245,6 +245,7 @@ async function exportVideo(simple, frontOnly = false) {
     status(tr('フォントを準備中…', 'Preparing fonts…'));
     try {
       const project = structuredClone(J.ui.project), plan = J.ui.plan, range = J.uiApi.exportRange();
+      await J.saveStudioSnapshot?.(project);
       await J.ensureFonts(project.lyrics, J.fontsOfPlan(plan));
       const missing = J.missingUserFonts(J.fontsOfPlan(plan));
       if (missing.length) throw new Error(tr('旧フォントファイルの指定を、PCにインストール済みの書体または標準書体に変更してください: ', 'Replace legacy file-font selections with installed PC fonts or built-in fonts: ') + missing.join(', '));

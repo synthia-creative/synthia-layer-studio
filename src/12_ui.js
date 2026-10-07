@@ -2064,7 +2064,14 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 J.ui = S;
 // Shared editor hooks used by the layer interface
 J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo, startTap, stopTap,
-  audioLike, cueRerollTarget,
+  audioLike, cueRerollTarget, resetAll,
+  restoreProject(project) {
+    if (S.exporting) return;
+    if (S.tap) stopTap(); pause(); J.projectSessionEpoch++;
+    S.project = mergeProject(project); ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
+    fontKey = ''; syncUI(); replan(); commit(); updateEditBtns(); flushSave();
+    seek(J.firstCuePreviewTime(S.plan));
+  },
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;
     pushEdit(); remember(); S.project = project; fontKey = ''; syncUI(); replan(); commit(); flushSave();
