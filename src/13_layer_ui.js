@@ -58,7 +58,8 @@ J.drawLayerPreview = (ctx, plan, t, opt) => {
     } catch (_) { /* An invalid duration is reported beside simple export. */ }
     J.drawSimpleTitle(ctx, title, 'backing');
     renderer.layer.getContext('2d').putImageData(new ImageData(pixels, w, h), 0, 0);
-    ctx.drawImage(renderer.layer, 0, 0);
+    if (J.studioOn(J.ui.project, 'timeline')) J.composeStudioLayers(ctx, J.ui.project, t, renderer.layer);
+    else ctx.drawImage(renderer.layer, 0, 0);
     J.drawSimpleTitle(ctx, title, 'text');
   }
   ctx.restore();

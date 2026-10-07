@@ -26,6 +26,8 @@
     "../src/11zz_zmusic.js",
     "../src/13l_analysis_ui.js",
     "../src/11zz_zxauto.js",
-    "../src/13m_auto_ui.js"
+    "../src/13m_auto_ui.js",
+    "../src/11zz_zytimeline.js",
+    "../src/13n_timeline_ui.js"
   ]
 }

@@ -7,6 +7,9 @@ interface StudioState {motion:StudioMotion;}
 interface StudioAnalysis {sections:{start:number;end:number;type:string}[];beatSnap:number;}
 interface StudioState {analysis:StudioAnalysis;}
 interface StudioInput {analysis?:StudioAnalysis;}
+interface StudioLayer {id:string;type:string;name:string;start:number;end:number;blend:string;transform:StudioTransform;text:string;color:string;fileName:string;font:string;}
+interface StudioState {layers:StudioLayer[];}
+interface StudioInput {layers?:StudioLayer[];}
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
 interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }
