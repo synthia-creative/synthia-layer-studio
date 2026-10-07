@@ -881,7 +881,7 @@ function editLine(li, ln) {
 // old per-cue snapshots can undo a later global palette/font change piecemeal.
 const HKEYS = ['style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
 const ED = { undo: [], redo: [] };
-const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
+const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
 function pushEdit() { const s = edSnap(); if (ED.undo[ED.undo.length - 1] !== s) ED.undo.push(s); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = []; updateEditBtns(); }
 function edGo(d) {
   const from = d < 0 ? ED.undo : ED.redo, to = d < 0 ? ED.redo : ED.undo;
@@ -890,6 +890,7 @@ function edGo(d) {
   if ('ov' in o) { cur.ov = S.project.overrides; cur.range = S.project.exportRange || null; }   // clearLyrics() also cleared these
   to.push(JSON.stringify(cur));
   if (o.look) Object.assign(S.project, o.look);
+  if ('studio' in o) S.project.studio = J.normalizeStudio(o.studio);
   S.project.subtitleCues = o.subtitleCues || null;
   S.project.localLooks = o.localLooks || null;
   S.project.fillerSettings = J.normalizeFillerSettings(o.fillerSettings);
@@ -1646,6 +1647,16 @@ function startTap(from = 0) {
 function tapNow() {
   if (!S.tap) return;
   if (Array.isArray(S.project.subtitleCues)) { pause(); stopTap(); return; }
+  if (J.studioOn(S.project, 'tapSync')) {
+    if (S.tap.i >= S.plan.lines.length || !S.playing || AP.pending || AP.seeking) return;
+    try {
+      const stamp = J.studioTap(S.project.timing.lineTimes, S.tap.i, playbackTime(), S.plan.lines.length);
+      S.tap.done.push({ i: S.tap.i, snapshot: stamp.before });
+      S.project.timing.lineTimes = stamp.next; S.tap.i++; replan(); updateTap(); flushSave();
+      if (S.tap.i >= S.plan.lines.length) pause();
+    } catch (error) { toast(error.message); }
+    return;
+  }
   const LT = S.project.timing.lineTimes, i = S.tap.i, t = +S.t.toFixed(3);
   S.tap.done.push({ i, had: LT[i] });
   LT[i] = t;
@@ -1659,6 +1670,10 @@ function tapBack() {                    // 1つ戻る: undo the last tap and jum
   if (!S.tap || !S.tap.done.length) return;
   if (Array.isArray(S.project.subtitleCues)) { pause(); stopTap(); return; }
   const d = S.tap.done.pop(), LT = S.project.timing.lineTimes;
+  if (d.snapshot) {
+    S.project.timing.lineTimes = d.snapshot; S.tap.i = d.i; replan(); updateTap();
+    seek(Math.max(0, S.t - 3)); if (!S.playing) play(); return;
+  }
   if (d.had != null) LT[d.i] = d.had; else delete LT[d.i];
   S.tap.i = d.i; replan(); updateTap();
   seek(Math.max(0, S.t - 3)); if (!S.playing) play();
@@ -1666,7 +1681,7 @@ function tapBack() {                    // 1つ戻る: undo the last tap and jum
 function stopTap() { resetTapSession(); replan(); flushSave(); }
 function updateTap() {
   const ln = S.plan.lines[S.tap.i];
-  $('tapLine').textContent = ln ? `${S.tap.i + 1}. ${ln.interlude ? '〔間奏〕' : ln.text}` : '—';
+  $('tapLine').textContent = ln ? `${S.tap.i + 1}. ${ln.interlude ? '〔間奏〕' : ln.text}` : J.layerText('全行の打刻完了。Undoまたは終了を選べます。', 'All lines stamped. Undo or finish.');
   const bb = $('tapBack'); if (bb) bb.disabled = !S.tap.done.length;
   $('tapPanel').classList.toggle('compact', S.tap.done.length > 0);   // 最初の数回が終わったら説明を畳んで、固定しても邪魔にならないように
 }
@@ -1709,7 +1724,11 @@ function bind() {
   $('btnResetTimes').addEventListener('click', () => { S.project.timing.lineTimes = {}; replan(); });
   $('audioFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) loadAudioFile(f); });
   $('btnTap').addEventListener('click', () => (S.tap ? stopTap() : startTap()));
-  $('tapBtn').addEventListener('click', tapNow);
+  $('tapBtn').addEventListener('click', e => { if (!J.studioOn(S.project, 'tapSync') || e.detail === 0) tapNow(); });
+  $('tapBtn').addEventListener('pointerdown', e => {
+    if (!J.studioOn(S.project, 'tapSync') || e.button !== 0 || !e.isPrimary) return;
+    e.preventDefault(); $('tapBtn').focus(); tapNow();
+  });
   $('tapStop').addEventListener('click', () => { pause(); stopTap(); });
   $('btnPlay').addEventListener('click', () => (S.playing ? pause() : play()));
   const cutPickAuto = $('cutPickAuto'), cutPickClose = $('cutPickClose');
@@ -1904,6 +1923,11 @@ function bind() {
     if (e.defaultPrevented || e.isComposing || document.querySelector('dialog[open]')) return;
     const tag = (e.target && e.target.tagName) || '';
     const typing = /INPUT|TEXTAREA|SELECT/.test(tag) || e.target?.isContentEditable;
+    if (S.tap && J.studioOn(S.project, 'tapSync')) {
+      if (typing || e.target?.closest('button,summary,a[href],[role="button"]') && e.target !== $('tapBtn') || TL.drag >= 0 || S.exporting || J.layerSession?.busy) return;
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (!e.repeat) tapNow(); return; }
+      if (e.code === 'Backspace') { e.preventDefault(); if (!e.repeat) tapBack(); return; }
+    }
     if (S.tap && (e.code === 'Space' || e.code === 'Enter') && !typing) { e.preventDefault(); tapNow(); return; }
     if (S.tap && e.code === 'Escape') { pause(); stopTap(); return; }
     if (S.tap && e.code === 'Backspace' && !typing) { e.preventDefault(); tapBack(); return; }
@@ -2039,7 +2063,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo, startTap, stopTap,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;

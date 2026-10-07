@@ -639,6 +639,15 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 @media (max-width: 650px) { .motion-library-grid { grid-template-columns: minmax(0, 1fr); } dialog.motion-library { padding: 12px; } }
 #app.is-mobile .transport { flex-wrap: wrap; }
 #app.is-mobile #btnMotionLibrary { flex: 0 0 100%; }
+/* Opt-in tools live alongside the existing panes. */
+.studio-tools { padding:16px 12px; border-top:1px solid #303540; }
+.studio-tools p { font-size:12px; color:#aeb7c7; }
+.studio-tools label { display:block; margin:8px 0; }
+.studio-tools input[type=number] { width:95px; margin-left:8px; }
+.studio-section { margin:12px 0; padding:10px 0; border-top:1px solid #303540; }
+.studio-tap-enhanced #tapPanel .hint { display:block; }
+.studio-tap-enhanced #tapBtn { width:100%; min-height:120px; touch-action:none; font-size:28px; }
+#studioTapMeta { white-space:pre-line; margin:10px 0; font-size:14px; }
 
 </style>
 </head>
@@ -39024,6 +39033,54 @@ J.parseMotionLibrary = data => {
 };
 })();
 
+/* Opt-in integrated tools. Projects retain their existing version-1 fields. */
+(() => {
+'use strict';
+const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
+J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
+J.normalizeStudio = value => ({
+  flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
+  tapGap: finite(value?.tapGap, 0, 0, 1000),
+  blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
+});
+J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
+const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
+J.defaultProject = () => ({ ...defaults(), studio: J.normalizeStudio() });
+J.upgradeLayerProject = (project, source) => {
+  upgrade(project, source); project.studio = J.normalizeStudio(source?.studio); return project;
+};
+// The complete timing snapshot matters: a tap can invalidate later old taps.
+J.studioTap = (lineTimes, index, time, count) => {
+  if (!Number.isInteger(index) || index < 0 || index >= count || !Number.isFinite(time) || time < 0) throw new Error('Invalid tap');
+  const rounded = Math.round(time * 1000) / 1000;
+  const previous = Object.values(Object.fromEntries(Object.entries(lineTimes).filter(([k]) => +k < index)));
+  if (previous.some(t => t >= rounded)) throw new Error(J.layerText('直前の行より後の時刻で打刻してください。', 'Tap after the preceding line.'));
+  const before = { ...lineTimes }, next = { ...lineTimes, [index]: rounded };
+  for (const k of Object.keys(next)) if (+k > index && next[k] <= time + 0.2) delete next[k];
+  return { before, next, index };
+};
+J.studioTapGap = (plan, project) => {
+  if (!J.studioOn(project, 'tapSync') || Array.isArray(project.subtitleCues)) return plan;
+  const gap = J.normalizeStudio(project.studio).tapGap / 1000, times = project.timing.lineTimes || {};
+  for (let i = 0; i < plan.lines.length - 1; i++) {
+    const line = plan.lines[i], next = plan.lines[i + 1];
+    if (!Number.isFinite(times[i]) || !Number.isFinite(times[i + 1])) continue;
+    const end = Math.max(line.start + .001, next.start - gap);
+    const before = line.end, ratio = (end - line.start) / Math.max(.001, before - line.start);
+    for (const cut of plan.cuts) if (cut.line === i && cut.layout !== 'interlude') {
+      cut.start = line.start + (cut.start - line.start) * ratio;
+      cut.end = line.start + (cut.end - line.start) * ratio;
+      cut.dur = cut.end - cut.start;
+      cut.inDur = Math.min(cut.inDur, cut.dur / 2); cut.outDur = Math.min(cut.outDur, cut.dur / 2);
+    }
+    line.end = end;
+  }
+  return plan;
+};
+const planner = J.plan;
+J.plan = (project, audio) => J.studioTapGap(planner(project, audio), project);
+})();
+
 /* ============================================================
    JIZURA — editor UI
    ============================================================ */
@@ -39907,7 +39964,7 @@ function editLine(li, ln) {
 // old per-cue snapshots can undo a later global palette/font change piecemeal.
 const HKEYS = ['style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
 const ED = { undo: [], redo: [] };
-const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
+const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
 function pushEdit() { const s = edSnap(); if (ED.undo[ED.undo.length - 1] !== s) ED.undo.push(s); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = []; updateEditBtns(); }
 function edGo(d) {
   const from = d < 0 ? ED.undo : ED.redo, to = d < 0 ? ED.redo : ED.undo;
@@ -39916,6 +39973,7 @@ function edGo(d) {
   if ('ov' in o) { cur.ov = S.project.overrides; cur.range = S.project.exportRange || null; }   // clearLyrics() also cleared these
   to.push(JSON.stringify(cur));
   if (o.look) Object.assign(S.project, o.look);
+  if ('studio' in o) S.project.studio = J.normalizeStudio(o.studio);
   S.project.subtitleCues = o.subtitleCues || null;
   S.project.localLooks = o.localLooks || null;
   S.project.fillerSettings = J.normalizeFillerSettings(o.fillerSettings);
@@ -40672,6 +40730,16 @@ function startTap(from = 0) {
 function tapNow() {
   if (!S.tap) return;
   if (Array.isArray(S.project.subtitleCues)) { pause(); stopTap(); return; }
+  if (J.studioOn(S.project, 'tapSync')) {
+    if (S.tap.i >= S.plan.lines.length || !S.playing || AP.pending || AP.seeking) return;
+    try {
+      const stamp = J.studioTap(S.project.timing.lineTimes, S.tap.i, playbackTime(), S.plan.lines.length);
+      S.tap.done.push({ i: S.tap.i, snapshot: stamp.before });
+      S.project.timing.lineTimes = stamp.next; S.tap.i++; replan(); updateTap(); flushSave();
+      if (S.tap.i >= S.plan.lines.length) pause();
+    } catch (error) { toast(error.message); }
+    return;
+  }
   const LT = S.project.timing.lineTimes, i = S.tap.i, t = +S.t.toFixed(3);
   S.tap.done.push({ i, had: LT[i] });
   LT[i] = t;
@@ -40685,6 +40753,10 @@ function tapBack() {                    // 1つ戻る: undo the last tap and jum
   if (!S.tap || !S.tap.done.length) return;
   if (Array.isArray(S.project.subtitleCues)) { pause(); stopTap(); return; }
   const d = S.tap.done.pop(), LT = S.project.timing.lineTimes;
+  if (d.snapshot) {
+    S.project.timing.lineTimes = d.snapshot; S.tap.i = d.i; replan(); updateTap();
+    seek(Math.max(0, S.t - 3)); if (!S.playing) play(); return;
+  }
   if (d.had != null) LT[d.i] = d.had; else delete LT[d.i];
   S.tap.i = d.i; replan(); updateTap();
   seek(Math.max(0, S.t - 3)); if (!S.playing) play();
@@ -40692,7 +40764,7 @@ function tapBack() {                    // 1つ戻る: undo the last tap and jum
 function stopTap() { resetTapSession(); replan(); flushSave(); }
 function updateTap() {
   const ln = S.plan.lines[S.tap.i];
-  $('tapLine').textContent = ln ? `${S.tap.i + 1}. ${ln.interlude ? '〔間奏〕' : ln.text}` : '—';
+  $('tapLine').textContent = ln ? `${S.tap.i + 1}. ${ln.interlude ? '〔間奏〕' : ln.text}` : J.layerText('全行の打刻完了。Undoまたは終了を選べます。', 'All lines stamped. Undo or finish.');
   const bb = $('tapBack'); if (bb) bb.disabled = !S.tap.done.length;
   $('tapPanel').classList.toggle('compact', S.tap.done.length > 0);   // 最初の数回が終わったら説明を畳んで、固定しても邪魔にならないように
 }
@@ -40735,7 +40807,11 @@ function bind() {
   $('btnResetTimes').addEventListener('click', () => { S.project.timing.lineTimes = {}; replan(); });
   $('audioFile').addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) loadAudioFile(f); });
   $('btnTap').addEventListener('click', () => (S.tap ? stopTap() : startTap()));
-  $('tapBtn').addEventListener('click', tapNow);
+  $('tapBtn').addEventListener('click', e => { if (!J.studioOn(S.project, 'tapSync') || e.detail === 0) tapNow(); });
+  $('tapBtn').addEventListener('pointerdown', e => {
+    if (!J.studioOn(S.project, 'tapSync') || e.button !== 0 || !e.isPrimary) return;
+    e.preventDefault(); $('tapBtn').focus(); tapNow();
+  });
   $('tapStop').addEventListener('click', () => { pause(); stopTap(); });
   $('btnPlay').addEventListener('click', () => (S.playing ? pause() : play()));
   const cutPickAuto = $('cutPickAuto'), cutPickClose = $('cutPickClose');
@@ -40930,6 +41006,11 @@ function bind() {
     if (e.defaultPrevented || e.isComposing || document.querySelector('dialog[open]')) return;
     const tag = (e.target && e.target.tagName) || '';
     const typing = /INPUT|TEXTAREA|SELECT/.test(tag) || e.target?.isContentEditable;
+    if (S.tap && J.studioOn(S.project, 'tapSync')) {
+      if (typing || e.target?.closest('button,summary,a[href],[role="button"]') && e.target !== $('tapBtn') || TL.drag >= 0 || S.exporting || J.layerSession?.busy) return;
+      if (e.code === 'Space' || e.code === 'Enter') { e.preventDefault(); if (!e.repeat) tapNow(); return; }
+      if (e.code === 'Backspace') { e.preventDefault(); if (!e.repeat) tapBack(); return; }
+    }
     if (S.tap && (e.code === 'Space' || e.code === 'Enter') && !typing) { e.preventDefault(); tapNow(); return; }
     if (S.tap && e.code === 'Escape') { pause(); stopTap(); return; }
     if (S.tap && e.code === 'Backspace' && !typing) { e.preventDefault(); tapBack(); return; }
@@ -41065,7 +41146,7 @@ function boot() {
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo,
+J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo, startTap, stopTap,
   audioLike, cueRerollTarget,
   applyMotionProject(project, index, resume) {
     if (S.exporting) return;
@@ -42529,6 +42610,31 @@ function boot() {
   });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* Extensions use the existing editor API; disabling a feature restores legacy tools. */
+(() => {
+'use strict';
+// IDs include legacy controls; explicit element constructors below stay typed.
+const $ = id => /** @type {any} */ (document.getElementById(id)), tr = J.layerText;
+const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
+J.studioElement = (tag, text, id) => { const e=document.createElement(tag); if(text!=null)e.textContent=text;if(id)e.id=id;return e; };
+J.studioButton = (id, ja, en, action) => {const e=J.studioElement('button',tr(ja,en),id);e.type='button';e.addEventListener('click',()=>{if(J.ui.exporting||J.layerSession.busy)return;try{const result=action();if(result?.catch)result.catch(error=>J.uiApi.toast(error.message));}catch(error){J.uiApi.toast(error.message);}});return e;};
+J.studioChanged = () => {J.uiApi.syncUI();J.uiApi.replan();J.uiApi.flushSave();};
+J.studioSection = (flag, ja, en) => {const section=J.studioElement('details',null,'studio-'+flag);section.className='studio-section';section.append(J.studioElement('summary',tr(ja,en)));$('studioTools').append(section);return section;};
+function boot(){
+ const panel=J.studioElement('section',null,'studioTools');panel.className='studio-tools';panel.append(J.studioElement('h2',tr('統合制作ツール','Integrated studio tools')),J.studioElement('p',tr('必要な拡張を有効にしてください。従来の編集・MP4出力はそのまま使えます。','Enable the tools you need. Existing editing and MP4 exports stay available.')));
+ const flags=J.studioElement('details',null,'studioFlags');flags.append(J.studioElement('summary',tr('拡張のオン／オフ','Enable / disable extensions')));
+ for(const key of J.STUDIO_FEATURES){const label=J.studioElement('label'),input=J.studioElement('input',null,'studioFlag-'+key);input.type='checkbox';input.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.flags[key]=input.checked;if(key==='tapSync'&&J.ui.tap)J.uiApi.stopTap();J.studioChanged();});label.append(input,document.createTextNode(tr(...labels[key])));flags.append(label);}
+ panel.append(flags);document.querySelector('.col-left').append(panel);
+ const gapLabel=J.studioElement('label',tr('次行までの余白（ms）','Gap before next line (ms)')),gap=J.studioElement('input',null,'studioTapGap');gap.type='number';gap.min='0';gap.max='1000';gap.step='50';gap.setAttribute('list','studioTapGaps');const presets=J.studioElement('datalist',null,'studioTapGaps');for(const value of [0,50,100,150]){const option=J.studioElement('option');option.value=String(value);presets.append(option);}gap.addEventListener('change',()=>{if(!Number.isFinite(gap.valueAsNumber)||gap.valueAsNumber<0||gap.valueAsNumber>1000)return;J.uiApi.pushEdit();J.ui.project.studio.tapGap=gap.valueAsNumber;J.studioChanged();});gapLabel.append(gap,presets);panel.append(gapLabel);
+ const meta=J.studioElement('div',null,'studioTapMeta');meta.setAttribute('aria-live','polite');$('tapBtn').before(meta);$('tapBtn').setAttribute('aria-label',tr('現在行を打刻','Stamp current lyric'));
+ const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
+ function sync(){const studio=J.ui.project.studio||(J.ui.project.studio=J.normalizeStudio());for(const key of J.STUDIO_FEATURES){$('studioFlag-'+key).checked=studio.flags[key];const section=$('studio-'+key);if(section)section.hidden=!studio.flags[key];}gapLabel.hidden=!studio.flags.tapSync;gap.value=String(studio.tapGap);document.documentElement.classList.toggle('studio-tap-enhanced',studio.flags.tapSync);}
+ function tapInfo(){if(!J.ui.tap||!J.studioOn(J.ui.project,'tapSync')){meta.hidden=true;return;}meta.hidden=false;const {i,done}=J.ui.tap,lines=J.ui.plan.lines;meta.textContent=tr(`現在 ${Math.min(i+1,lines.length)} / ${lines.length} · 打刻済み ${done.length} · 残り ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}秒\n次: ${lines[i+1]?.text||'—'}`,`Line ${Math.min(i+1,lines.length)} / ${lines.length} · Stamped ${done.length} · Remaining ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}s\nNext: ${lines[i+1]?.text||'—'}`);$('tapBtn').disabled=i>=lines.length;}
+ setInterval(tapInfo,100);sync();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 
 /* Finish pointer-operated controls without stealing keyboard/text editing focus. */

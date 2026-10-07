@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": false
+  },
+  "files": ["studio_types.d.ts", "../src/11zz_studio.js", "../src/13g_studio_ui.js"]
+}
