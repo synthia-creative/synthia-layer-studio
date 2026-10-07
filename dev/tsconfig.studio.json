@@ -24,6 +24,8 @@
     "../src/11zz_zmotion.js",
     "../src/13k_motion_ui.js",
     "../src/11zz_zmusic.js",
-    "../src/13l_analysis_ui.js"
+    "../src/13l_analysis_ui.js",
+    "../src/11zz_zxauto.js",
+    "../src/13m_auto_ui.js"
   ]
 }
