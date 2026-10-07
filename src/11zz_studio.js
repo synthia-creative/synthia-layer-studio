@@ -12,6 +12,7 @@ J.normalizeStudio = value => ({
   motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
   analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : {sections:[],beatSnap:0},
   layers: J.normalizeStudioLayers ? J.normalizeStudioLayers(value?.layers) : [],
+  output: {filename:typeof value?.output?.filename==='string'?value.output.filename.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100):''},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;

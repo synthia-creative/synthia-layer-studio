@@ -186,11 +186,12 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
   if (!attempts.length) throw new Error(tr('H.264 MP4出力に対応していません。', 'H.264 MP4 encoding is unavailable.'));
   const errors = [];
   for (const codec of attempts) {
-    let reader = null, backgroundReader = null, encoder = null, error = null, count = 0, audioPhase = false;
+    let reader = null, backgroundReader = null, studioAssets = null, encoder = null, error = null, count = 0, audioPhase = false;
     try {
       abort(signal);
       if (spectrum) reader = await J.createSpectrumReader(spectrum, w, h, span.t0, fps, span.frames, signal);
       if (background?.video) backgroundReader = await J.VideoBackgroundReader.create(background, span, fps, signal);
+      if (J.createStudioExportAssets) studioAssets = await J.createStudioExportAssets(project, span, fps, signal);
       const target = new Mp4Muxer.ArrayBufferTarget(), mux = new Mp4Muxer.Muxer({ target, video: { codec: 'avc', width: w, height: h, frameRate: fps },
         ...(audioConfig ? { audio: { codec: 'aac', sampleRate: audioConfig.sampleRate, numberOfChannels: audioConfig.numberOfChannels } } : {}), fastStart: 'in-memory', firstTimestampBehavior: 'offset' });
       encoder = new VideoEncoder({ output(chunk, meta) { try { mux.addVideoChunk(chunk, meta); count++; } catch (e) { error = e; } }, error(e) { error = e; } });
@@ -207,13 +208,15 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         abort(signal);
         const t = span.t0 + i / fps;
         if (backgroundReader) await backgroundReader.drawNext(bx);
+        if (studioAssets) await studioAssets.frame(t);
         let pixels = render.draw(plan, t);
         if (reader) pixels = J.composeLayerPixels(await reader.pixels(t, signal, project.spectrumLayout), pixels, mode);
         ctx.drawImage(base, 0, 0);
         const title = J.simpleTitleFrame(ctx, settings.title, t, span);
         J.drawSimpleTitle(ctx, title, 'backing');
         render.layer.getContext('2d').putImageData(new ImageData(pixels, w, h), 0, 0);
-        ctx.drawImage(render.layer, 0, 0);
+        if (studioAssets) J.composeStudioLayers(ctx, project, t, render.layer, studioAssets.assets);
+        else ctx.drawImage(render.layer, 0, 0);
         J.drawSimpleTitle(ctx, title, 'text');
         const frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });
         try { encoder.encode(frame, { keyFrame: i % (fps * 2) === 0 }); } finally { frame.close(); }
@@ -229,7 +232,7 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
       if (signal?.aborted || e.name === 'AbortError') throw new DOMException('Cancelled', 'AbortError');
       if (audioPhase) throw e;
       errors.push(codec.label + ': ' + e.message);
-    } finally { try { encoder?.close(); } catch (_) {} await Promise.allSettled([reader?.close(), backgroundReader?.close()]); }
+    } finally { try { encoder?.close(); } catch (_) {} await Promise.allSettled([reader?.close(), backgroundReader?.close(), studioAssets?.close()]); }
   }
   throw new Error(tr('簡易動画の出力に失敗しました。', 'Simple export failed. ') + errors.join(' / '));
 };

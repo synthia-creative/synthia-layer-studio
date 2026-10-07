@@ -206,13 +206,13 @@ J.resetLayerProjectSession = () => {
   simpleProject = null; simpleMaterials = null; simpleInvalidDraft = false;
   clearDownloads(); status(''); $('layerProgress').value = 0;
 };
-function offerDownloads(files, title) {
+function offerDownloads(files, title, project) {
   clearDownloads();
   const prefix = (title || 'project').replace(/[\\/:*?"<>|]+/g, '_').slice(0, 60);
   const links = files.map(file => {
     const a = el('a', file.name === 'simple_video.mp4' ? tr('簡易動画MP4を保存', 'Save simple video MP4') : file.name.includes('_matte_dark') ? tr('マットMP4を保存', 'Save matte MP4') : tr('フロントMP4を保存', 'Save front MP4'));
     a.href = URL.createObjectURL(file.blob); downloadUrls.push(a.href);
-    a.download = prefix + '_' + file.name; a.title = a.download;
+    a.download = J.studioOn(project, 'export') && project.studio.output.filename ? J.studioOutputName(project) + (file.name === 'simple_video.mp4' ? '.mp4' : '_' + file.name) : prefix + '_' + file.name; a.title = a.download;
     $('layerDownloads').append(a);
     return a;
   });
@@ -252,7 +252,7 @@ async function exportVideo(simple, frontOnly = false) {
         onProgress(p, m) { $('layerProgress').value = p; status((simple ? tr('簡易動画を生成中 ', 'Encoding simple video ') : frontOnly ? tr('フロント動画を生成中 ', 'Encoding front video ') : tr('ペア動画を生成中 ', 'Encoding pair ')) + m); } };
       const pair = simple ? await J.exportSimpleVideo({ ...args, background: session.background, audio: J.ui.audio }) : frontOnly ? await J.exportLayerFront(args) : await J.exportLayerPair(args);
       if (ac.signal.aborted) throw new DOMException('Cancelled', 'AbortError');
-      offerDownloads(pair.files, project.title);
+      offerDownloads(pair.files, project.title, project);
       status(simple ? tr('簡易動画MP4を生成しました。保存されない場合はリンクから保存してください。', 'Simple video MP4 is ready. Use the save link if needed.') : frontOnly ? tr('フロントMP4を生成しました。保存されない場合はリンクから保存してください。', 'Front MP4 is ready. Use the save link if needed.') : tr('2本のMP4を生成し、ダウンロードを開始しました。保存されない場合は下のリンクから個別に保存してください。', 'Two MP4s are ready and downloads have started. If either is missing, save it using the links below.'));
     } finally {
       controls.forEach((e, i) => { e.disabled = disabled[i]; });

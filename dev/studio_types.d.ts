@@ -1,4 +1,6 @@
 // Incremental contracts: existing engine APIs stay behind the legacy bridge.
+type StudioControl = HTMLButtonElement|HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement;
+declare const Mediabunny:{VideoSampleSink:new(track:unknown)=>{samplesAtTimestamps:(times:Iterable<number>)=>AsyncIterableIterator<unknown>}};
 interface StudioTransform {x:number;y:number;scale:number;rotation:number;opacity:number;kerning:number;}
 interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; characters:Record<string,{line:StudioTransform;glyphs:Record<string,StudioTransform>}>; fontFiles:{key:string;label:string;data:string}[]; }
 interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; fontFiles?:StudioState['fontFiles']; motion?:StudioMotion; }
@@ -10,6 +12,8 @@ interface StudioInput {analysis?:StudioAnalysis;}
 interface StudioLayer {id:string;type:string;name:string;start:number;end:number;blend:string;transform:StudioTransform;text:string;color:string;fileName:string;font:string;}
 interface StudioState {layers:StudioLayer[];}
 interface StudioInput {layers?:StudioLayer[];}
+interface StudioState {output:{filename:string};}
+interface StudioInput {output?:{filename:string};}
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
 interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }
