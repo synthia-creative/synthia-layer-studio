@@ -1,7 +1,7 @@
 // Incremental contracts: existing engine APIs stay behind the legacy bridge.
 interface StudioTransform {x:number;y:number;scale:number;rotation:number;opacity:number;kerning:number;}
-interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; characters:Record<string,{line:StudioTransform;glyphs:Record<string,StudioTransform>}>; }
-interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; }
+interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; characters:Record<string,{line:StudioTransform;glyphs:Record<string,StudioTransform>}>; fontFiles:{key:string;label:string;data:string}[]; }
+interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; fontFiles?:StudioState['fontFiles']; }
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
 interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }

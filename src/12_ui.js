@@ -203,7 +203,7 @@ function showProjectLoadNotice() {
     for (const [ja, en] of [
       ['字幕・フィラー・演出設定はJSONから復元されます。SRTの再読み込みは不要です（読み込むと現在の字幕を置き換えます）。', 'Subtitles, fillers and effect settings are restored from JSON. Do not reimport SRT to resume: importing it replaces the current subtitles.'],
       ['音源・背景画像／動画・外部スペアナのフロント／マット動画はJSONに含まれません。使用する素材は別途読み込んでください。すでに選択中の素材がある場合は、このプロジェクト用か確認してください。', 'Audio, background images/videos and external spectrum front/matte videos are not included in JSON. Load the media you use separately. If media is already selected, check that it belongs to this project.'],
-      ['追加書体はPCにインストール済みのフォントを使用します。別のPCでは同じ書体をインストールしてください。音源・フォント本体のブラウザ保存と自動復元は行いません。', 'Additional fonts use installed PC families. Install the same fonts on another PC. Audio and font files are no longer stored or restored by the app.'],
+      ['PC書体は別のPCでも同じ書体が必要です。拡張ツールで読み込んだフォントファイルはJSON内のデータから復元します。音源や背景素材は別途読み込んでください。', 'Installed PC families must also exist on another PC. Fonts imported with the advanced tools are restored from JSON data. Load audio and background media separately.'],
     ]) { const p = document.createElement('p'); p.textContent = J.layerText(ja, en); dlg.append(p); }
     const button = document.createElement('button'); button.type = 'button'; button.textContent = J.layerText('閉じる', 'Close'); button.addEventListener('click', () => dlg.close()); dlg.append(button);
     document.body.append(dlg);

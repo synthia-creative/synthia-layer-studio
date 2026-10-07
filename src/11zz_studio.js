@@ -8,6 +8,7 @@ J.normalizeStudio = value => ({
   tapGap: finite(value?.tapGap, 0, 0, 1000),
   blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
   characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
+  fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
