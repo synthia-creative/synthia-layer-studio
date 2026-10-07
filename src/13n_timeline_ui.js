@@ -1,12 +1,223 @@
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('timeline','追加トラック・レイヤー','Additional tracks / layers'),track=el('canvas',null,'studioTracks');track.width=720;track.height=180;track.style.width='100%';track.style.touchAction='none';root.append(track);let selectedCue=null,drag=null;const labels=['Audio','Lyrics','Images','Videos','Effects','Background'];const startX=90,width=630,span=()=>Math.max(1,J.ui.plan.duration,...J.ui.project.studio.layers.filter(l=>l.end<86400).map(l=>l.end));
- const drawTracks=()=>{const ctx=track.getContext('2d'),dur=span();ctx.clearRect(0,0,720,180);ctx.font='12px sans-serif';labels.forEach((label,row)=>{ctx.fillStyle='#aeb7c7';ctx.fillText(label,2,row*30+18);ctx.fillStyle='#242936';ctx.fillRect(startX,row*30+3,width,24);});const block=(row,a,b,text,color)=>{const x=startX+a/dur*width,w=Math.max(3,(b-a)/dur*width);ctx.fillStyle=color;ctx.fillRect(x,row*30+4,w,22);ctx.fillStyle='#fff';ctx.save();ctx.beginPath();ctx.rect(x,row*30+4,w,22);ctx.clip();ctx.fillText(text,x+3,row*30+19);ctx.restore();};if(J.ui.audio)block(0,0,J.ui.audio.duration,J.ui.audio.name,'#365960');for(const line of J.ui.plan.lines)block(1,line.start,line.end,line.text||'—',selectedCue===line.cueId?'#78654a':'#414b75');for(const l of J.ui.project.studio.layers){const row={Image:2,Video:3,Effect:4,Overlay:4,Background:5,Text:1}[l.type];if(row!==undefined)block(row,l.start,Math.min(l.end,dur),l.name,'#4e6458');}if(J.layerSession.background)block(5,0,dur,J.layerSession.background.name,'#375b4b');};
- const point=e=>{const r=track.getBoundingClientRect();return{x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*180/r.height};};track.addEventListener('pointerdown',e=>{if(e.button!==0||J.ui.exporting||J.ui.tap)return;const p=point(e),dur=span();if(p.y<30||p.y>=60){if(p.x>=startX)J.uiApi.seek(Math.max(0,(p.x-startX)/width*dur));return;}const time=(p.x-startX)/width*dur,line=J.ui.plan.lines.find(l=>time>=l.start&&time<=l.end);if(!line)return;J.uiApi.pause();J.uiApi.pushEdit();const cues=J.studioEnsureCues(J.ui.project),cue=cues[line.index];selectedCue=cue.id;drag={cue:{...cue},time,dur,resize:Math.abs(p.x-(startX+cue.end/dur*width))<12};track.setPointerCapture(e.pointerId);e.preventDefault();J.studioChanged();});track.addEventListener('pointermove',e=>{if(!drag)return;const time=(point(e).x-startX)/width*drag.dur,delta=time-drag.time,index=J.ui.project.subtitleCues.findIndex(c=>c.id===selectedCue),cue=drag.cue;const start=Math.max(0,cue.start+delta);if(drag.resize)J.editLayerCue(J.ui.project,index,{end:Math.max(cue.start+.01,cue.end+delta)});else J.editLayerCue(J.ui.project,index,{start,end:start+(cue.end-cue.start)});J.studioChanged();});for(const event of['pointerup','pointercancel','lostpointercapture'])track.addEventListener(event,()=>{drag=null;});
- root.append(J.studioButton('studioDuplicateCue','選択字幕を複製','Duplicate selected cue',()=>{const i=J.ui.project.subtitleCues?.findIndex(c=>c.id===selectedCue);if(i==null||i<0)throw new Error(tr('字幕ブロックを選択してください。','Select a lyric block.'));J.uiApi.pushEdit();selectedCue=J.studioDuplicateCue(J.ui.project,i);J.studioChanged();}),J.studioButton('studioDeleteCue','選択字幕を削除','Delete selected cue',()=>{const i=J.ui.project.subtitleCues?.findIndex(c=>c.id===selectedCue);if(i==null||i<0)return;J.uiApi.pushEdit();J.deleteLayerCue(J.ui.project,i);selectedCue=null;J.studioChanged();}));
- const kind=el('select',null,'studioLayerType'),list=el('select',null,'studioLayerList');for(const type of J.STUDIO_LAYER_TYPES.filter(t=>t!=='Lyrics')){const o=el('option',type);o.value=type;kind.append(o);}root.append(kind,J.studioButton('studioAddLayer','レイヤー追加','Add layer',()=>{const p=J.ui.project;if(p.studio.layers.length>=64)throw new Error('Maximum 64 layers');J.uiApi.pushEdit();const layer=J.normalizeStudioLayers([{id:'layer-'+crypto.randomUUID(),type:kind.value,start:0,end:J.ui.plan.duration,text:'Text',transform:{opacity:['Overlay','Effect'].includes(kind.value)?.25:1},color:kind.value==='Background'?'#202733':'#ffffff'}]).find(l=>l.type!=='Lyrics');p.studio.layers.push(layer);active=layer.id;J.studioChanged();}),list);let active='lyrics';const fields={};for(const [key,label]of[['name','名前 / Name'],['text','Text'],['start','Start (s)'],['end','End (s)'],['color','Color'],['blend','Blend'],['x','X'],['y','Y'],['scale','Scale'],['rotation','Rotation'],['opacity','Opacity']]){const lab=el('label',label);let input;if(key==='blend'){input=el('select',null,'studioLayer-'+key);for(const b of J.STUDIO_BLENDS){const o=el('option',b);o.value=b;input.append(o);}}else{input=el('input',null,'studioLayer-'+key);input.type=key==='color'?'color':['name','text'].includes(key)?'text':'number';input.step=['scale','opacity'].includes(key)?'.05':'.01';}fields[key]=input;lab.append(input);root.append(lab);input.addEventListener('change',()=>{const l=J.ui.project.studio.layers.find(l=>l.id===active);if(!l)return;const next=structuredClone(l);if(['x','y','scale','rotation','opacity'].includes(key))next.transform[key]=+input.value;else next[key]=input.type==='number'?+input.value:input.value;if(next.end<=next.start){J.uiApi.toast('End must follow start');sync();return;}J.uiApi.pushEdit();J.ui.project.studio.layers=J.normalizeStudioLayers(J.ui.project.studio.layers.map(l=>l.id===active?next:l));J.studioChanged();});}
- const file=el('input',null,'studioLayerFile'),mediaLabel=el('label',tr('選択レイヤーの画像／動画を読み込む','Load selected layer image / video')),status=el('p',null,'studioLayerStatus');file.type='file';file.accept='image/*,video/*';mediaLabel.append(file);root.append(mediaLabel,status);file.addEventListener('change',async()=>{const l=J.ui.project.studio.layers.find(l=>l.id===active),f=file.files?.[0],project=J.ui.project,epoch=J.projectSessionEpoch;if(!l||!f||!['Image','Video'].includes(l.type))return;try{const m=await J.loadLayerMedia(f,l.type==='Video');if(m.video!==(l.type==='Video')){m.dispose();throw new Error('Media type does not match layer');}if(epoch!==J.projectSessionEpoch||project!==J.ui.project){m.dispose();return;}J.studioMedia.get(l.id)?.dispose();J.studioMedia.set(l.id,m);if(m.video)m.el.addEventListener('seeked',()=>{J.ui.need=true;});J.uiApi.pushEdit();l.fileName=f.name;J.studioChanged();}catch(e){status.textContent=e.message;}finally{file.value='';}});
- for(const [id,ja,en,delta]of[['studioLayerDown','下へ','Down',-1],['studioLayerUp','上へ','Up',1]])root.append(J.studioButton(String(id),String(ja),String(en),()=>{const a=J.ui.project.studio.layers,i=a.findIndex(l=>l.id===active),n=i+delta;if(n<0||n>=a.length)return;J.uiApi.pushEdit();[a[i],a[n]]=[a[n],a[i]];J.studioChanged();}));root.append(J.studioButton('studioRemoveLayer','選択レイヤーを削除','Delete selected layer',()=>{const a=J.ui.project.studio.layers,l=a.find(l=>l.id===active);if(!l||l.type==='Lyrics')return;J.uiApi.pushEdit();J.ui.project.studio.layers=a.filter(l=>l.id!==active);active='lyrics';J.studioChanged();}),el('p',tr('リストは下から上の描画順です。字幕ブロックはドラッグで移動、右端で長さ変更。画像・動画本体はJSONに含まれず、別途再読込が必要です。完成MP4には追加レイヤーも描画されます。','List order is bottom to top. Drag lyrics to move; drag the right edge to resize. Media files are not embedded in JSON; reload them separately. Additional layers are included in completed MP4 exports.')));
- const reset=J.resetLayerProjectSession;J.resetLayerProjectSession=()=>{reset();J.clearStudioMedia();};const pauseMedia=J.pausePreviewMedia;J.pausePreviewMedia=()=>{pauseMedia();for(const m of J.studioMedia.values())if(m.video)m.el.pause();};list.addEventListener('change',()=>{active=list.value;sync();});const sync=()=>{const layers=J.ui.project.studio.layers;if(!layers.some(l=>l.id===active))active=layers[0]?.id;list.replaceChildren(...layers.map((l,i)=>{const o=el('option',`${i}: ${l.name} [${l.type}]`);o.value=l.id;return o;}));list.value=active;const l=layers.find(l=>l.id===active);if(l)for(const k in fields)fields[k].value=String(['x','y','scale','rotation','opacity'].includes(k)?l.transform[k]:l[k]);file.disabled=!l||!['Image','Video'].includes(l.type);status.textContent=l?.fileName?(J.studioMedia.has(l.id)?'✓ ':'再読込が必要 / Reload: ')+l.fileName:'';drawTracks();};const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('timeline', '追加トラック・レイヤー', 'Additional tracks / layers'), track = el('canvas', null, 'studioTracks');
+        track.width = 720;
+        track.height = 180;
+        track.style.width = '100%';
+        track.style.touchAction = 'none';
+        root.append(track);
+        let selectedCue = null, drag = null;
+        const labels = ['Audio', 'Lyrics', 'Images', 'Videos', 'Effects', 'Background'];
+        const startX = 90, width = 630, span = () => Math.max(1, J.ui.plan.duration, ...J.ui.project.studio.layers.filter(l => l.end < 86400).map(l => l.end));
+        const drawTracks = () => {
+            const ctx = track.getContext('2d'), dur = span();
+            ctx.clearRect(0, 0, 720, 180);
+            ctx.font = '20px sans-serif';
+            labels.forEach((label, row) => { ctx.fillStyle = '#aeb7c7'; ctx.fillText(label, 2, row * 30 + 18); ctx.fillStyle = '#242936'; ctx.fillRect(startX, row * 30 + 3, width, 24); });
+            const block = (row, a, b, text, color) => { const x = startX + a / dur * width, w = Math.max(3, (b - a) / dur * width); ctx.fillStyle = color; ctx.fillRect(x, row * 30 + 4, w, 22); ctx.fillStyle = '#fff'; ctx.save(); ctx.beginPath(); ctx.rect(x, row * 30 + 4, w, 22); ctx.clip(); ctx.fillText(text, x + 3, row * 30 + 19); ctx.restore(); };
+            if (J.ui.audio)
+                block(0, 0, J.ui.audio.duration, J.ui.audio.name, '#365960');
+            for (const line of J.ui.plan.lines)
+                block(1, line.start, line.end, line.text || '—', selectedCue === line.cueId ? '#78654a' : '#414b75');
+            for (const l of J.ui.project.studio.layers) {
+                const row = { Image: 2, Video: 3, Effect: 4, Overlay: 4, Background: 5, Text: 1 }[l.type];
+                if (row !== undefined)
+                    block(row, l.start, Math.min(l.end, dur), l.name, '#4e6458');
+            }
+            if (J.layerSession.background)
+                block(5, 0, dur, J.layerSession.background.name, '#375b4b');
+        };
+        const point = e => { const r = track.getBoundingClientRect(); return { x: (e.clientX - r.left) * 720 / r.width, y: (e.clientY - r.top) * 180 / r.height }; };
+        track.addEventListener('pointerdown', e => {
+            if (e.button !== 0 || J.ui.exporting || J.ui.tap)
+                return;
+            const p = point(e), dur = span();
+            if (p.y < 30 || p.y >= 60) {
+                if (p.x >= startX)
+                    J.uiApi.seek(Math.max(0, (p.x - startX) / width * dur));
+                return;
+            }
+            const time = (p.x - startX) / width * dur, line = J.ui.plan.lines.find(l => time >= l.start && time <= l.end);
+            if (!line)
+                return;
+            J.uiApi.pause();
+            J.uiApi.pushEdit();
+            const cues = J.studioEnsureCues(J.ui.project), cue = cues[line.index];
+            selectedCue = cue.id;
+            drag = { cue: { ...cue }, time, dur, resize: Math.abs(p.x - (startX + cue.end / dur * width)) < 12 };
+            track.setPointerCapture(e.pointerId);
+            e.preventDefault();
+            J.studioChanged();
+        });
+        track.addEventListener('pointermove', e => {
+            if (!drag)
+                return;
+            const time = (point(e).x - startX) / width * drag.dur, delta = time - drag.time, index = J.ui.project.subtitleCues.findIndex(c => c.id === selectedCue), cue = drag.cue;
+            const start = Math.max(0, cue.start + delta);
+            if (drag.resize)
+                J.editLayerCue(J.ui.project, index, { end: Math.max(cue.start + .01, cue.end + delta) });
+            else
+                J.editLayerCue(J.ui.project, index, { start, end: start + (cue.end - cue.start) });
+            J.studioChanged();
+        });
+        for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
+            track.addEventListener(event, () => { drag = null; });
+        root.append(J.studioButton('studioDuplicateCue', '選択字幕を複製', 'Duplicate selected cue', () => {
+            const i = J.ui.project.subtitleCues?.findIndex(c => c.id === selectedCue);
+            if (i == null || i < 0)
+                throw new Error(tr('字幕ブロックを選択してください。', 'Select a lyric block.'));
+            J.uiApi.pushEdit();
+            selectedCue = J.studioDuplicateCue(J.ui.project, i);
+            J.studioChanged();
+        }), J.studioButton('studioDeleteCue', '選択字幕を削除', 'Delete selected cue', () => {
+            const i = J.ui.project.subtitleCues?.findIndex(c => c.id === selectedCue);
+            if (i == null || i < 0)
+                return;
+            J.uiApi.pushEdit();
+            J.deleteLayerCue(J.ui.project, i);
+            selectedCue = null;
+            J.studioChanged();
+        }));
+        const kind = el('select', null, 'studioLayerType'), list = el('select', null, 'studioLayerList');
+        for (const type of J.STUDIO_LAYER_TYPES.filter(t => t !== 'Lyrics')) {
+            const o = el('option', type);
+            o.value = type;
+            kind.append(o);
+        }
+        root.append(kind, J.studioButton('studioAddLayer', 'レイヤー追加', 'Add layer', () => {
+            const p = J.ui.project;
+            if (p.studio.layers.length >= 64)
+                throw new Error('Maximum 64 layers');
+            J.uiApi.pushEdit();
+            const layer = J.normalizeStudioLayers([{ id: 'layer-' + crypto.randomUUID(), type: kind.value, start: 0, end: J.ui.plan.duration, text: 'Text', transform: { opacity: ['Overlay', 'Effect'].includes(kind.value) ? .25 : 1 }, color: kind.value === 'Background' ? '#202733' : '#ffffff' }]).find(l => l.type !== 'Lyrics');
+            p.studio.layers.push(layer);
+            active = layer.id;
+            J.studioChanged();
+        }), list);
+        let active = 'lyrics';
+        const fields = {};
+        for (const [key, label] of [['name', '名前 / Name'], ['text', 'Text'], ['start', 'Start (s)'], ['end', 'End (s)'], ['color', 'Color'], ['blend', 'Blend'], ['x', 'X'], ['y', 'Y'], ['scale', 'Scale'], ['rotation', 'Rotation'], ['opacity', 'Opacity']]) {
+            const lab = el('label', label);
+            let input;
+            if (key === 'blend') {
+                input = el('select', null, 'studioLayer-' + key);
+                for (const b of J.STUDIO_BLENDS) {
+                    const o = el('option', b);
+                    o.value = b;
+                    input.append(o);
+                }
+            }
+            else {
+                input = el('input', null, 'studioLayer-' + key);
+                input.type = key === 'color' ? 'color' : ['name', 'text'].includes(key) ? 'text' : 'number';
+                input.step = ['scale', 'opacity'].includes(key) ? '.05' : '.01';
+            }
+            fields[key] = input;
+            lab.append(input);
+            root.append(lab);
+            input.addEventListener('change', () => {
+                const l = J.ui.project.studio.layers.find(l => l.id === active);
+                if (!l)
+                    return;
+                const next = structuredClone(l);
+                if (['x', 'y', 'scale', 'rotation', 'opacity'].includes(key))
+                    next.transform[key] = +input.value;
+                else
+                    next[key] = input.type === 'number' ? +input.value : input.value;
+                if (next.end <= next.start) {
+                    J.uiApi.toast('End must follow start');
+                    sync();
+                    return;
+                }
+                J.uiApi.pushEdit();
+                J.ui.project.studio.layers = J.normalizeStudioLayers(J.ui.project.studio.layers.map(l => l.id === active ? next : l));
+                J.studioChanged();
+            });
+        }
+        const file = el('input', null, 'studioLayerFile'), mediaLabel = el('label', tr('選択レイヤーの画像／動画を読み込む', 'Load selected layer image / video')), status = el('p', null, 'studioLayerStatus');
+        file.type = 'file';
+        file.accept = 'image/*,video/*';
+        mediaLabel.append(file);
+        root.append(mediaLabel, status);
+        file.addEventListener('change', async () => {
+            const l = J.ui.project.studio.layers.find(l => l.id === active), f = file.files?.[0], project = J.ui.project, epoch = J.projectSessionEpoch;
+            if (!l || !f || !['Image', 'Video'].includes(l.type))
+                return;
+            try {
+                const m = await J.loadLayerMedia(f, l.type === 'Video');
+                if (m.video !== (l.type === 'Video')) {
+                    m.dispose();
+                    throw new Error('Media type does not match layer');
+                }
+                if (epoch !== J.projectSessionEpoch || project !== J.ui.project || J.ui.exporting || J.layerSession.busy) {
+                    m.dispose();
+                    return;
+                }
+                J.studioMedia.get(l.id)?.dispose();
+                J.studioMedia.set(l.id, m);
+                if (m.video)
+                    m.el.addEventListener('seeked', () => { J.ui.need = true; });
+                J.uiApi.pushEdit();
+                l.fileName = f.name;
+                J.studioChanged();
+            }
+            catch (e) {
+                status.textContent = e.message;
+            }
+            finally {
+                file.value = '';
+            }
+        });
+        for (const [id, ja, en, delta] of [['studioLayerDown', '下へ', 'Down', -1], ['studioLayerUp', '上へ', 'Up', 1]])
+            root.append(J.studioButton(String(id), String(ja), String(en), () => {
+                const a = J.ui.project.studio.layers, i = a.findIndex(l => l.id === active), n = i + delta;
+                if (n < 0 || n >= a.length)
+                    return;
+                J.uiApi.pushEdit();
+                [a[i], a[n]] = [a[n], a[i]];
+                J.studioChanged();
+            }));
+        root.append(J.studioButton('studioRemoveLayer', '選択レイヤーを削除', 'Delete selected layer', () => {
+            const a = J.ui.project.studio.layers, l = a.find(l => l.id === active);
+            if (!l || l.type === 'Lyrics')
+                return;
+            J.uiApi.pushEdit();
+            J.ui.project.studio.layers = a.filter(l => l.id !== active);
+            active = 'lyrics';
+            J.studioChanged();
+        }), el('p', tr('リストは下から上の描画順です。字幕ブロックはドラッグで移動、右端で長さ変更。画像・動画本体はJSONに含まれず、別途再読込が必要です。完成MP4には追加レイヤーも描画されます。', 'List order is bottom to top. Drag lyrics to move; drag the right edge to resize. Media files are not embedded in JSON; reload them separately. Additional layers are included in completed MP4 exports.')));
+        const reset = J.resetLayerProjectSession;
+        J.resetLayerProjectSession = () => { reset(); J.clearStudioMedia(); };
+        const pauseMedia = J.pausePreviewMedia;
+        J.pausePreviewMedia = () => {
+            pauseMedia();
+            for (const m of J.studioMedia.values())
+                if (m.video)
+                    m.el.pause();
+        };
+        list.addEventListener('change', () => { active = list.value; sync(); });
+        const sync = () => {
+            const layers = J.ui.project.studio.layers;
+            if (!layers.some(l => l.id === active))
+                active = layers[0]?.id;
+            list.replaceChildren(...layers.map((l, i) => { const o = el('option', `${i}: ${l.name} [${l.type}]`); o.value = l.id; return o; }));
+            list.value = active;
+            const l = layers.find(l => l.id === active);
+            if (l)
+                for (const k in fields)
+                    fields[k].value = String(['x', 'y', 'scale', 'rotation', 'opacity'].includes(k) ? l.transform[k] : l[k]);
+            file.disabled = !l || !['Image', 'Video'].includes(l.type);
+            status.textContent = l?.fileName ? (J.studioMedia.has(l.id) ? '✓ ' : '再読込が必要 / Reload: ') + l.fileName : '';
+            drawTracks();
+        };
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); sync(); };
+        sync();
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();

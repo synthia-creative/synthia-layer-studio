@@ -1,5 +1,47 @@
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('autoMotion','3種類のおまかせ','Three auto modes'),snap=el('select',null,'studioBeatSnap');for(const value of[0,20,50,100,150]){const o=el('option',value?`±${value}ms`:'OFF');o.value=String(value);snap.append(o);}const label=el('label','Beat Snap');label.append(snap);root.append(label);snap.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.analysis.beatSnap=+snap.value;J.studioChanged();});const status=el('p',null,'studioAutoStatus');const run=full=>{const a=J.studioAnalyze(J.ui.audio);if(J.ui.tap)J.uiApi.stopTap();J.uiApi.pause();J.uiApi.pushEdit();if(full){document.getElementById('btnOmakaseTop').click();J.uiApi.pause();}const p=J.ui.project;if(p.studio.analysis.beatSnap){const cues=p.subtitleCues||J.studioPlanCues(J.ui.plan);p.subtitleCues=J.studioSnapCues(cues,a.beats,p.studio.analysis.beatSnap);p.lyrics=p.subtitleCues.map(c=>c.text).join('\n\n');p.timing.lineTimes={};J.uiApi.replan();}p.studio.motion.rows={...p.studio.motion.rows,...J.studioAutoRecipes(J.ui.plan,a,p.studio.analysis.sections.length?p.studio.analysis.sections:a.sections)};p.studio.flags.motionEditing=true;J.studioChanged();status.textContent=tr('楽曲エネルギー・文字密度・区間を反映しました。時刻補正: ','Energy, density and sections applied. Timing snap: ')+(p.studio.analysis.beatSnap?`±${p.studio.analysis.beatSnap}ms`:'OFF');};root.append(J.studioButton('studioDesignAuto','デザインおまかせ','Design Auto',()=>document.getElementById('btnOmakaseTop').click()),el('p',tr('従来のフォント・色・配置・動きのおまかせです。','Existing font, color, layout and motion auto design.')),J.studioButton('studioMusicAuto','楽曲連動おまかせ','Music Auto',()=>run(false)),el('p',tr('現在のデザインに音量・文字密度・区間別の強度とモーションを反映します。','Apply energy, density and section motion to the current design.')),J.studioButton('studioFullAuto','フルおまかせ','Full Auto',()=>run(true)),el('p',tr('従来のデザイン生成と楽曲連動をまとめて実行。Beat SnapがOFFならSRT開始・終了は保持します。音源のBPMは推定です。','Run existing design generation and music-driven motion together. SRT start/end are preserved with Beat Snap OFF. BPM is estimated.')),status);const old=J.syncLayerUI;J.syncLayerUI=()=>{old();snap.value=String(J.ui.project.studio.analysis.beatSnap);};J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('autoMotion', '3種類のおまかせ', 'Three auto modes'), snap = el('select', null, 'studioBeatSnap');
+        for (const value of [0, 20, 50, 100, 150]) {
+            const o = el('option', value ? `±${value}ms` : 'OFF');
+            o.value = String(value);
+            snap.append(o);
+        }
+        const label = el('label', 'Beat Snap');
+        label.append(snap);
+        root.append(label);
+        snap.addEventListener('change', () => { J.uiApi.pushEdit(); J.ui.project.studio.analysis.beatSnap = +snap.value; J.studioChanged(); });
+        const status = el('p', null, 'studioAutoStatus');
+        const run = full => {
+            const a = J.studioAnalyze(J.ui.audio);
+            if (J.ui.tap)
+                J.uiApi.stopTap();
+            J.uiApi.pause();
+            J.uiApi.pushEdit();
+            if (full) {
+                document.getElementById('btnOmakaseTop').click();
+                J.uiApi.pause();
+            }
+            const p = J.ui.project;
+            if (p.studio.analysis.beatSnap) {
+                const cues = p.subtitleCues || J.studioPlanCues(J.ui.plan);
+                p.subtitleCues = J.studioSnapCues(cues, a.beats, p.studio.analysis.beatSnap);
+                p.lyrics = p.subtitleCues.map(c => c.text).join('\n\n');
+                p.timing.lineTimes = {};
+                J.uiApi.replan();
+            }
+            p.studio.motion.rows = { ...p.studio.motion.rows, ...J.studioAutoRecipes(J.ui.plan, a, p.studio.analysis.sections.length ? p.studio.analysis.sections : a.sections) };
+            p.studio.flags.motionEditing = true;
+            J.studioChanged();
+            status.textContent = tr('楽曲エネルギー・文字密度・区間を反映しました。時刻補正: ', 'Energy, density and sections applied. Timing snap: ') + (p.studio.analysis.beatSnap ? `±${p.studio.analysis.beatSnap}ms` : 'OFF');
+        };
+        root.append(J.studioButton('studioDesignAuto', 'デザインおまかせ', 'Design Auto', () => document.getElementById('btnOmakaseTop').click()), el('p', tr('従来のフォント・色・配置・動きのおまかせです。', 'Existing font, color, layout and motion auto design.')), J.studioButton('studioMusicAuto', '楽曲連動おまかせ', 'Music Auto', () => run(false)), el('p', tr('現在のデザインに音量・文字密度・区間別の強度とモーションを反映します。', 'Apply energy, density and section motion to the current design.')), J.studioButton('studioFullAuto', 'フルおまかせ', 'Full Auto', () => run(true)), el('p', tr('従来のデザイン生成と楽曲連動をまとめて実行。Beat SnapがOFFならSRT開始・終了は保持します。音源のBPMは推定です。', 'Run existing design generation and music-driven motion together. SRT start/end are preserved with Beat Snap OFF. BPM is estimated.')), status);
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); snap.value = String(J.ui.project.studio.analysis.beatSnap); };
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();

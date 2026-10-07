@@ -663,7 +663,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.5.0</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.6.0</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -944,7 +944,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.5.0</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.6.0</p></div>
     <p>SYNTHIA Layer Studio is an independent customized derivative based on JIZURA by hakoniwa and JIZURA Layer Studio modifications by cityedge. The original authors do not maintain this edition. Original and third-party copyrights and licenses remain with their respective owners.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -1427,7 +1427,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.5.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.6.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1491,7 +1491,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.5.0</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.6.0</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -2398,6 +2398,7 @@ J.drawItem = (env, it) => {
   const col = ghostPass ? env.passColor : (it.color || '#fff');
   const sCol = ghostPass ? env.passColor : (it.strokeColor || it.color || '#fff');
   const fill = it.fill !== false;
+  const studioLineMatrix = env.studioGlyph ? ctx.getTransform() : null;
   ctx.save();
   ctx.translate(it.x, it.y);
   if (it.rot) ctx.rotate(it.rot * J.DEG);
@@ -2441,8 +2442,9 @@ J.drawItem = (env, it) => {
     const csx = sx * cs * (c && c.sx ? c.sx : 1), csy = sy * cs * (c && c.sy ? c.sy : 1);
     const gcol = (!ghostPass && c && c.color) || col;
     if (env.studioGlyph) {
+      const studioCharacterMatrix = ctx.getTransform();
       ctx.save(); ctx.translate(gx, gy); if (crot) ctx.rotate(crot * J.DEG); ctx.scale(csx, csy);
-      env.studioGlyph(g, ctx.getTransform()); ctx.restore();
+      env.studioGlyph(g, ctx.getTransform(), {line:studioLineMatrix,character:studioCharacterMatrix}); ctx.restore();
     }
     boxes.push({ x: gx, y: gy, w: g.w * sx * cs / (g.fs || 1), h: g.h * sy * cs / (g.fs || 1) });
     // モーフ: record where each glyph ends up (device space) / leave the glyphs out while the morph draws them
@@ -4516,7 +4518,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.5.0', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.6.0', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -39042,162 +39044,608 @@ J.parseMotionLibrary = data => {
 
 /* Opt-in integrated tools. Projects retain their existing version-1 fields. */
 (() => {
-'use strict';
-const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
-J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'motionEditing', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
-J.normalizeStudio = value => ({
-  flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
-  tapGap: finite(value?.tapGap, 0, 0, 1000),
-  blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
-  characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
-  fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
-  motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
-  analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : {sections:[],beatSnap:0},
-  layers: J.normalizeStudioLayers ? J.normalizeStudioLayers(value?.layers) : [],
-  output: {filename:typeof value?.output?.filename==='string'?value.output.filename.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100):''},
-});
-J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
-const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
-J.defaultProject = () => ({ ...defaults(), studio: J.normalizeStudio() });
-J.upgradeLayerProject = (project, source) => {
-  upgrade(project, source); project.studio = J.normalizeStudio(source?.studio); return project;
-};
-// The complete timing snapshot matters: a tap can invalidate later old taps.
-J.studioTap = (lineTimes, index, time, count) => {
-  if (!Number.isInteger(index) || index < 0 || index >= count || !Number.isFinite(time) || time < 0) throw new Error('Invalid tap');
-  const rounded = Math.round(time * 1000) / 1000;
-  const previous = Object.values(Object.fromEntries(Object.entries(lineTimes).filter(([k]) => +k < index)));
-  if (previous.some(t => t >= rounded)) throw new Error(J.layerText('直前の行より後の時刻で打刻してください。', 'Tap after the preceding line.'));
-  const before = { ...lineTimes }, next = { ...lineTimes, [index]: rounded };
-  for (const k of Object.keys(next)) if (+k > index && next[k] <= time + 0.2) delete next[k];
-  return { before, next, index };
-};
-J.studioTapGap = (plan, project) => {
-  if (!J.studioOn(project, 'tapSync') || Array.isArray(project.subtitleCues)) return plan;
-  const gap = J.normalizeStudio(project.studio).tapGap / 1000, times = project.timing.lineTimes || {};
-  for (let i = 0; i < plan.lines.length - 1; i++) {
-    const line = plan.lines[i], next = plan.lines[i + 1];
-    if (!Number.isFinite(times[i]) || !Number.isFinite(times[i + 1])) continue;
-    const end = Math.max(line.start + .001, next.start - gap);
-    const before = line.end, ratio = (end - line.start) / Math.max(.001, before - line.start);
-    for (const cut of plan.cuts) if (cut.line === i && cut.layout !== 'interlude') {
-      cut.start = line.start + (cut.start - line.start) * ratio;
-      cut.end = line.start + (cut.end - line.start) * ratio;
-      cut.dur = cut.end - cut.start;
-      cut.inDur = Math.min(cut.inDur, cut.dur / 2); cut.outDur = Math.min(cut.outDur, cut.dur / 2);
-    }
-    line.end = end; line.visEnd = Math.min(line.visEnd ?? end, end);
-  }
-  return plan;
-};
-const planner = J.plan;
-J.plan = (project, audio) => {
-  const plan=J.studioTapGap(planner(project, audio), project);
-  if (Array.isArray(project.subtitleCues)) for (const line of plan.lines) line.cueId=project.subtitleCues[line.index]?.id;
-  return Object.assign(plan, {studio:J.normalizeStudio(project.studio)});
-};
+    'use strict';
+    const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
+    J.STUDIO_FEATURES = ['tapSync', 'lyricsTiming', 'characterEditing', 'advancedFont', 'motionEditing', 'musicAnalysis', 'autoMotion', 'timeline', 'export', 'autosave'];
+    J.normalizeStudio = value => ({
+        flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
+        tapGap: finite(value?.tapGap, 0, 0, 1000),
+        blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
+        characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
+        fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
+        motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
+        analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },
+        layers: J.normalizeStudioLayers ? J.normalizeStudioLayers(value?.layers) : [],
+        output: { filename: typeof value?.output?.filename === 'string' ? value.output.filename.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 100) : '' },
+    });
+    J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
+    const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
+    J.defaultProject = () => ({ ...defaults(), studio: J.normalizeStudio() });
+    J.upgradeLayerProject = (project, source) => {
+        upgrade(project, source);
+        project.studio = J.normalizeStudio(source?.studio);
+        return project;
+    };
+    // The complete timing snapshot matters: a tap can invalidate later old taps.
+    J.studioTap = (lineTimes, index, time, count) => {
+        if (!Number.isInteger(index) || index < 0 || index >= count || !Number.isFinite(time) || time < 0)
+            throw new Error('Invalid tap');
+        const rounded = Math.round(time * 1000) / 1000;
+        const previous = Object.values(Object.fromEntries(Object.entries(lineTimes).filter(([k]) => +k < index)));
+        if (previous.some(t => t >= rounded))
+            throw new Error(J.layerText('直前の行より後の時刻で打刻してください。', 'Tap after the preceding line.'));
+        const before = { ...lineTimes }, next = { ...lineTimes, [index]: rounded };
+        for (const k of Object.keys(next))
+            if (+k > index && next[k] <= time + 0.2)
+                delete next[k];
+        return { before, next, index };
+    };
+    J.studioTapGap = (plan, project) => {
+        if (!J.studioOn(project, 'tapSync') || Array.isArray(project.subtitleCues))
+            return plan;
+        const gap = J.normalizeStudio(project.studio).tapGap / 1000, times = project.timing.lineTimes || {};
+        for (let i = 0; i < plan.lines.length - 1; i++) {
+            const line = plan.lines[i], next = plan.lines[i + 1];
+            if (!Number.isFinite(times[i]) || !Number.isFinite(times[i + 1]))
+                continue;
+            const end = Math.max(line.start + .001, next.start - gap);
+            const before = line.end, ratio = (end - line.start) / Math.max(.001, before - line.start);
+            for (const cut of plan.cuts)
+                if (cut.line === i && cut.layout !== 'interlude') {
+                    cut.start = line.start + (cut.start - line.start) * ratio;
+                    cut.end = line.start + (cut.end - line.start) * ratio;
+                    cut.dur = cut.end - cut.start;
+                    cut.inDur = Math.min(cut.inDur, cut.dur / 2);
+                    cut.outDur = Math.min(cut.outDur, cut.dur / 2);
+                }
+            line.end = end;
+            line.visEnd = Math.min(line.visEnd ?? end, end);
+        }
+        return plan;
+    };
+    const planner = J.plan;
+    J.plan = (project, audio) => {
+        const plan = J.studioTapGap(planner(project, audio), project);
+        if (Array.isArray(project.subtitleCues))
+            for (const line of plan.lines)
+                line.cueId = project.subtitleCues[line.index]?.id;
+        return Object.assign(plan, { studio: J.normalizeStudio(project.studio) });
+    };
 })();
 
 /* Timing interchange reuses the legacy lyric/SRT parsers and cue validator. */
 (() => {
-'use strict';
-J.studioPlanCues = plan => J.validateCues(plan.lines.map((line,index)=>({id:String(line.cueId||'line-'+index),start:line.start,end:line.end,text:line.text})));
-J.studioSRT = cues => {
- const clock=t=>{const ms=Math.round(t*1000);return [Math.floor(ms/3600000),Math.floor(ms/60000)%60,Math.floor(ms/1000)%60].map(v=>String(v).padStart(2,'0')).join(':')+','+String(ms%1000).padStart(3,'0');};
- return J.validateCues(cues).filter(c=>c.text.length).map((c,i)=>`${i+1}\n${clock(c.start)} --> ${clock(c.end)}\n${c.text}`).join('\n\n')+'\n';
-};
-J.studioLRC = cues => J.validateCues(cues).map(c=>{const ms=Math.round(c.start*1000),minutes=Math.floor(ms/60000),seconds=Math.floor(ms/1000)%60;return `[${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}]${c.text.replace(/\r?\n/g,' ')}`;}).join('\n')+'\n';
-J.studioParseLRC = (raw, duration = 0, gap = 0) => {
- const parsed=J.parseLyrics(String(raw).replace(/^\uFEFF/,'')),offset=Number(parsed.meta.offset||0)/1000;
- if(!parsed.lines.length||parsed.lines.some(l=>!Number.isFinite(l.lrc)))throw new Error(J.layerText('各行にLRCタイムスタンプを付けてください。','Every lyric line needs an LRC timestamp.'));
- const lines=parsed.lines.map(l=>({...l,start:Math.max(0,l.lrc+offset)})).sort((a,b)=>a.start-b.start);
- return J.validateCues(lines.map((l,i)=>({id:'lrc-'+i,start:l.start,end:i+1<lines.length?Math.max(l.start+.001,lines[i+1].start-gap/1000):Math.max(l.start+3,duration),text:l.text})));
-};
-J.studioPasteLyrics = (raw, keep) => String(raw).replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n').split('\n').map(line=>!line.trim()&&keep?'[間奏]':line).join('\n');
+    'use strict';
+    J.studioPlanCues = plan => J.validateCues(plan.lines.map((line, index) => ({ id: String(line.cueId || 'line-' + index), start: line.start, end: line.end, text: line.text })));
+    J.studioSRT = cues => {
+        const clock = t => { const ms = Math.round(t * 1000); return [Math.floor(ms / 3600000), Math.floor(ms / 60000) % 60, Math.floor(ms / 1000) % 60].map(v => String(v).padStart(2, '0')).join(':') + ',' + String(ms % 1000).padStart(3, '0'); };
+        return J.validateCues(cues).filter(c => c.text.length).map((c, i) => `${i + 1}\n${clock(c.start)} --> ${clock(c.end)}\n${c.text}`).join('\n\n') + '\n';
+    };
+    J.studioLRC = cues => J.validateCues(cues).map(c => { const ms = Math.round(c.start * 1000), minutes = Math.floor(ms / 60000), seconds = Math.floor(ms / 1000) % 60; return `[${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}.${String(ms % 1000).padStart(3, '0')}]${c.text.replace(/\r?\n/g, ' ')}`; }).join('\n') + '\n';
+    J.studioParseLRC = (raw, duration = 0, gap = 0) => {
+        const parsed = J.parseLyrics(String(raw).replace(/^\uFEFF/, '')), offset = Number(parsed.meta.offset || 0) / 1000;
+        if (!parsed.lines.length || parsed.lines.some(l => !Number.isFinite(l.lrc)))
+            throw new Error(J.layerText('各行にLRCタイムスタンプを付けてください。', 'Every lyric line needs an LRC timestamp.'));
+        const lines = parsed.lines.map(l => ({ ...l, start: Math.max(0, l.lrc + offset) })).sort((a, b) => a.start - b.start);
+        return J.validateCues(lines.map((l, i) => ({ id: 'lrc-' + i, start: l.start, end: i + 1 < lines.length ? Math.max(l.start + .001, lines[i + 1].start - gap / 1000) : Math.max(l.start + 3, duration), text: l.text })));
+    };
+    J.studioPasteLyrics = (raw, keep) => String(raw).replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n').split('\n').map(line => !line.trim() && keep ? '[間奏]' : line).join('\n');
 })();
 
 /* Manual transforms compose with existing animation; no alternate render engine. */
 (() => {
-'use strict';
-const num=(v,d,lo,hi)=>Number.isFinite(v)?Math.max(lo,Math.min(hi,v)):d;
-J.studioTransform=v=>({x:num(v?.x,0,-10000,10000),y:num(v?.y,0,-10000,10000),scale:num(v?.scale,1,.05,10),rotation:num(v?.rotation,0,-360,360),opacity:num(v?.opacity,1,0,1),kerning:num(v?.kerning,0,-500,500)});
-J.normalizeStudioCharacters=value=>{const out={};if(!value||typeof value!=='object')return out;for(const [key,row] of Object.entries(value).slice(0,20000)){if(!row||typeof row!=='object'||!/^line-\d+$|^cue-.{1,100}$/.test(key)||['__proto__','constructor','prototype'].includes(key))continue;const glyphs={};for(const [i,t] of Object.entries(row.glyphs||{}).slice(0,2000))if(/^\d{1,5}$/.test(i))glyphs[i]=J.studioTransform(t);out[key]={line:J.studioTransform(row.line),glyphs};}return out;};
-J.studioLineKey=line=>line?.cueId?'cue-'+line.cueId:'line-'+line.index;
-J.studioGlyphHits=[];
-const draw=J.drawItem;
-J.drawItem=(env,it)=>{
- const studio=env.plan?.studio,line=env.plan?.lines?.find(l=>l.index===env.cut?.line);
- if(!studio?.flags?.characterEditing||!line||env.bgOnly||env.inLayer||it._studioApplied||!it.text||!env.cut.text?.includes(it.text))return draw(env,it);
- const key=J.studioLineKey(line),row=studio.characters[key],base=J.studioTransform(row?.line),offset=Math.max(0,line.text.indexOf(it.text)),old=it.charFn;
- const changed={...it,_studioApplied:true,x:it.x+base.x,y:it.y+base.y,rot:(it.rot||0)+base.rotation,sx:(it.sx||1)*base.scale,sy:(it.sy||1)*base.scale,alpha:(it.alpha??1)*base.opacity,charFn:(i,g,n)=>{const a=old?.(i,g,n)||{},b=J.studioTransform(row?.glyphs[i+offset]);return {...a,dx:(a.dx||0)+b.x+base.kerning*i+b.kerning,dy:(a.dy||0)+b.y,s:(a.s??1)*b.scale,rot:(a.rot||0)+b.rotation,a:(a.a??1)*b.opacity};}};
- return draw({...env,studioGlyph:(g,m)=>{if(J.studioCapturing&&env.pass==='main')J.studioGlyphHits.push({key,index:g.i+offset,ch:g.ch,x:m.e,y:m.f,w:Math.max(12,Math.hypot(m.a,m.b)*g.w),h:Math.max(12,Math.hypot(m.c,m.d)*g.h)});}},changed);
-};
+    'use strict';
+    const num = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
+    J.studioTransform = v => ({ x: num(v?.x, 0, -10000, 10000), y: num(v?.y, 0, -10000, 10000), scale: num(v?.scale, 1, .05, 10), rotation: num(v?.rotation, 0, -360, 360), opacity: num(v?.opacity, 1, 0, 1), kerning: num(v?.kerning, 0, -500, 500) });
+    J.normalizeStudioCharacters = value => {
+        const out = {};
+        if (!value || typeof value !== 'object')
+            return out;
+        for (const [key, row] of Object.entries(value).slice(0, 20000)) {
+            if (!row || typeof row !== 'object' || !/^line-\d+$|^cue-.{1,100}$/.test(key) || ['__proto__', 'constructor', 'prototype'].includes(key))
+                continue;
+            const glyphs = {};
+            for (const [i, t] of Object.entries(row.glyphs || {}).slice(0, 2000))
+                if (/^\d{1,5}$/.test(i))
+                    glyphs[i] = J.studioTransform(t);
+            out[key] = { line: J.studioTransform(row.line), glyphs };
+        }
+        return out;
+    };
+    J.studioLineKey = line => line?.cueId ? 'cue-' + line.cueId : 'line-' + line.index;
+    J.studioGlyphHits = [];
+    // Glyph indices count Unicode code points and spaces, but not line-break separators.
+    J.studioGlyphMap = (full, part, start = 0) => {
+        const source = [...String(full).replace(/\r?\n/g, '')], chars = [...String(part).replace(/\r?\n/g, '')], visible = source.map((ch, index) => ({ ch, index })).filter(g => !/\s/.test(g.ch)), needle = chars.filter(ch => !/\s/.test(ch));
+        let found = -1;
+        for (let i = start; i <= visible.length - needle.length; i++)
+            if (needle.every((ch, j) => visible[i + j].ch === ch)) {
+                found = i;
+                break;
+            }
+        if (found < 0 || !needle.length)
+            return { map: [], end: start, found: false };
+        let j = 0;
+        return { map: chars.map(ch => /\s/.test(ch) ? null : visible[found + j++].index), end: found + needle.length, found: true };
+    };
+    const planner = J.plan;
+    J.plan = (project, audio) => {
+        const plan = planner(project, audio);
+        if (!J.studioOn(project, 'characterEditing'))
+            return plan;
+        for (const line of plan.lines) {
+            let cursor = 0;
+            for (const cut of plan.cuts.filter(c => c.line === line.index && c.text)) {
+                let match = J.studioGlyphMap(line.text, cut.text, cut.recap ? 0 : cursor);
+                if (!match.found)
+                    match = J.studioGlyphMap(line.text, cut.text);
+                cut.studioCharacterMap = match.map;
+                if (!cut.recap && match.found)
+                    cursor = match.end;
+            }
+        }
+        return plan;
+    };
+    const draw = J.drawItem;
+    J.drawItem = (env, it) => {
+        const studio = env.plan?.studio, line = env.plan?.lines?.find(l => l.index === env.cut?.line);
+        if (!studio?.flags?.characterEditing || !line || env.bgOnly || env.inLayer || it._studioApplied || !it.text)
+            return draw(env, it);
+        const match = J.studioGlyphMap(env.cut.text, it.text);
+        if (!match.found)
+            return draw(env, it);
+        const indices = match.map.map(i => env.cut.studioCharacterMap?.[i] ?? i), key = J.studioLineKey(line), row = studio.characters[key], base = J.studioTransform(row?.line), old = it.charFn;
+        const changed = { ...it, _studioApplied: true, x: it.x + base.x, y: it.y + base.y, rot: (it.rot || 0) + base.rotation, sx: (it.sx || 1) * base.scale, sy: (it.sy || 1) * base.scale, alpha: (it.alpha ?? 1) * base.opacity, charFn: (i, g, n) => { const a = old?.(i, g, n) || {}, b = J.studioTransform(row?.glyphs[indices[i]]); return { ...a, dx: (a.dx || 0) + b.x + base.kerning * i + b.kerning, dy: (a.dy || 0) + b.y, s: (a.s ?? 1) * b.scale, rot: (a.rot || 0) + b.rotation, a: (a.a ?? 1) * b.opacity }; } };
+        return draw({ ...env, studioGlyph: (g, m, bases) => {
+                if (J.studioCapturing && env.pass === 'main')
+                    J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.hypot(m.a, m.b) * g.w), h: Math.max(12, Math.hypot(m.c, m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
+            } }, changed);
+    };
 })();
 
 (() => {
-'use strict';
-const jobs=new Map();
-J.normalizeStudioFonts=files=>{let total=0;return(Array.isArray(files)?files:[]).slice(0,8).filter(f=>{if(!f||!/^local_import_[a-z0-9_]{1,70}$/.test(f.key)||typeof f.data!=='string'||f.data.length>12*1024*1024||!/^[A-Za-z0-9+/]+={0,2}$/.test(f.data))return false;total+=f.data.length;return total<=24*1024*1024;}).map(f=>({key:f.key,label:String(f.label||f.key).slice(0,80),data:f.data}));};
-J.studioFontBytes=data=>{const binary=atob(data),bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);if(bytes.length<12)throw new Error('Invalid font');const sig=String.fromCharCode(...bytes.subarray(0,4));if(!['OTTO','wOFF','wOF2','true','\x00\x01\x00\x00'].includes(sig))throw new Error('Expected TTF, OTF, WOFF or WOFF2');return bytes.buffer;};
-const register=f=>{J.addUserFont(f.key,f.label,'Synthia_'+f.key,400);};
-J.restoreStudioFonts=async files=>{for(const f of J.normalizeStudioFonts(files)){let job=jobs.get(f.key);if(!job||job.data!==f.data){const face=new FontFace('Synthia_'+f.key,J.studioFontBytes(f.data));const promise=face.load().then(loaded=>{document.fonts.add(loaded);return loaded;});job={data:f.data,promise};jobs.set(f.key,job);}await job.promise;register(f);}J.metrics.clear();J.glyphs.clear();};
-const plan=J.plan;J.plan=(project,audio)=>{for(const f of J.normalizeStudioFonts(project.studio?.fontFiles))register(f);return plan(project,audio);};
-const ensure=J.ensureFonts;J.ensureFonts=async(text,keys)=>{await J.restoreStudioFonts(J.ui?.project?.studio?.fontFiles);return ensure(text,keys);};
-J.importStudioFont=async(file,project)=>{if(!/\.(ttf|otf|woff2?)$/i.test(file.name)||file.size>8*1024*1024)throw new Error(J.layerText('TTF/OTF/WOFF/WOFF2（8MB以下）を選択してください。','Choose TTF/OTF/WOFF/WOFF2 (up to 8 MB).'));const epoch=J.projectSessionEpoch,bytes=new Uint8Array(await file.arrayBuffer());let binary='';for(let i=0;i<bytes.length;i+=8192)binary+=String.fromCharCode(...bytes.subarray(i,i+8192));const f={key:'local_import_'+crypto.randomUUID().replace(/-/g,'_'),label:file.name,data:btoa(binary)};J.studioFontBytes(f.data);if(project.studio.fontFiles.length>=8)throw new Error('Maximum 8 imported fonts');if(J.normalizeStudioFonts([...project.studio.fontFiles,f]).length!==project.studio.fontFiles.length+1)throw new Error('Font data limit reached');await J.restoreStudioFonts([f]);if(epoch!==J.projectSessionEpoch||project!==J.ui.project)return null;J.uiApi.pushEdit();project.studio.fontFiles.push(f);project.userFonts.push({key:f.key,label:f.label,family:'Synthia_'+f.key,weight:400});for(const role of Object.keys(J.ui.plan.style.fonts))project.fonts[role]=f.key;J.studioChanged();return f;};
+    'use strict';
+    const jobs = new Map();
+    J.normalizeStudioFonts = files => {
+        let total = 0;
+        return (Array.isArray(files) ? files : []).slice(0, 8).filter(f => {
+            if (!f || !/^local_import_[a-z0-9_]{1,70}$/.test(f.key) || typeof f.data !== 'string' || f.data.length > 12 * 1024 * 1024 || !/^[A-Za-z0-9+/]+={0,2}$/.test(f.data))
+                return false;
+            total += f.data.length;
+            return total <= 24 * 1024 * 1024;
+        }).map(f => ({ key: f.key, label: String(f.label || f.key).slice(0, 80), data: f.data }));
+    };
+    J.studioFontBytes = data => {
+        const binary = atob(data), bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++)
+            bytes[i] = binary.charCodeAt(i);
+        if (bytes.length < 12)
+            throw new Error('Invalid font');
+        const sig = String.fromCharCode(...bytes.subarray(0, 4));
+        if (!['OTTO', 'wOFF', 'wOF2', 'true', '\x00\x01\x00\x00'].includes(sig))
+            throw new Error('Expected TTF, OTF, WOFF or WOFF2');
+        return bytes.buffer;
+    };
+    const register = f => { J.addUserFont(f.key, f.label, 'Synthia_' + f.key, 400); };
+    J.restoreStudioFonts = async (files) => {
+        for (const f of J.normalizeStudioFonts(files)) {
+            let job = jobs.get(f.key);
+            if (!job || job.data !== f.data) {
+                const face = new FontFace('Synthia_' + f.key, J.studioFontBytes(f.data));
+                const promise = face.load().then(loaded => { document.fonts.add(loaded); return loaded; });
+                job = { data: f.data, promise };
+                jobs.set(f.key, job);
+            }
+            await job.promise;
+            register(f);
+        }
+        J.metrics.clear();
+        J.glyphs.clear();
+    };
+    const plan = J.plan;
+    J.plan = (project, audio) => {
+        for (const f of J.normalizeStudioFonts(project.studio?.fontFiles))
+            register(f);
+        return plan(project, audio);
+    };
+    const ensure = J.ensureFonts;
+    J.ensureFonts = async (text, keys) => { await J.restoreStudioFonts(J.ui?.project?.studio?.fontFiles); return ensure(text, keys); };
+    J.importStudioFont = async (file, project) => {
+        if (!/\.(ttf|otf|woff2?)$/i.test(file.name) || file.size > 8 * 1024 * 1024)
+            throw new Error(J.layerText('TTF/OTF/WOFF/WOFF2（8MB以下）を選択してください。', 'Choose TTF/OTF/WOFF/WOFF2 (up to 8 MB).'));
+        const epoch = J.projectSessionEpoch, bytes = new Uint8Array(await file.arrayBuffer());
+        let binary = '';
+        for (let i = 0; i < bytes.length; i += 8192)
+            binary += String.fromCharCode(...bytes.subarray(i, i + 8192));
+        const f = { key: 'local_import_' + crypto.randomUUID().replace(/-/g, '_'), label: file.name, data: btoa(binary) };
+        J.studioFontBytes(f.data);
+        if (project.studio.fontFiles.length >= 8)
+            throw new Error('Maximum 8 imported fonts');
+        if (J.normalizeStudioFonts([...project.studio.fontFiles, f]).length !== project.studio.fontFiles.length + 1)
+            throw new Error('Font data limit reached');
+        await J.restoreStudioFonts([f]);
+        if (epoch !== J.projectSessionEpoch || project !== J.ui.project || J.ui.exporting || J.layerSession.busy)
+            return null;
+        J.uiApi.pushEdit();
+        project.studio.fontFiles.push(f);
+        project.userFonts.push({ key: f.key, label: f.label, family: 'Synthia_' + f.key, weight: 400 });
+        for (const role of Object.keys(J.ui.plan.style.fonts))
+            project.fonts[role] = f.key;
+        J.studioChanged();
+        return f;
+    };
 })();
 
 (() => {
-'use strict';
-const clamp=(v,d,lo=0,hi=1)=>Number.isFinite(v)?Math.max(lo,Math.min(hi,v)):d;
-J.STUDIO_PRESETS={Minimal:['blur','still','blur',.2],Pop:['pop','breathe','shrink',.65],Rock:['drop','jitter','scatter',.8],Cyber:['type','glitchtick','blur',.65],Emotional:['blur','drift','blur',.35],Elegant:['wipe','still','blur',.25],Dark:['blur','breathe','blur',.35],Impact:['pop','jitter','scatter',.95],Glitch:['scramble','glitchtick','flicker',.8],Cinematic:['zoom','drift','shrink',.5]};
-J.STUDIO_CONTROLS=['calm','impact','sharpness','speed','spread','shake','glitch'];
-J.studioMotionRow=v=>({enter:J.ENTER[v?.enter]?v.enter:'',hold:J.HOLD[v?.hold]?v.hold:'',exit:J.EXIT[v?.exit]?v.exit:'',intensity:clamp(v?.intensity,.5)});
-J.normalizeStudioMotion=v=>{const controls={};for(const key of J.STUDIO_CONTROLS)controls[key]=clamp(v?.controls?.[key],key==='speed'?50:0,0,100);const rows={};for(const [key,row]of Object.entries(v?.rows||{}).slice(0,20000))if(/^line-\d+$|^cue-.{1,100}$/.test(key))rows[key]=J.studioMotionRow(row);return{preset:Object.hasOwn(J.STUDIO_PRESETS,v?.preset)?v.preset:'Minimal',controls,rows};};
-J.studioPreset=(name)=>{const recipe=J.STUDIO_PRESETS[name]||J.STUDIO_PRESETS.Minimal;return J.studioMotionRow({enter:recipe[0],hold:recipe[1],exit:recipe[2],intensity:recipe[3]});};
-const planner=J.plan;J.plan=(project,audio)=>{const plan=planner(project,audio);if(!J.studioOn(project,'motionEditing'))return plan;for(const cut of plan.cuts){const line=plan.lines.find(l=>l.index===cut.line);if(!line||line.interlude)continue;const row=plan.studio.motion.rows[J.studioLineKey(line)];if(!row)continue;for(const [stage,table]of[['enter',J.ENTER],['hold',J.HOLD],['exit',J.EXIT]]){const def=table[row[stage]];if(def&&(!def.maxChars||[...cut.text].length<=def.maxChars)&&(!def.minDur||cut.dur>=def.minDur))cut[stage]=row[stage];}const speed=.5+plan.studio.motion.controls.speed/100;cut.inDur=Math.min(cut.dur/2,cut.inDur/speed);cut.outDur=Math.min(cut.dur/2,cut.outDur/speed);cut.studioMotion=row;}return plan;};
-const make=J.Renderer.prototype.makeEnv;J.Renderer.prototype.makeEnv=function(ctx,plan,cut,sc,opt){const env=make.call(this,ctx,plan,cut,sc,opt);if(plan.studio?.flags.motionEditing&&cut?.studioMotion){const row=cut.studioMotion,c=plan.studio.motion.controls,amt=row.intensity*(1-c.calm/125);env.fx={...env.fx,motion:amt*(.5+c.impact/100),glitch:(env.fx.glitch||0)*c.glitch/100};env.studioAmount=amt;}return env;};
-const draw=J.drawItem;J.drawItem=(env,it)=>{if(!env.cut?.studioMotion||!env.plan.studio?.flags.motionEditing||env.inLayer||it._studioMotion||!env.cut.text.includes(it.text))return draw(env,it);const c=env.plan.studio.motion.controls,a=env.studioAmount||0,old=it.charFn,phase=Math.sin(env.t*(2+c.speed/10)),pulse=1+.035*a*phase*c.impact/100;return draw(env,{...it,_studioMotion:true,sx:(it.sx||1)*pulse,sy:(it.sy||1)*pulse,blur:(it.blur||0)*(1-c.sharpness/100),charFn:(i,g,n)=>{const t=old?.(i,g,n)||{};return{...t,dx:(t.dx||0)+(i-(n-1)/2)*a*c.spread/10,dy:(t.dy||0)+Math.sin(env.t*14+i)*a*c.shake/10,rot:(t.rot||0)+phase*a*c.impact/30};}});};
+    'use strict';
+    const clamp = (v, d, lo = 0, hi = 1) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
+    J.STUDIO_PRESETS = { Minimal: ['blur', 'still', 'blur', .2], Pop: ['pop', 'breathe', 'shrink', .65], Rock: ['drop', 'jitter', 'scatter', .8], Cyber: ['type', 'glitchtick', 'blur', .65], Emotional: ['blur', 'drift', 'blur', .35], Elegant: ['wipe', 'still', 'blur', .25], Dark: ['blur', 'breathe', 'blur', .35], Impact: ['pop', 'jitter', 'scatter', .95], Glitch: ['scramble', 'glitchtick', 'flicker', .8], Cinematic: ['zoom', 'drift', 'shrink', .5] };
+    J.STUDIO_CONTROLS = ['calm', 'impact', 'sharpness', 'speed', 'spread', 'shake', 'glitch'];
+    J.studioMotionRow = v => ({ enter: J.ENTER[v?.enter] ? v.enter : '', hold: J.HOLD[v?.hold] ? v.hold : '', exit: J.EXIT[v?.exit] ? v.exit : '', intensity: clamp(v?.intensity, .5) });
+    J.normalizeStudioMotion = v => {
+        const controls = {};
+        for (const key of J.STUDIO_CONTROLS)
+            controls[key] = clamp(v?.controls?.[key], key === 'speed' ? 50 : 0, 0, 100);
+        const rows = {};
+        for (const [key, row] of Object.entries(v?.rows || {}).slice(0, 20000))
+            if (/^line-\d+$|^cue-.{1,100}$/.test(key))
+                rows[key] = J.studioMotionRow(row);
+        return { preset: Object.hasOwn(J.STUDIO_PRESETS, v?.preset) ? v.preset : 'Minimal', controls, rows };
+    };
+    J.studioPreset = (name) => { const recipe = J.STUDIO_PRESETS[name] || J.STUDIO_PRESETS.Minimal; return J.studioMotionRow({ enter: recipe[0], hold: recipe[1], exit: recipe[2], intensity: recipe[3] }); };
+    const planner = J.plan;
+    J.plan = (project, audio) => {
+        const plan = planner(project, audio);
+        if (!J.studioOn(project, 'motionEditing'))
+            return plan;
+        for (const cut of plan.cuts) {
+            const line = plan.lines.find(l => l.index === cut.line);
+            if (!line || line.interlude)
+                continue;
+            const row = plan.studio.motion.rows[J.studioLineKey(line)];
+            if (!row)
+                continue;
+            for (const [stage, table] of [['enter', J.ENTER], ['hold', J.HOLD], ['exit', J.EXIT]]) {
+                const def = table[row[stage]];
+                if (def && (!def.maxChars || [...cut.text].length <= def.maxChars) && (!def.minDur || cut.dur >= def.minDur))
+                    cut[stage] = row[stage];
+            }
+            const speed = .5 + plan.studio.motion.controls.speed / 100;
+            cut.inDur = Math.min(cut.dur / 2, cut.inDur / speed);
+            cut.outDur = Math.min(cut.dur / 2, cut.outDur / speed);
+            cut.studioMotion = row;
+        }
+        return plan;
+    };
+    const make = J.Renderer.prototype.makeEnv;
+    J.Renderer.prototype.makeEnv = function (ctx, plan, cut, sc, opt) {
+        const env = make.call(this, ctx, plan, cut, sc, opt);
+        if (plan.studio?.flags.motionEditing && cut?.studioMotion) {
+            const row = cut.studioMotion, c = plan.studio.motion.controls, amt = row.intensity * (1 - c.calm / 125);
+            env.fx = { ...env.fx, motion: amt * (.5 + c.impact / 100), glitch: (env.fx.glitch || 0) * c.glitch / 100 };
+            env.studioAmount = amt;
+        }
+        return env;
+    };
+    const draw = J.drawItem;
+    J.drawItem = (env, it) => {
+        if (!env.cut?.studioMotion || !env.plan.studio?.flags.motionEditing || env.inLayer || it._studioMotion || !env.cut.text.includes(it.text))
+            return draw(env, it);
+        const c = env.plan.studio.motion.controls, a = env.studioAmount || 0, old = it.charFn, phase = Math.sin(env.t * (2 + c.speed / 10)), pulse = 1 + .035 * a * phase * c.impact / 100;
+        return draw(env, { ...it, _studioMotion: true, sx: (it.sx || 1) * pulse, sy: (it.sy || 1) * pulse, blur: (it.blur || 0) * (1 - c.sharpness / 100), charFn: (i, g, n) => { const t = old?.(i, g, n) || {}; return { ...t, dx: (t.dx || 0) + (i - (n - 1) / 2) * a * c.spread / 10, dy: (t.dy || 0) + Math.sin(env.t * 14 + i) * a * c.shake / 10, rot: (t.rot || 0) + phase * a * c.impact / 30 }; } });
+    };
 })();
 
 (() => {
-'use strict';
-const cache=new WeakMap();J.STUDIO_SECTIONS=['Unknown','Intro','Verse','Pre Chorus','Chorus','Bridge','Outro'];
-J.normalizeStudioAnalysis=v=>({beatSnap:[20,50,100,150].includes(v?.beatSnap)?v.beatSnap:0,sections:(Array.isArray(v?.sections)?v.sections:[]).slice(0,500).filter(s=>Number.isFinite(s?.start)&&Number.isFinite(s?.end)&&s.start>=0&&s.end>s.start&&J.STUDIO_SECTIONS.includes(s.type)).map(s=>({start:s.start,end:s.end,type:s.type})).sort((a,b)=>a.start-b.start)});
-J.studioDensity=lines=>lines.map(l=>{const count=[...(l.text||'').replace(/\s/g,'')].length,seconds=Math.max(.001,l.end-l.start);return{index:l.index,key:J.studioLineKey(l),count,seconds,cps:count/seconds};});
-J.studioAnalyze=audio=>{if(!audio?.buffer)throw new Error(J.layerText('音源を先に読み込んでください。','Load audio first.'));if(cache.has(audio.buffer))return cache.get(audio.buffer);const rate=audio.energyRate||50,energy=audio.energy||[],sections=[];let start=0,previous=0;const average=(a,b)=>{let sum=0;for(let i=a;i<b;i++)sum+=energy[i]||0;return sum/Math.max(1,b-a);};for(let i=0;i<energy.length;i+=rate*5){const mean=average(i,Math.min(energy.length,i+rate*5));if(i>0&&Math.abs(mean-previous)>.25){sections.push({start,end:i/rate,type:'Unknown'});start=i/rate;}previous=mean;}if(audio.duration>start)sections.push({start,end:audio.duration,type:'Unknown'});const result={rate,rms:audio.rms||[],peak:audio.framePeaks||[],energy,onset:audio.onset||[],beats:audio.beats||[],bpm:audio.bpm,confidence:(audio.onset||[]).some(v=>v>.1)?'estimated':'low',sections};cache.set(audio.buffer,result);return result;};
-J.studioLineEnergy=(analysis,line)=>{const a=Math.floor(line.start*analysis.rate),b=Math.min(analysis.energy.length,Math.ceil(line.end*analysis.rate));let sum=0;for(let i=a;i<b;i++)sum+=analysis.energy[i]||0;return Math.max(0,Math.min(1,sum/Math.max(1,b-a)));};
+    'use strict';
+    const cache = new WeakMap();
+    J.STUDIO_SECTIONS = ['Unknown', 'Intro', 'Verse', 'Pre Chorus', 'Chorus', 'Bridge', 'Outro'];
+    J.normalizeStudioAnalysis = v => ({ beatSnap: [20, 50, 100, 150].includes(v?.beatSnap) ? v.beatSnap : 0, sections: (Array.isArray(v?.sections) ? v.sections : []).slice(0, 500).filter(s => Number.isFinite(s?.start) && Number.isFinite(s?.end) && s.start >= 0 && s.end > s.start && J.STUDIO_SECTIONS.includes(s.type)).map(s => ({ start: s.start, end: s.end, type: s.type })).sort((a, b) => a.start - b.start) });
+    J.studioDensity = lines => lines.map(l => { const count = [...(l.text || '').replace(/\s/g, '')].length, seconds = Math.max(.001, l.end - l.start); return { index: l.index, key: J.studioLineKey(l), count, seconds, cps: count / seconds }; });
+    J.studioAnalyze = audio => {
+        if (!audio?.buffer)
+            throw new Error(J.layerText('音源を先に読み込んでください。', 'Load audio first.'));
+        if (cache.has(audio.buffer))
+            return cache.get(audio.buffer);
+        const rate = audio.energyRate || 50, energy = audio.energy || [], sections = [];
+        let start = 0, previous = 0;
+        const average = (a, b) => {
+            let sum = 0;
+            for (let i = a; i < b; i++)
+                sum += energy[i] || 0;
+            return sum / Math.max(1, b - a);
+        };
+        for (let i = 0; i < energy.length; i += rate * 5) {
+            const mean = average(i, Math.min(energy.length, i + rate * 5));
+            if (i > 0 && Math.abs(mean - previous) > .25) {
+                sections.push({ start, end: i / rate, type: 'Unknown' });
+                start = i / rate;
+            }
+            previous = mean;
+        }
+        if (audio.duration > start)
+            sections.push({ start, end: audio.duration, type: 'Unknown' });
+        const result = { rate, rms: audio.rms || [], peak: audio.framePeaks || [], energy, onset: audio.onset || [], beats: audio.beats || [], bpm: audio.bpm, confidence: (audio.onset || []).some(v => v > .1) ? 'estimated' : 'low', sections };
+        cache.set(audio.buffer, result);
+        return result;
+    };
+    J.studioLineEnergy = (analysis, line) => {
+        const a = Math.floor(line.start * analysis.rate), b = Math.min(analysis.energy.length, Math.ceil(line.end * analysis.rate));
+        let sum = 0;
+        for (let i = a; i < b; i++)
+            sum += analysis.energy[i] || 0;
+        return Math.max(0, Math.min(1, sum / Math.max(1, b - a)));
+    };
 })();
 
 (() => {
-'use strict';
-J.studioSnapCues=(cues,beats,maxMs)=>{const limit=[20,50,100,150].includes(maxMs)?maxMs/1000:0,valid=J.validateCues(cues),grid=beats.filter(Number.isFinite).sort((a,b)=>a-b);if(!limit||!grid.length)return valid;let cursor=0;const next=valid.map(c=>{while(cursor+1<grid.length&&grid[cursor+1]<c.start)cursor++;const options=[grid[cursor],grid[cursor+1]].filter(Number.isFinite),nearest=options.reduce((a,b)=>Math.abs(b-c.start)<Math.abs(a-c.start)?b:a,options[0]),delta=nearest-c.start;if(Math.abs(delta)>limit+1e-9||nearest<0)return c;return{...c,start:nearest,end:c.end+delta};});for(let i=1;i<next.length;i++)if(next[i].start<next[i-1].start)return valid;return J.validateCues(next);};
-J.studioAutoRecipes=(plan,analysis,sections)=>{const rows={};for(const d of J.studioDensity(plan.lines)){const line=plan.lines.find(l=>l.index===d.index);if(!d.count)continue;const energy=J.studioLineEnergy(analysis,line),section=sections.find(s=>line.start>=s.start&&line.start<s.end)?.type;let intensity=Math.max(.15,Math.min(1,.15+energy*.75));if(section==='Chorus')intensity=Math.max(.8,intensity);if(section==='Verse'||section==='Intro')intensity=Math.min(.5,intensity);if(d.cps>8)intensity=Math.min(.45,intensity);const preset=d.cps>8?'Minimal':intensity>.75?'Impact':intensity>.5?'Pop':'Elegant';rows[d.key]={...J.studioPreset(preset),intensity};}return rows;};
+    'use strict';
+    J.studioSnapCues = (cues, beats, maxMs) => {
+        const limit = [20, 50, 100, 150].includes(maxMs) ? maxMs / 1000 : 0, valid = J.validateCues(cues), grid = beats.filter(Number.isFinite).sort((a, b) => a - b);
+        if (!limit || !grid.length)
+            return valid;
+        let cursor = 0;
+        const next = valid.map(c => {
+            while (cursor + 1 < grid.length && grid[cursor + 1] < c.start)
+                cursor++;
+            const options = [grid[cursor], grid[cursor + 1]].filter(Number.isFinite), nearest = options.reduce((a, b) => Math.abs(b - c.start) < Math.abs(a - c.start) ? b : a, options[0]), delta = nearest - c.start;
+            if (Math.abs(delta) > limit + 1e-9 || nearest < 0)
+                return c;
+            return { ...c, start: nearest, end: c.end + delta };
+        });
+        for (let i = 1; i < next.length; i++)
+            if (next[i].start < next[i - 1].start)
+                return valid;
+        return J.validateCues(next);
+    };
+    J.studioAutoRecipes = (plan, analysis, sections) => {
+        const rows = {};
+        for (const d of J.studioDensity(plan.lines)) {
+            const line = plan.lines.find(l => l.index === d.index);
+            if (!d.count)
+                continue;
+            const energy = J.studioLineEnergy(analysis, line), section = sections.find(s => line.start >= s.start && line.start < s.end)?.type;
+            let intensity = Math.max(.15, Math.min(1, .15 + energy * .75));
+            if (section === 'Chorus')
+                intensity = Math.max(.8, intensity);
+            if (section === 'Verse' || section === 'Intro')
+                intensity = Math.min(.5, intensity);
+            if (d.cps > 8)
+                intensity = Math.min(.45, intensity);
+            const preset = d.cps > 8 ? 'Minimal' : intensity > .75 ? 'Impact' : intensity > .5 ? 'Pop' : 'Elegant';
+            rows[d.key] = { ...J.studioPreset(preset), intensity };
+        }
+        return rows;
+    };
 })();
 
 (() => {
-'use strict';
-J.STUDIO_LAYER_TYPES=['Lyrics','Text','Image','Video','Overlay','Effect','Background'];J.STUDIO_BLENDS=['source-over','multiply','screen','overlay','lighter'];J.studioMedia=new Map();
-J.normalizeStudioLayers=value=>{const used=new Set(),out=[];for(const layer of(Array.isArray(value)?value:[]).slice(0,64)){if(!layer||!J.STUDIO_LAYER_TYPES.includes(layer.type)||typeof layer.id!=='string'||!/^[-a-zA-Z0-9_]{1,100}$/.test(layer.id)||used.has(layer.id)||layer.type==='Lyrics'&&out.some(l=>l.type==='Lyrics'))continue;used.add(layer.id);const start=Number.isFinite(layer.start)?Math.max(0,layer.start):0,end=Number.isFinite(layer.end)?Math.max(start+.001,layer.end):86400;out.push({id:layer.id,type:layer.type,name:String(layer.name||layer.type).slice(0,100),start,end,blend:J.STUDIO_BLENDS.includes(layer.blend)?layer.blend:'source-over',transform:J.studioTransform(layer.transform),text:String(layer.text||'').slice(0,10000),color:/^#[0-9a-f]{6}$/i.test(layer.color)?layer.color:'#ffffff',fileName:String(layer.fileName||'').slice(0,200),font:J.FONTS[layer.font]?layer.font:'gothic_bold'});}if(!out.some(l=>l.type==='Lyrics'))out.unshift({id:'lyrics',type:'Lyrics',name:'Lyrics',start:0,end:86400,blend:'source-over',transform:J.studioTransform(),text:'',color:'#ffffff',fileName:'',font:'gothic_bold'});return out;};
-J.studioEnsureCues=project=>{if(Array.isArray(project.subtitleCues))return project.subtitleCues;const plan=J.plan(project,J.ui.audio),cues=J.studioPlanCues(plan);for(let i=0;i<cues.length;i++){const from=J.studioLineKey(plan.lines[i]),to='cue-'+cues[i].id;for(const map of[project.studio.characters,project.studio.motion.rows])if(map[from])map[to]=structuredClone(map[from]);}project.subtitleCues=cues;project.lyrics=cues.map(c=>c.text).join('\n\n');project.timing.lineTimes={};return cues;};
-J.studioDuplicateCue=(project,index)=>{const cue=project.subtitleCues[index];if(!cue)throw new Error('Cue not found');const id='copy-'+crypto.randomUUID(),entries=project.subtitleCues.map((cue,i)=>({cue,override:project.overrides?.[i]}));entries.push({cue:{...cue,id,start:cue.end,end:cue.end+(cue.end-cue.start)},override:structuredClone(project.overrides?.[index]||{})});entries.sort((a,b)=>a.cue.start-b.cue.start);project.subtitleCues=J.validateCues(entries.map(e=>e.cue));project.overrides=Object.fromEntries(entries.map((e,i)=>[i,e.override||{}]));for(const map of[project.studio.characters,project.studio.motion.rows])if(map['cue-'+cue.id])map['cue-'+id]=structuredClone(map['cue-'+cue.id]);project.lyrics=project.subtitleCues.map(c=>c.text).join('\n\n');project.exportRange=null;return id;};
-J.composeStudioLayers=(ctx,project,t,lyrics,assets=J.studioMedia)=>{const w=ctx.canvas.width,h=ctx.canvas.height,design=J.designSize(project.aspect),k=w/design[0];for(const layer of project.studio.layers){const m=assets.get(layer.id);if(m?.video&&assets===J.studioMedia){const local=Math.max(0,Math.min(t-layer.start,m.duration-.001));if(!m.el.seeking&&Math.abs(m.el.currentTime-local)>.03)m.el.currentTime=local;if(J.ui.playing&&t>=layer.start&&t<layer.end&&local<m.duration-.01)m.el.play().catch(()=>{});else m.el.pause();}if(t<layer.start||t>=layer.end)continue;const p=layer.transform;ctx.save();ctx.globalAlpha=p.opacity;ctx.globalCompositeOperation=layer.blend;ctx.translate(w/2+p.x*k,h/2+p.y*k);ctx.rotate(p.rotation*J.DEG);ctx.scale(p.scale,p.scale);if(layer.type==='Lyrics')ctx.drawImage(lyrics,-w/2,-h/2);else if(layer.type==='Text'){ctx.font=J.fontCSS(layer.font,Math.max(12,h/10));ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle=layer.color;const rows=layer.text.split('\n');rows.forEach((row,i)=>ctx.fillText(row,0,(i-(rows.length-1)/2)*h/8));}else if(['Background','Overlay','Effect'].includes(layer.type)){ctx.fillStyle=layer.color;if(layer.type==='Effect')ctx.globalAlpha*=.5+.5*Math.sin(t*J.TAU);ctx.fillRect(-w/2,-h/2,w,h);}else if(m){const ratio=Math.min(w/m.width,h/m.height);ctx.drawImage(m.el,-m.width*ratio/2,-m.height*ratio/2,m.width*ratio,m.height*ratio);}ctx.restore();}};
-const reset=J.resetLayerProjectSession;J.clearStudioMedia=()=>{for(const m of J.studioMedia.values())m.dispose();J.studioMedia.clear();};if(reset)J.resetLayerProjectSession=()=>{reset();J.clearStudioMedia();};
+    'use strict';
+    J.STUDIO_LAYER_TYPES = ['Lyrics', 'Text', 'Image', 'Video', 'Overlay', 'Effect', 'Background'];
+    J.STUDIO_BLENDS = ['source-over', 'multiply', 'screen', 'overlay', 'lighter'];
+    J.studioMedia = new Map();
+    J.normalizeStudioLayers = value => {
+        const used = new Set(), out = [];
+        for (const layer of (Array.isArray(value) ? value : []).slice(0, 64)) {
+            if (!layer || !J.STUDIO_LAYER_TYPES.includes(layer.type) || typeof layer.id !== 'string' || !/^[-a-zA-Z0-9_]{1,100}$/.test(layer.id) || used.has(layer.id) || layer.type === 'Lyrics' && out.some(l => l.type === 'Lyrics'))
+                continue;
+            used.add(layer.id);
+            const start = Number.isFinite(layer.start) ? Math.max(0, layer.start) : 0, end = Number.isFinite(layer.end) ? Math.max(start + .001, layer.end) : 86400;
+            out.push({ id: layer.id, type: layer.type, name: String(layer.name || layer.type).slice(0, 100), start, end, blend: J.STUDIO_BLENDS.includes(layer.blend) ? layer.blend : 'source-over', transform: J.studioTransform(layer.transform), text: String(layer.text || '').slice(0, 10000), color: /^#[0-9a-f]{6}$/i.test(layer.color) ? layer.color : '#ffffff', fileName: String(layer.fileName || '').slice(0, 200), font: J.FONTS[layer.font] ? layer.font : 'gothic_bold' });
+        }
+        if (!out.some(l => l.type === 'Lyrics'))
+            out.unshift({ id: 'lyrics', type: 'Lyrics', name: 'Lyrics', start: 0, end: 86400, blend: 'source-over', transform: J.studioTransform(), text: '', color: '#ffffff', fileName: '', font: 'gothic_bold' });
+        return out;
+    };
+    J.studioEnsureCues = project => {
+        if (Array.isArray(project.subtitleCues))
+            return project.subtitleCues;
+        const plan = J.plan(project, J.ui.audio), cues = J.studioPlanCues(plan);
+        for (let i = 0; i < cues.length; i++) {
+            const from = J.studioLineKey(plan.lines[i]), to = 'cue-' + cues[i].id;
+            for (const map of [project.studio.characters, project.studio.motion.rows])
+                if (map[from])
+                    map[to] = structuredClone(map[from]);
+        }
+        project.subtitleCues = cues;
+        project.lyrics = cues.map(c => c.text).join('\n\n');
+        project.timing.lineTimes = {};
+        return cues;
+    };
+    J.studioDuplicateCue = (project, index) => {
+        const cue = project.subtitleCues[index];
+        if (!cue)
+            throw new Error('Cue not found');
+        const id = 'copy-' + crypto.randomUUID(), entries = project.subtitleCues.map((cue, i) => ({ cue, override: project.overrides?.[i] }));
+        entries.push({ cue: { ...cue, id, start: cue.end, end: cue.end + (cue.end - cue.start) }, override: structuredClone(project.overrides?.[index] || {}) });
+        entries.sort((a, b) => a.cue.start - b.cue.start);
+        project.subtitleCues = J.validateCues(entries.map(e => e.cue));
+        project.overrides = Object.fromEntries(entries.map((e, i) => [i, e.override || {}]));
+        for (const map of [project.studio.characters, project.studio.motion.rows])
+            if (map['cue-' + cue.id])
+                map['cue-' + id] = structuredClone(map['cue-' + cue.id]);
+        project.lyrics = project.subtitleCues.map(c => c.text).join('\n\n');
+        project.exportRange = null;
+        return id;
+    };
+    J.composeStudioLayers = (ctx, project, t, lyrics, assets = J.studioMedia) => {
+        const w = ctx.canvas.width, h = ctx.canvas.height, design = J.designSize(project.aspect), k = w / design[0];
+        for (const layer of project.studio.layers) {
+            const m = assets.get(layer.id);
+            if (m?.video && assets === J.studioMedia) {
+                const local = Math.max(0, Math.min(t - layer.start, m.duration - .001));
+                if (!m.el.seeking && Math.abs(m.el.currentTime - local) > .03)
+                    m.el.currentTime = local;
+                if (J.ui.playing && t >= layer.start && t < layer.end && local < m.duration - .01)
+                    m.el.play().catch(() => { });
+                else
+                    m.el.pause();
+            }
+            if (t < layer.start || t >= layer.end)
+                continue;
+            const p = layer.transform;
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+            ctx.globalCompositeOperation = layer.blend;
+            ctx.translate(w / 2 + p.x * k, h / 2 + p.y * k);
+            ctx.rotate(p.rotation * J.DEG);
+            ctx.scale(p.scale, p.scale);
+            if (layer.type === 'Lyrics')
+                ctx.drawImage(lyrics, -w / 2, -h / 2);
+            else if (layer.type === 'Text') {
+                ctx.font = J.fontCSS(layer.font, Math.max(12, h / 10));
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = layer.color;
+                const rows = layer.text.split('\n');
+                rows.forEach((row, i) => ctx.fillText(row, 0, (i - (rows.length - 1) / 2) * h / 8));
+            }
+            else if (['Background', 'Overlay', 'Effect'].includes(layer.type)) {
+                ctx.fillStyle = layer.color;
+                if (layer.type === 'Effect')
+                    ctx.globalAlpha *= .5 + .5 * Math.sin(t * J.TAU);
+                ctx.fillRect(-w / 2, -h / 2, w, h);
+            }
+            else if (m) {
+                const ratio = Math.min(w / m.width, h / m.height);
+                ctx.drawImage(m.el, -m.width * ratio / 2, -m.height * ratio / 2, m.width * ratio, m.height * ratio);
+            }
+            ctx.restore();
+        }
+    };
+    const reset = J.resetLayerProjectSession;
+    J.clearStudioMedia = () => {
+        for (const m of J.studioMedia.values())
+            m.dispose();
+        J.studioMedia.clear();
+    };
+    if (reset)
+        J.resetLayerProjectSession = () => { reset(); J.clearStudioMedia(); };
 })();
 
 (() => {
-'use strict';
-J.createStudioExportAssets=async(project,span,fps,signal)=>{if(!J.studioOn(project,'timeline'))return null;const assets=new Map(),readers=[];const close=async()=>{await Promise.allSettled(readers.map(r=>r.reader.close()));};try{for(const l of project.studio.layers.filter(l=>['Image','Video'].includes(l.type)&&l.start<span.t0+span.duration&&l.end>span.t0&&l.transform.opacity>0)){const m=J.studioMedia.get(l.id);if(!m)throw new Error(J.layerText('レイヤー素材を再読込してください: ','Reload layer media: ')+l.name+' / '+l.fileName);if(l.type==='Image'){assets.set(l.id,m);continue;}const reader=await J.VideoBackgroundReader.open(m,signal);readers.push({reader,layer:l,ctx:null});const ratio=Math.min(1,...J.outputSize(project).map((n,i)=>n/(i?m.height:m.width))),cv=J.layerCanvas(Math.max(1,Math.round(m.width*ratio)),Math.max(1,Math.round(m.height*ratio)));readers[readers.length-1].ctx=cv.getContext('2d');function* times(){for(let i=0;i<span.frames;i++){const t=span.t0+i/fps;if(t<l.start||t>=l.end)continue;const local=t-l.start+.000001;yield local;if(local>=reader.lastTimestamp)break;}}reader.iterator=new Mediabunny.VideoSampleSink(reader.track).samplesAtTimestamps(times());assets.set(l.id,{el:cv,width:cv.width,height:cv.height,video:false});}return{assets,frame:async t=>{for(const r of readers)if(t>=r.layer.start&&t<r.layer.end)await r.reader.drawNext(r.ctx);},close};}catch(e){await close();throw e;}};
-J.studioOutputName=project=>project.studio.output.filename||((project.title||'project').replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100)||'project');
-J.exportStudioPNG=async({project,plan,range,signal,onProgress})=>{const span=J.simpleExportSpan(project.simpleExport.duration,plan.fps,range),[w,h]=J.outputSize(project);if(span.frames>18000)throw new Error('PNG sequence limit: 18,000 frames; select a shorter range.');await J.ensureFonts(project.lyrics,J.fontsOfPlan(plan));const render=new J.LayerRenderer(w,h,'alpha',0,project.hideDecorativeText),cv=J.layerCanvas(w,h),ctx=cv.getContext('2d'),zip=new J.ZipWriter(),name=J.studioOutputName(project),lyricProject={...project,studio:{...project.studio,layers:project.studio.layers.filter(l=>l.type==='Lyrics')}};for(let i=0;i<span.frames;i++){if(signal?.aborted)throw new DOMException('Cancelled','AbortError');const t=span.t0+i/plan.fps;render.draw(plan,t);ctx.clearRect(0,0,w,h);if(J.studioOn(project,'timeline'))J.composeStudioLayers(ctx,lyricProject,t,render.layer,new Map());else ctx.drawImage(render.layer,0,0);const blob=await new Promise(resolve=>cv.toBlob(resolve,'image/png'));if(!blob)throw new Error('PNG encoding failed');zip.add(`${name}_${String(i).padStart(6,'0')}.png`,new Uint8Array(await blob.arrayBuffer()));onProgress?.((i+1)/span.frames,`${i+1} / ${span.frames}`);if(i%3===0)await new Promise(resolve=>setTimeout(resolve,0));}return zip.finish();};
+    'use strict';
+    J.createStudioExportAssets = async (project, span, fps, signal) => {
+        if (!J.studioOn(project, 'timeline'))
+            return null;
+        const assets = new Map(), readers = [];
+        const close = async () => { await Promise.allSettled(readers.map(r => r.reader.close())); };
+        try {
+            for (const l of project.studio.layers.filter(l => ['Image', 'Video'].includes(l.type) && l.start < span.t0 + span.duration && l.end > span.t0 && l.transform.opacity > 0)) {
+                const m = J.studioMedia.get(l.id);
+                if (!m)
+                    throw new Error(J.layerText('レイヤー素材を再読込してください: ', 'Reload layer media: ') + l.name + ' / ' + l.fileName);
+                if (l.type === 'Image') {
+                    assets.set(l.id, m);
+                    continue;
+                }
+                const reader = await J.VideoBackgroundReader.open(m, signal);
+                readers.push({ reader, layer: l, ctx: null });
+                const ratio = Math.min(1, ...J.outputSize(project).map((n, i) => n / (i ? m.height : m.width))), cv = J.layerCanvas(Math.max(1, Math.round(m.width * ratio)), Math.max(1, Math.round(m.height * ratio)));
+                readers[readers.length - 1].ctx = cv.getContext('2d');
+                function* times() {
+                    for (let i = 0; i < span.frames; i++) {
+                        const t = span.t0 + i / fps;
+                        if (t < l.start || t >= l.end)
+                            continue;
+                        const local = t - l.start + .000001;
+                        yield local;
+                        if (local >= reader.lastTimestamp)
+                            break;
+                    }
+                }
+                reader.iterator = new Mediabunny.VideoSampleSink(reader.track).samplesAtTimestamps(times());
+                assets.set(l.id, { el: cv, width: cv.width, height: cv.height, video: false });
+            }
+            return { assets, frame: async (t) => {
+                    for (const r of readers)
+                        if (t >= r.layer.start && t < r.layer.end)
+                            await r.reader.drawNext(r.ctx);
+                }, close };
+        }
+        catch (e) {
+            await close();
+            throw e;
+        }
+    };
+    J.studioOutputName = project => project.studio.output.filename || ((project.title || 'project').replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 100) || 'project');
+    J.exportStudioPNG = async ({ project, plan, range, signal, onProgress }) => {
+        const span = J.simpleExportSpan(project.simpleExport.duration, plan.fps, range), [w, h] = J.outputSize(project);
+        if (span.frames > 18000)
+            throw new Error('PNG sequence limit: 18,000 frames; select a shorter range.');
+        await J.ensureFonts(project.lyrics, J.fontsOfPlan(plan));
+        const render = new J.LayerRenderer(w, h, 'alpha', 0, project.hideDecorativeText), cv = J.layerCanvas(w, h), ctx = cv.getContext('2d'), zip = new J.ZipWriter(), name = J.studioOutputName(project), lyricProject = { ...project, studio: { ...project.studio, layers: project.studio.layers.filter(l => l.type === 'Lyrics') } };
+        for (let i = 0; i < span.frames; i++) {
+            if (signal?.aborted)
+                throw new DOMException('Cancelled', 'AbortError');
+            const t = span.t0 + i / plan.fps;
+            render.draw(plan, t);
+            ctx.clearRect(0, 0, w, h);
+            if (J.studioOn(project, 'timeline'))
+                J.composeStudioLayers(ctx, lyricProject, t, render.layer, new Map());
+            else
+                ctx.drawImage(render.layer, 0, 0);
+            const blob = await new Promise(resolve => cv.toBlob(resolve, 'image/png'));
+            if (!blob)
+                throw new Error('PNG encoding failed');
+            zip.add(`${name}_${String(i).padStart(6, '0')}.png`, new Uint8Array(await blob.arrayBuffer()));
+            onProgress?.((i + 1) / span.frames, `${i + 1} / ${span.frames}`);
+            if (i % 3 === 0)
+                await new Promise(resolve => setTimeout(resolve, 0));
+        }
+        return zip.finish();
+    };
 })();
 
 (() => {
-'use strict';
-let database=null,revision=0;J.studioRecoveryPending=true;
-J.openStudioRecovery=()=>{if(database)return database;database=new Promise((resolve,reject)=>{if(typeof indexedDB==='undefined'){reject(new Error('IndexedDB unavailable'));return;}const req=indexedDB.open('synthia-layer-studio-recovery-v1',1);req.onupgradeneeded=()=>req.result.createObjectStore('projects');req.onsuccess=()=>{const db=req.result;db.onversionchange=()=>{db.close();database=null;};resolve(db);};req.onerror=()=>{database=null;reject(req.error);};req.onblocked=()=>{database=null;reject(new Error('Recovery database is blocked by another tab'));};});return database;};
-J.readStudioSnapshot=async()=>{const db=await J.openStudioRecovery();return new Promise((resolve,reject)=>{const tx=db.transaction('projects','readonly'),req=tx.objectStore('projects').get('latest');req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);});};
-J.deleteStudioSnapshot=async()=>{revision++;const db=await J.openStudioRecovery();return new Promise((resolve,reject)=>{const tx=db.transaction('projects','readwrite');tx.objectStore('projects').delete('latest');tx.oncomplete=()=>resolve(true);tx.onabort=()=>reject(tx.error);tx.onerror=()=>reject(tx.error);});};
-J.saveStudioSnapshot=async(project=J.ui.project)=>{if(J.studioRecoveryPending||!J.studioOn(project,'autosave'))return false;const rev=revision,source=J.ui.project;try{const snapshot={schema:1,time:Date.now(),project:structuredClone(project)},db=await J.openStudioRecovery();if(rev!==revision||source!==J.ui.project)return false;await new Promise((resolve,reject)=>{const tx=db.transaction('projects','readwrite');tx.objectStore('projects').put(snapshot,'latest');tx.oncomplete=()=>resolve(true);tx.onabort=()=>reject(tx.error);tx.onerror=()=>reject(tx.error);});J.studioRecoveryStatus?.(J.layerText('保存済み ','Saved ')+new Date(snapshot.time).toLocaleTimeString());return true;}catch(e){J.studioRecoveryStatus?.(J.layerText('自動保存に失敗: ','Autosave failed: ')+e.message);return false;}};
+    'use strict';
+    let database = null, revision = 0, saveSequence = 0;
+    J.studioRecoveryPending = true;
+    J.openStudioRecovery = () => {
+        if (database)
+            return database;
+        database = new Promise((resolve, reject) => {
+            if (typeof indexedDB === 'undefined') {
+                reject(new Error('IndexedDB unavailable'));
+                return;
+            }
+            const req = indexedDB.open('synthia-layer-studio-recovery-v1', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('projects');
+            req.onsuccess = () => { const db = req.result; db.onversionchange = () => { db.close(); database = null; }; resolve(db); };
+            req.onerror = () => { database = null; reject(req.error); };
+            req.onblocked = () => { database = null; reject(new Error('Recovery database is blocked by another tab')); };
+        });
+        return database;
+    };
+    J.readStudioSnapshot = async () => {
+        const db = await J.openStudioRecovery();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('projects', 'readonly');
+            const req = tx.objectStore('projects').get('latest');
+            // Wait for the transaction, so callers may safely navigate after reading.
+            tx.oncomplete = () => resolve(req.result);
+            tx.onabort = () => reject(tx.error);
+            tx.onerror = () => reject(tx.error);
+        });
+    };
+    J.deleteStudioSnapshot = async () => { revision++; const db = await J.openStudioRecovery(); return new Promise((resolve, reject) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').delete('latest'); tx.oncomplete = () => resolve(true); tx.onabort = () => reject(tx.error); tx.onerror = () => reject(tx.error); }); };
+    J.saveStudioSnapshot = async (project = J.ui.project) => {
+        if (J.studioRecoveryPending || !J.studioOn(project, 'autosave'))
+            return false;
+        const rev = revision, sequence = ++saveSequence, source = J.ui.project;
+        try {
+            const snapshot = { schema: 1, time: Date.now(), project: structuredClone(project) }, db = await J.openStudioRecovery();
+            if (rev !== revision || sequence !== saveSequence || source !== J.ui.project)
+                return false;
+            await new Promise((resolve, reject) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put(snapshot, 'latest'); tx.oncomplete = () => resolve(true); tx.onabort = () => reject(tx.error); tx.onerror = () => reject(tx.error); });
+            J.studioRecoveryStatus?.(J.layerText('保存済み ', 'Saved ') + new Date(snapshot.time).toLocaleTimeString());
+            return true;
+        }
+        catch (e) {
+            J.studioRecoveryStatus?.(J.layerText('自動保存に失敗: ', 'Autosave failed: ') + e.message);
+            return false;
+        }
+    };
 })();
 
 /* English labels are applied after all expression packs register, before the editor starts.
@@ -41324,7 +41772,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.5.0' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.6.0' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -42510,6 +42958,8 @@ function mount() {
 }
 J.createLocalFontPickerButton = onSelect => {
   const button = el('button', tr('PCのフォントから選ぶ…', 'Choose installed PC font…')); button.type = 'button'; button.className = 'local-font-open';
+  button.disabled = !window.isSecureContext || typeof window.queryLocalFonts !== 'function';
+  if (button.disabled) button.title = tr('この環境は書体一覧の取得に対応していません。フォント名の入力またはフォントファイル読込を利用してください。', 'Font enumeration is unavailable. Enter a family name or import a font file.');
   button.addEventListener('click', async () => {
     mount(); const seq = ++request; selectFamily = onSelect; origin = button;
     families = []; search.value = ''; search.disabled = true; list.replaceChildren(); list.disabled = true; apply.disabled = true; sample.style.fontFamily = 'sans-serif';
@@ -42986,122 +43436,927 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 
 /* Extensions use the existing editor API; disabling a feature restores legacy tools. */
 (() => {
-'use strict';
-// IDs include legacy controls; explicit element constructors below stay typed.
-const $ = id => /** @type {any} */ (document.getElementById(id)), tr = J.layerText;
-const labels = {tapSync:['Tap Sync拡張','Enhanced Tap Sync'],lyricsTiming:['歌詞・SRT / LRC','Lyrics / SRT / LRC'],characterEditing:['文字単位編集','Character editing'],advancedFont:['フォントファイル','Font files'],motionEditing:['段階別モーション','Staged motion'],musicAnalysis:['楽曲解析','Music analysis'],autoMotion:['楽曲・フルおまかせ','Music / Full Auto'],timeline:['追加トラック・レイヤー','Extra tracks / layers'],export:['追加書き出し','Additional exports'],autosave:['自動保存・復元','Autosave / recovery']};
-J.studioElement = (tag, text, id) => { const e=document.createElement(tag); if(text!=null)e.textContent=text;if(id)e.id=id;return e; };
-J.studioButton = (id, ja, en, action) => {const e=J.studioElement('button',tr(ja,en),id);e.type='button';e.addEventListener('click',()=>{if(J.ui.exporting||J.layerSession.busy)return;try{const result=action();if(result?.catch)result.catch(error=>J.uiApi.toast(error.message));}catch(error){J.uiApi.toast(error.message);}});return e;};
-J.studioChanged = () => {J.uiApi.syncUI();J.uiApi.replan();J.uiApi.flushSave();};
-J.studioSection = (flag, ja, en) => {const section=J.studioElement('details',null,'studio-'+flag);section.className='studio-section';section.append(J.studioElement('summary',tr(ja,en)));$('studioTools').append(section);return section;};
-function boot(){
- const panel=J.studioElement('section',null,'studioTools');panel.className='studio-tools';panel.append(J.studioElement('h2',tr('統合制作ツール','Integrated studio tools')),J.studioElement('p',tr('必要な拡張を有効にしてください。従来の編集・MP4出力はそのまま使えます。','Enable the tools you need. Existing editing and MP4 exports stay available.')));
- const flags=J.studioElement('details',null,'studioFlags');flags.append(J.studioElement('summary',tr('拡張のオン／オフ','Enable / disable extensions')));
- for(const key of J.STUDIO_FEATURES){const label=J.studioElement('label'),input=J.studioElement('input',null,'studioFlag-'+key);input.type='checkbox';input.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.flags[key]=input.checked;if(key==='tapSync'&&J.ui.tap)J.uiApi.stopTap();J.studioChanged();});label.append(input,document.createTextNode(tr(...labels[key])));flags.append(label);}
- panel.append(flags);document.querySelector('.col-left').append(panel);
- const gapLabel=J.studioElement('label',tr('次行までの余白（ms）','Gap before next line (ms)')),gap=J.studioElement('input',null,'studioTapGap');gap.type='number';gap.min='0';gap.max='1000';gap.step='50';gap.setAttribute('list','studioTapGaps');const presets=J.studioElement('datalist',null,'studioTapGaps');for(const value of [0,50,100,150]){const option=J.studioElement('option');option.value=String(value);presets.append(option);}gap.addEventListener('change',()=>{if(!Number.isFinite(gap.valueAsNumber)||gap.valueAsNumber<0||gap.valueAsNumber>1000)return;J.uiApi.pushEdit();J.ui.project.studio.tapGap=gap.valueAsNumber;J.studioChanged();});gapLabel.append(gap,presets);panel.append(gapLabel);
- const meta=J.studioElement('div',null,'studioTapMeta');meta.setAttribute('aria-live','polite');$('tapBtn').before(meta);$('tapBtn').setAttribute('aria-label',tr('現在行を打刻','Stamp current lyric'));
- const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
- function sync(){const studio=J.ui.project.studio||(J.ui.project.studio=J.normalizeStudio());for(const key of J.STUDIO_FEATURES){$('studioFlag-'+key).checked=studio.flags[key];const section=$('studio-'+key);if(section)section.hidden=!studio.flags[key];}gapLabel.hidden=!studio.flags.tapSync;gap.value=String(studio.tapGap);document.documentElement.classList.toggle('studio-tap-enhanced',studio.flags.tapSync);}
- function tapInfo(){if(!J.ui.tap||!J.studioOn(J.ui.project,'tapSync')){meta.hidden=true;return;}meta.hidden=false;const {i,done}=J.ui.tap,lines=J.ui.plan.lines;meta.textContent=tr(`現在 ${Math.min(i+1,lines.length)} / ${lines.length} · 打刻済み ${done.length} · 残り ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}秒\n次: ${lines[i+1]?.text||'—'}`,`Line ${Math.min(i+1,lines.length)} / ${lines.length} · Stamped ${done.length} · Remaining ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}s\nNext: ${lines[i+1]?.text||'—'}`);$('tapBtn').disabled=i>=lines.length;}
- setInterval(tapInfo,100);sync();
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    // IDs include legacy controls; explicit element constructors below stay typed.
+    const $ = id => /** @type {any} */ (document.getElementById(id)), tr = J.layerText;
+    const labels = { tapSync: ['Tap Sync拡張', 'Enhanced Tap Sync'], lyricsTiming: ['歌詞・SRT / LRC', 'Lyrics / SRT / LRC'], characterEditing: ['文字単位編集', 'Character editing'], advancedFont: ['フォントファイル', 'Font files'], motionEditing: ['段階別モーション', 'Staged motion'], musicAnalysis: ['楽曲解析', 'Music analysis'], autoMotion: ['楽曲・フルおまかせ', 'Music / Full Auto'], timeline: ['追加トラック・レイヤー', 'Extra tracks / layers'], export: ['追加書き出し', 'Additional exports'], autosave: ['自動保存・復元', 'Autosave / recovery'] };
+    J.studioElement = (tag, text, id) => {
+        const e = document.createElement(tag);
+        if (text != null)
+            e.textContent = text;
+        if (id)
+            e.id = id;
+        return e;
+    };
+    J.studioButton = (id, ja, en, action) => {
+        const e = J.studioElement('button', tr(ja, en), id);
+        e.type = 'button';
+        e.addEventListener('click', () => {
+            if (J.ui.exporting || J.layerSession.busy)
+                return;
+            try {
+                const result = action();
+                if (result?.catch)
+                    result.catch(error => J.uiApi.toast(error.message));
+            }
+            catch (error) {
+                J.uiApi.toast(error.message);
+            }
+        });
+        return e;
+    };
+    J.studioChanged = () => { J.uiApi.syncUI(); J.uiApi.replan(); J.uiApi.flushSave(); };
+    J.studioSection = (flag, ja, en) => { const section = J.studioElement('details', null, 'studio-' + flag); section.className = 'studio-section'; section.append(J.studioElement('summary', tr(ja, en))); $('studioTools').append(section); return section; };
+    function boot() {
+        const panel = J.studioElement('section', null, 'studioTools');
+        panel.className = 'studio-tools';
+        panel.append(J.studioElement('h2', tr('統合制作ツール', 'Integrated studio tools')), J.studioElement('p', tr('必要な拡張を有効にしてください。従来の編集・MP4出力はそのまま使えます。', 'Enable the tools you need. Existing editing and MP4 exports stay available.')));
+        const flags = J.studioElement('details', null, 'studioFlags');
+        flags.append(J.studioElement('summary', tr('拡張のオン／オフ', 'Enable / disable extensions')));
+        for (const key of J.STUDIO_FEATURES) {
+            const label = J.studioElement('label'), input = J.studioElement('input', null, 'studioFlag-' + key);
+            input.type = 'checkbox';
+            input.addEventListener('change', () => {
+                J.uiApi.pushEdit();
+                J.ui.project.studio.flags[key] = input.checked;
+                if (key === 'tapSync' && J.ui.tap)
+                    J.uiApi.stopTap();
+                J.studioChanged();
+            });
+            label.append(input, document.createTextNode(tr(...labels[key])));
+            flags.append(label);
+        }
+        panel.append(flags);
+        document.querySelector('.col-left').append(panel);
+        const gapLabel = J.studioElement('label', tr('次行までの余白（ms）', 'Gap before next line (ms)')), gap = J.studioElement('input', null, 'studioTapGap');
+        gap.type = 'number';
+        gap.min = '0';
+        gap.max = '1000';
+        gap.step = '50';
+        gap.setAttribute('list', 'studioTapGaps');
+        const presets = J.studioElement('datalist', null, 'studioTapGaps');
+        for (const value of [0, 50, 100, 150]) {
+            const option = J.studioElement('option');
+            option.value = String(value);
+            presets.append(option);
+        }
+        gap.addEventListener('change', () => {
+            if (!Number.isFinite(gap.valueAsNumber) || gap.valueAsNumber < 0 || gap.valueAsNumber > 1000)
+                return;
+            J.uiApi.pushEdit();
+            J.ui.project.studio.tapGap = gap.valueAsNumber;
+            J.studioChanged();
+        });
+        gapLabel.append(gap, presets);
+        panel.append(gapLabel);
+        const meta = J.studioElement('div', null, 'studioTapMeta');
+        meta.setAttribute('aria-live', 'polite');
+        $('tapBtn').before(meta);
+        $('tapBtn').setAttribute('aria-label', tr('現在行を打刻', 'Stamp current lyric'));
+        const oldSync = J.syncLayerUI;
+        J.syncLayerUI = () => { oldSync(); sync(); };
+        function sync() {
+            const studio = J.ui.project.studio || (J.ui.project.studio = J.normalizeStudio());
+            for (const key of J.STUDIO_FEATURES) {
+                $('studioFlag-' + key).checked = studio.flags[key];
+                const section = $('studio-' + key);
+                if (section)
+                    section.hidden = !studio.flags[key];
+            }
+            gapLabel.hidden = !studio.flags.tapSync;
+            gap.value = String(studio.tapGap);
+            document.documentElement.classList.toggle('studio-tap-enhanced', studio.flags.tapSync);
+        }
+        function tapInfo() {
+            if (!J.ui.tap || !J.studioOn(J.ui.project, 'tapSync')) {
+                meta.hidden = true;
+                return;
+            }
+            meta.hidden = false;
+            const { i, done } = J.ui.tap, lines = J.ui.plan.lines;
+            meta.textContent = tr(`現在 ${Math.min(i + 1, lines.length)} / ${lines.length} · 打刻済み ${done.length} · 残り ${Math.max(0, lines.length - i)}\n♪ ${J.ui.t.toFixed(3)}秒\n次: ${lines[i + 1]?.text || '—'}`, `Line ${Math.min(i + 1, lines.length)} / ${lines.length} · Stamped ${done.length} · Remaining ${Math.max(0, lines.length - i)}\n♪ ${J.ui.t.toFixed(3)}s\nNext: ${lines[i + 1]?.text || '—'}`);
+            $('tapBtn').disabled = i >= lines.length;
+        }
+        setInterval(tapInfo, 100);
+        sync();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-const tr=J.layerText,el=J.studioElement,button=J.studioButton;
-function boot(){
- const root=J.studioSection('lyricsTiming','歌詞・タイミング / SRT / LRC','Lyrics / timing / SRT / LRC');
- const paste=el('textarea',null,'studioLyricsPaste');paste.rows=5;paste.setAttribute('aria-label',tr('貼り付ける歌詞','Lyrics to paste'));paste.placeholder=tr('歌詞を1行ずつ貼り付け','Paste one lyric per line');
- const label=el('label',tr('空行','Blank lines')),blanks=el('select',null,'studioBlankLines');for(const [value,ja,en] of [['skip','区切りとして扱う','Treat as a section break'],['keep','間奏として残す','Keep as an interlude']]){const o=el('option',tr(ja,en));o.value=value;blanks.append(o);}label.append(blanks);root.append(paste,label);
- root.append(button('studioPasteApply','歌詞を適用（Tap Sync用）','Apply lyrics (for Tap Sync)',()=>{if(J.ui.tap)J.uiApi.stopTap();if(!paste.value.trim())throw new Error(tr('歌詞を入力してください。','Enter lyrics.'));J.uiApi.pushEdit();const p=J.ui.project;p.studio.blankLines=blanks.value==='keep'?'keep':'skip';p.lyrics=J.studioPasteLyrics(paste.value,blanks.value==='keep');delete p.subtitleCues;p.overrides={};p.localLooks=null;p.timing.lineTimes={};p.exportRange=null;J.studioChanged();}));
- const fileLabel=el('label',tr('LRCを読み込む','Import LRC')),file=el('input',null,'studioLRCFile');file.type='file';file.accept='.lrc,text/plain';fileLabel.className='file';fileLabel.append(file);root.append(fileLabel);
- file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const epoch=J.projectSessionEpoch;try{const cues=J.studioParseLRC(await f.text(),J.ui.audio?.duration||0,J.ui.project.studio.tapGap);if(epoch!==J.projectSessionEpoch)return;if(J.ui.tap)J.uiApi.stopTap();J.uiApi.pushEdit();Object.assign(J.ui.project,{subtitleCues:cues,lyrics:cues.map(c=>c.text).join('\n\n'),overrides:{},localLooks:null,exportRange:null});J.ui.project.timing.lineTimes={};J.studioChanged();}catch(error){J.uiApi.toast(error.message);}finally{file.value='';}});
- const cues=()=>J.ui.project.subtitleCues||J.studioPlanCues(J.ui.plan),name=()=>((J.ui.project.title||'lyrics').replace(/[\\/:*?"<>|]/g,'_').slice(0,60)||'lyrics');
- root.append(button('studioExportSRT','SRTを保存','Save SRT',()=>J.saveFile(name()+'.srt',J.studioSRT(cues()))),button('studioExportLRC','LRCを保存','Save LRC',()=>J.saveFile(name()+'.lrc',J.studioLRC(cues()))));
- root.append(button('studioTimingEdit','現在の歌詞を字幕時刻編集へ','Edit current lyrics as timed cues',()=>{if(Array.isArray(J.ui.project.subtitleCues))return;const next=J.studioPlanCues(J.ui.plan);J.uiApi.pushEdit();J.ui.project.subtitleCues=next;J.studioChanged();J.editLayerCueText(0);}));
- root.append(el('p',tr('SRTの開始・終了はそのまま保存します。文字なしの字幕はSRT出力で省略します。LRCは開始時刻のみの形式です。複数行本文は1行にまとめ、読込時の終了は次行または音源長から補完します。空行を間奏にした歌詞は文字を描画しません。','SRT preserves start/end times; empty cues are omitted. LRC stores starts only and combines multiline text. Imported ends use the next start or audio duration. Blank interludes draw no lyric text.')));
- J.syncLayerUI();
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    const tr = J.layerText, el = J.studioElement, button = J.studioButton;
+    function boot() {
+        const root = J.studioSection('lyricsTiming', '歌詞・タイミング / SRT / LRC', 'Lyrics / timing / SRT / LRC');
+        const paste = el('textarea', null, 'studioLyricsPaste');
+        paste.rows = 5;
+        paste.setAttribute('aria-label', tr('貼り付ける歌詞', 'Lyrics to paste'));
+        paste.placeholder = tr('歌詞を1行ずつ貼り付け', 'Paste one lyric per line');
+        const label = el('label', tr('空行', 'Blank lines')), blanks = el('select', null, 'studioBlankLines');
+        for (const [value, ja, en] of [['skip', '区切りとして扱う', 'Treat as a section break'], ['keep', '間奏として残す', 'Keep as an interlude']]) {
+            const o = el('option', tr(ja, en));
+            o.value = value;
+            blanks.append(o);
+        }
+        label.append(blanks);
+        root.append(paste, label);
+        root.append(button('studioPasteApply', '歌詞を適用（Tap Sync用）', 'Apply lyrics (for Tap Sync)', () => {
+            if (J.ui.tap)
+                J.uiApi.stopTap();
+            if (!paste.value.trim())
+                throw new Error(tr('歌詞を入力してください。', 'Enter lyrics.'));
+            J.uiApi.pushEdit();
+            const p = J.ui.project;
+            p.studio.blankLines = blanks.value === 'keep' ? 'keep' : 'skip';
+            p.lyrics = J.studioPasteLyrics(paste.value, blanks.value === 'keep');
+            delete p.subtitleCues;
+            p.overrides = {};
+            p.localLooks = null;
+            p.timing.lineTimes = {};
+            p.exportRange = null;
+            J.studioChanged();
+        }));
+        const fileLabel = el('label', tr('LRCを読み込む', 'Import LRC')), file = el('input', null, 'studioLRCFile');
+        file.type = 'file';
+        file.accept = '.lrc,text/plain';
+        fileLabel.className = 'file';
+        fileLabel.append(file);
+        root.append(fileLabel);
+        file.addEventListener('change', async () => {
+            const f = file.files?.[0];
+            if (!f)
+                return;
+            const epoch = J.projectSessionEpoch;
+            try {
+                const cues = J.studioParseLRC(await f.text(), J.ui.audio?.duration || 0, J.ui.project.studio.tapGap);
+                if (epoch !== J.projectSessionEpoch)
+                    return;
+                if (J.ui.tap)
+                    J.uiApi.stopTap();
+                J.uiApi.pushEdit();
+                Object.assign(J.ui.project, { subtitleCues: cues, lyrics: cues.map(c => c.text).join('\n\n'), overrides: {}, localLooks: null, exportRange: null });
+                J.ui.project.timing.lineTimes = {};
+                J.studioChanged();
+            }
+            catch (error) {
+                J.uiApi.toast(error.message);
+            }
+            finally {
+                file.value = '';
+            }
+        });
+        const cues = () => J.ui.project.subtitleCues || J.studioPlanCues(J.ui.plan), name = () => ((J.ui.project.title || 'lyrics').replace(/[\\/:*?"<>|]/g, '_').slice(0, 60) || 'lyrics');
+        root.append(button('studioExportSRT', 'SRTを保存', 'Save SRT', () => J.saveFile(name() + '.srt', J.studioSRT(cues()))), button('studioExportLRC', 'LRCを保存', 'Save LRC', () => J.saveFile(name() + '.lrc', J.studioLRC(cues()))));
+        root.append(button('studioTimingEdit', '現在の歌詞を字幕時刻編集へ', 'Edit current lyrics as timed cues', () => {
+            if (Array.isArray(J.ui.project.subtitleCues))
+                return;
+            const next = J.studioPlanCues(J.ui.plan);
+            J.uiApi.pushEdit();
+            J.ui.project.subtitleCues = next;
+            J.studioChanged();
+            J.editLayerCueText(0);
+        }));
+        root.append(el('p', tr('SRTの開始・終了はそのまま保存します。文字なしの字幕はSRT出力で省略します。LRCは開始時刻のみの形式です。複数行本文は1行にまとめ、読込時の終了は次行または音源長から補完します。空行を間奏にした歌詞は文字を描画しません。', 'SRT preserves start/end times; empty cues are omitted. LRC stores starts only and combines multiline text. Imported ends use the next start or audio duration. Blank interludes draw no lyric text.')));
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-const el=J.studioElement,tr=J.layerText;
-function boot(){
- const root=J.studioSection('characterEditing','文字・行の直接編集','Character / line editing'),mode=el('select',null,'studioCharacterMode');for(const [v,t]of[['off','選択を解除 / Off'],['line','行 / Line'],['character','文字 / Character']]){const o=el('option',t);o.value=v;mode.append(o);}root.append(mode);
- const status=el('p',tr('一時停止したプレビューの文字をクリックして選択します。','Pause the preview and click a glyph to select it.'),'studioCharacterSelection');root.append(status);
- const fields={};let selected=null,drag=null;
- for(const [key,label,min,max,step]of[['x','X',-10000,10000,1],['y','Y',-10000,10000,1],['scale','Scale',.05,10,.05],['rotation','Rotation',-360,360,1],['opacity','Opacity',0,1,.05],['kerning','Kerning',-500,500,1]]){const labelEl=el('label',String(label)),input=el('input',null,'studioChar-'+key);input.type='number';input.min=String(min);input.max=String(max);input.step=String(step);fields[key]=input;labelEl.append(input);root.append(labelEl);input.addEventListener('change',()=>{if(!selected)return;J.uiApi.pushEdit();const t=current();t[key]=+input.value;set(t);});}
- const current=()=>{if(!selected)return J.studioTransform();const row=J.ui.project.studio.characters[selected.key];return J.studioTransform(mode.value==='line'?row?.line:row?.glyphs[selected.index]);};
- const set=t=>{if(!selected)return;const chars=J.ui.project.studio.characters,row=chars[selected.key]||(chars[selected.key]={line:J.studioTransform(),glyphs:{}});if(mode.value==='line')row.line=J.studioTransform(t);else row.glyphs[selected.index]=J.studioTransform(t);J.studioChanged();sync();};
- const sync=()=>{const t=current();for(const k in fields){fields[k].value=String(t[k]);fields[k].disabled=!selected;}status.textContent=selected?`${selected.key} / ${selected.index+1} / ${selected.ch}`:tr('プレビューの文字を選択してください。','Select a preview glyph.');};
- root.append(J.studioButton('studioCharReset','選択の変形をリセット','Reset selected transform',()=>{if(selected){J.uiApi.pushEdit();set(J.studioTransform());}}));
- const preview=J.drawLayerPreview;J.drawLayerPreview=(ctx,plan,t,opt)=>{J.studioCapturing=ctx.canvas.id==='view'&&J.studioOn(J.ui.project,'characterEditing');if(J.studioCapturing)J.studioGlyphHits=[];try{return preview(ctx,plan,t,opt);}finally{J.studioCapturing=false;}};
- const canvas=/** @type {HTMLCanvasElement} */(document.getElementById('view'));const point=e=>{const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*canvas.width/r.width,y:(e.clientY-r.top)*canvas.height/r.height};};
- canvas.addEventListener('pointerdown',e=>{if(e.button!==0||mode.value==='off'||!J.studioOn(J.ui.project,'characterEditing')||J.ui.playing||J.ui.tap||J.layerSession.busy)return;const p=point(e),hits=J.studioGlyphHits.filter(h=>Math.abs(h.x-p.x)<=h.w/2+6&&Math.abs(h.y-p.y)<=h.h/2+6).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y));selected=hits[0]||null;sync();if(!selected)return;e.preventDefault();canvas.setPointerCapture(e.pointerId);J.uiApi.pushEdit();drag={point:p,transform:current(),ratio:J.ui.plan.W/canvas.width};});
- canvas.addEventListener('pointermove',e=>{if(!drag)return;const p=point(e);set({...drag.transform,x:drag.transform.x+(p.x-drag.point.x)*drag.ratio,y:drag.transform.y+(p.y-drag.point.y)*drag.ratio});});
- for(const event of['pointerup','pointercancel','lostpointercapture'])canvas.addEventListener(event,()=>{drag=null;});mode.addEventListener('change',()=>{selected=null;sync();});sync();J.syncLayerUI();
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    const el = J.studioElement, tr = J.layerText;
+    function boot() {
+        const root = J.studioSection('characterEditing', '文字・行の直接編集', 'Character / line editing'), mode = el('select', null, 'studioCharacterMode');
+        for (const [v, t] of [['off', '選択を解除 / Off'], ['line', '行 / Line'], ['character', '文字 / Character']]) {
+            const o = el('option', t);
+            o.value = v;
+            mode.append(o);
+        }
+        root.append(mode);
+        const status = el('p', tr('一時停止したプレビューの文字をクリックして選択します。', 'Pause the preview and click a glyph to select it.'), 'studioCharacterSelection');
+        root.append(status);
+        const fields = {};
+        let selected = null, drag = null;
+        for (const [key, label, min, max, step] of [['x', 'X', -10000, 10000, 1], ['y', 'Y', -10000, 10000, 1], ['scale', 'Scale', .05, 10, .05], ['rotation', 'Rotation', -360, 360, 1], ['opacity', 'Opacity', 0, 1, .05], ['kerning', 'Kerning', -500, 500, 1]]) {
+            const labelEl = el('label', String(label)), input = el('input', null, 'studioChar-' + key);
+            input.type = 'number';
+            input.min = String(min);
+            input.max = String(max);
+            input.step = String(step);
+            fields[key] = input;
+            labelEl.append(input);
+            root.append(labelEl);
+            input.addEventListener('change', () => {
+                if (!selected)
+                    return;
+                J.uiApi.pushEdit();
+                const t = current();
+                t[key] = +input.value;
+                set(t);
+            });
+        }
+        const current = () => {
+            if (!selected)
+                return J.studioTransform();
+            const row = J.ui.project.studio.characters[selected.key];
+            return J.studioTransform(mode.value === 'line' ? row?.line : row?.glyphs[selected.index]);
+        };
+        const set = t => {
+            if (!selected)
+                return;
+            const chars = J.ui.project.studio.characters, row = chars[selected.key] || (chars[selected.key] = { line: J.studioTransform(), glyphs: {} });
+            if (mode.value === 'line')
+                row.line = J.studioTransform(t);
+            else
+                row.glyphs[selected.index] = J.studioTransform(t);
+            J.studioChanged();
+            sync();
+        };
+        const sync = () => {
+            const t = current();
+            for (const k in fields) {
+                fields[k].value = String(t[k]);
+                fields[k].disabled = !selected;
+            }
+            status.textContent = selected ? `${selected.key} / ${selected.index + 1} / ${selected.ch}` : tr('プレビューの文字を選択してください。', 'Select a preview glyph.');
+        };
+        root.append(J.studioButton('studioCharReset', '選択の変形をリセット', 'Reset selected transform', () => {
+            if (selected) {
+                J.uiApi.pushEdit();
+                set(J.studioTransform());
+            }
+        }));
+        const preview = J.drawLayerPreview;
+        J.drawLayerPreview = (ctx, plan, t, opt) => {
+            J.studioCapturing = ctx.canvas.id === 'view' && J.studioOn(J.ui.project, 'characterEditing');
+            if (J.studioCapturing)
+                J.studioGlyphHits = [];
+            try {
+                const result = preview(ctx, plan, t, opt);
+                if (J.studioCapturing && J.studioOn(J.ui.project, 'timeline')) {
+                    const layer = J.ui.project.studio.layers.find(l => l.type === 'Lyrics'), p = layer?.transform;
+                    if (!p || p.opacity <= 0 || t < layer.start || t >= layer.end)
+                        J.studioGlyphHits = [];
+                    else {
+                        const w = ctx.canvas.width, h = ctx.canvas.height, k = w / plan.W, cos = Math.cos(p.rotation * J.DEG), sin = Math.sin(p.rotation * J.DEG);
+                        for (const hit of J.studioGlyphHits) {
+                            const x = hit.x - w / 2, y = hit.y - h / 2;
+                            hit.x = w / 2 + p.x * k + p.scale * (cos * x - sin * y);
+                            hit.y = h / 2 + p.y * k + p.scale * (sin * x + cos * y);
+                            const width = hit.w, height = hit.h;
+                            hit.w = p.scale * (Math.abs(cos) * width + Math.abs(sin) * height);
+                            hit.h = p.scale * (Math.abs(sin) * width + Math.abs(cos) * height);
+                            for (const key of ['lineBasis', 'characterBasis']) {
+                                const b = hit[key];
+                                hit[key] = { a: p.scale * (cos * b.a - sin * b.b), b: p.scale * (sin * b.a + cos * b.b), c: p.scale * (cos * b.c - sin * b.d), d: p.scale * (sin * b.c + cos * b.d) };
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+            finally {
+                J.studioCapturing = false;
+            }
+        };
+        const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('view'));
+        const point = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height }; };
+        canvas.addEventListener('pointerdown', e => {
+            if (e.button !== 0 || mode.value === 'off' || !J.studioOn(J.ui.project, 'characterEditing') || J.ui.playing || J.ui.tap || J.layerSession.busy)
+                return;
+            const p = point(e), hits = J.studioGlyphHits.filter(h => Math.abs(h.x - p.x) <= h.w / 2 + 6 && Math.abs(h.y - p.y) <= h.h / 2 + 6).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y));
+            selected = hits[0] || null;
+            sync();
+            if (!selected)
+                return;
+            e.preventDefault();
+            canvas.setPointerCapture(e.pointerId);
+            J.uiApi.pushEdit();
+            drag = { point: p, transform: current(), basis: mode.value === 'line' ? selected.lineBasis : selected.characterBasis };
+        });
+        canvas.addEventListener('pointermove', e => {
+            if (!drag || J.ui.exporting)
+                return;
+            const p = point(e), b = drag.basis, det = b.a * b.d - b.b * b.c, dx = p.x - drag.point.x, dy = p.y - drag.point.y;
+            if (Math.abs(det) < 1e-9)
+                return;
+            set({ ...drag.transform, x: drag.transform.x + (b.d * dx - b.c * dy) / det, y: drag.transform.y + (-b.b * dx + b.a * dy) / det });
+        });
+        for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
+            canvas.addEventListener(event, () => { drag = null; });
+        mode.addEventListener('change', () => { selected = null; sync(); });
+        sync();
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('advancedFont','フォントファイル読込','Import font files'),file=el('input',null,'studioFontFile');file.type='file';file.accept='.ttf,.otf,.woff,.woff2';const label=el('label',tr('フォントを選択 / ここへドロップ','Choose a font / drop here'));label.className='studio-font-drop';label.append(file);root.append(label);const status=el('p',null,'studioFontStatus');status.setAttribute('role','status');root.append(status,el('p',tr('追加したフォント本体はプロジェクトJSONに含まれます。最大8書体・各8MB・合計約18MB。既存の「PCのフォントから選ぶ」も引き続き使えます。','Imported font data is embedded in project JSON. Up to 8 fonts, 8 MB each, about 18 MB total. The installed PC font picker remains available.')));let busy=false;const load=async f=>{if(!f||busy)return;busy=true;file.disabled=true;try{const added=await J.importStudioFont(f,J.ui.project);status.textContent=added?added.label+' ✓':'';}catch(e){status.textContent=e.message;J.uiApi.toast(e.message);}finally{busy=false;file.disabled=false;file.value='';}};file.addEventListener('change',()=>load(file.files?.[0]));label.addEventListener('dragover',e=>e.preventDefault());label.addEventListener('drop',e=>{e.preventDefault();load(e.dataTransfer.files[0]);});J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('advancedFont', 'フォントファイル読込', 'Import font files'), file = el('input', null, 'studioFontFile');
+        file.type = 'file';
+        file.accept = '.ttf,.otf,.woff,.woff2';
+        const label = el('label', tr('フォントを選択 / ここへドロップ', 'Choose a font / drop here'));
+        label.className = 'studio-font-drop';
+        label.append(file);
+        root.append(label);
+        const status = el('p', null, 'studioFontStatus');
+        status.setAttribute('role', 'status');
+        root.append(status, el('p', tr('追加したフォント本体はプロジェクトJSONに含まれます。最大8書体・各8MB・合計約18MB。既存の「PCのフォントから選ぶ」も引き続き使えます。', 'Imported font data is embedded in project JSON. Up to 8 fonts, 8 MB each, about 18 MB total. The installed PC font picker remains available.')));
+        let busy = false;
+        const load = async (f) => {
+            if (!f || busy || J.ui.exporting || J.layerSession.busy)
+                return;
+            busy = true;
+            file.disabled = true;
+            try {
+                const added = await J.importStudioFont(f, J.ui.project);
+                status.textContent = added ? added.label + ' ✓' : '';
+            }
+            catch (e) {
+                status.textContent = e.message;
+                J.uiApi.toast(e.message);
+            }
+            finally {
+                busy = false;
+                file.disabled = false;
+                file.value = '';
+            }
+        };
+        file.addEventListener('change', () => load(file.files?.[0]));
+        label.addEventListener('dragover', e => e.preventDefault());
+        label.addEventListener('drop', e => { e.preventDefault(); load(e.dataTransfer.files[0]); });
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('motionEditing','IN / HOLD / OUT・演出強度','IN / HOLD / OUT / intensity'),line=el('select',null,'studioMotionLine'),preset=el('select',null,'studioPreset'),fields={};root.append(line,preset);for(const name of Object.keys(J.STUDIO_PRESETS)){const o=el('option',name);o.value=name;preset.append(o);}for(const [name,table]of[['enter',J.ENTER],['hold',J.HOLD],['exit',J.EXIT]]){const label=el('label',name.toUpperCase()),select=el('select',null,'studioMotion-'+name);select.append(el('option',tr('既存のおまかせ','Existing auto')));for(const [key,d]of Object.entries(table)){const o=el('option',d.name||key);o.value=key;select.append(o);}select.options[0].value='';label.append(select);fields[name]=select;root.append(label);select.addEventListener('change',()=>save());}const intensity=el('input',null,'studioMotionIntensity');intensity.type='range';intensity.min='0';intensity.max='1';intensity.step='.01';const il=el('label','Intensity 0–1');il.append(intensity);root.append(il);intensity.addEventListener('change',()=>save());const labels=['落ち着き / Calm','インパクト / Impact','切れ味 / Sharpness','スピード / Speed','広がり / Spread','揺れ / Shake','グリッチ / Glitch'];const controls={};for(const [i,key]of J.STUDIO_CONTROLS.entries()){const label=el('label',labels[i]),input=el('input',null,'studioControl-'+key);input.type='range';input.min='0';input.max='100';input.step='1';label.append(input);controls[key]=input;root.append(label);input.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.motion.controls[key]=+input.value;J.studioChanged();});}
- const selected=()=>J.ui.plan.lines.find(l=>J.studioLineKey(l)===line.value),save=()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.rows[line.value]=J.studioMotionRow({enter:fields.enter.value,hold:fields.hold.value,exit:fields.exit.value,intensity:+intensity.value});J.studioChanged();};
- root.append(J.studioButton('studioApplyPreset','選択行にプリセットを適用','Apply preset to selected line',()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.preset=preset.value;J.ui.project.studio.motion.rows[line.value]=J.studioPreset(preset.value);J.studioChanged();}));
- const sync=()=>{const value=line.value,lines=J.ui.plan.lines.filter(l=>l.text);line.replaceChildren(...lines.map(l=>{const o=el('option',`${l.index+1}: ${l.text.slice(0,32)}`);o.value=J.studioLineKey(l);return o;}));if(lines.some(l=>J.studioLineKey(l)===value))line.value=value;const m=J.ui.project.studio.motion,row=J.studioMotionRow(m.rows[line.value]);for(const k in fields)fields[k].value=row[k];intensity.value=String(row.intensity);for(const k in controls)controls[k].value=String(m.controls[k]);preset.value=m.preset;};line.addEventListener('change',()=>{sync();const l=selected();if(l)J.uiApi.seek(l.start+Math.min(.5,(l.end-l.start)/2));});const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('motionEditing', 'IN / HOLD / OUT・演出強度', 'IN / HOLD / OUT / intensity'), line = el('select', null, 'studioMotionLine'), preset = el('select', null, 'studioPreset'), fields = {};
+        root.append(line, preset);
+        for (const name of Object.keys(J.STUDIO_PRESETS)) {
+            const o = el('option', name);
+            o.value = name;
+            preset.append(o);
+        }
+        for (const [name, table] of [['enter', J.ENTER], ['hold', J.HOLD], ['exit', J.EXIT]]) {
+            const label = el('label', name.toUpperCase()), select = el('select', null, 'studioMotion-' + name);
+            select.append(el('option', tr('既存のおまかせ', 'Existing auto')));
+            for (const [key, d] of Object.entries(table)) {
+                const o = el('option', d.name || key);
+                o.value = key;
+                select.append(o);
+            }
+            select.options[0].value = '';
+            label.append(select);
+            fields[name] = select;
+            root.append(label);
+            select.addEventListener('change', () => save());
+        }
+        const intensity = el('input', null, 'studioMotionIntensity');
+        intensity.type = 'range';
+        intensity.min = '0';
+        intensity.max = '1';
+        intensity.step = '.01';
+        const il = el('label', 'Intensity 0–1');
+        il.append(intensity);
+        root.append(il);
+        intensity.addEventListener('change', () => save());
+        const labels = ['落ち着き / Calm', 'インパクト / Impact', '切れ味 / Sharpness', 'スピード / Speed', '広がり / Spread', '揺れ / Shake', 'グリッチ / Glitch'];
+        const controls = {};
+        for (const [i, key] of J.STUDIO_CONTROLS.entries()) {
+            const label = el('label', labels[i]), input = el('input', null, 'studioControl-' + key);
+            input.type = 'range';
+            input.min = '0';
+            input.max = '100';
+            input.step = '1';
+            label.append(input);
+            controls[key] = input;
+            root.append(label);
+            input.addEventListener('change', () => { J.uiApi.pushEdit(); J.ui.project.studio.motion.controls[key] = +input.value; J.studioChanged(); });
+        }
+        const selected = () => J.ui.plan.lines.find(l => J.studioLineKey(l) === line.value), save = () => {
+            if (!selected())
+                return;
+            J.uiApi.pushEdit();
+            J.ui.project.studio.motion.rows[line.value] = J.studioMotionRow({ enter: fields.enter.value, hold: fields.hold.value, exit: fields.exit.value, intensity: +intensity.value });
+            J.studioChanged();
+        };
+        root.append(J.studioButton('studioApplyPreset', '選択行にプリセットを適用', 'Apply preset to selected line', () => {
+            if (!selected())
+                return;
+            J.uiApi.pushEdit();
+            J.ui.project.studio.motion.preset = preset.value;
+            J.ui.project.studio.motion.rows[line.value] = J.studioPreset(preset.value);
+            J.studioChanged();
+        }));
+        const sync = () => {
+            const value = line.value, lines = J.ui.plan.lines.filter(l => l.text);
+            line.replaceChildren(...lines.map(l => { const o = el('option', `${l.index + 1}: ${l.text.slice(0, 32)}`); o.value = J.studioLineKey(l); return o; }));
+            if (lines.some(l => J.studioLineKey(l) === value))
+                line.value = value;
+            const m = J.ui.project.studio.motion, row = J.studioMotionRow(m.rows[line.value]);
+            for (const k in fields)
+                fields[k].value = row[k];
+            intensity.value = String(row.intensity);
+            for (const k in controls)
+                controls[k].value = String(m.controls[k]);
+            preset.value = m.preset;
+        };
+        line.addEventListener('change', () => {
+            sync();
+            const l = selected();
+            if (l)
+                J.uiApi.seek(l.start + Math.min(.5, (l.end - l.start) / 2));
+        });
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); sync(); };
+        sync();
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('musicAnalysis','楽曲解析・歌詞密度・区間','Music analysis / lyric density / sections'),status=el('p',tr('音源読込後に解析してください。','Load audio, then analyze.'),'studioAnalysisStatus'),cv=el('canvas',null,'studioAnalysisGraph');cv.width=600;cv.height=100;cv.style.width='100%';const rows=el('pre',null,'studioDensity'),sections=el('textarea',null,'studioSections');sections.rows=5;sections.placeholder='0, 10, Intro\n10, 30, Verse\n30, 50, Chorus';root.append(J.studioButton('studioAnalyze','音量・ビート・区間を解析','Analyze level / beats / sections',()=>{const a=J.studioAnalyze(J.ui.audio),ctx=cv.getContext('2d');const peak=a.peak.reduce((m,v)=>Math.max(m,v),0);status.textContent=`RMS / Peak / Energy / Onset · BPM ${a.bpm} (${a.confidence}) · Beat ${a.beats.length} · Peak ${peak.toFixed(3)}`;ctx.clearRect(0,0,600,100);for(const [values,color]of[[a.rms,'#79d9ae'],[a.energy,'#ffffff'],[a.onset,'#e4bb72']]){const max=values.reduce((m,v)=>Math.max(m,v),1);ctx.strokeStyle=color;ctx.beginPath();for(let i=0;i<600;i++){const v=values[Math.floor(i/600*values.length)]||0;ctx.lineTo(i,98-Math.min(1,v/max)*90);}ctx.stroke();}for(const t of a.beats){ctx.fillStyle='#e4bb72';ctx.fillRect(t/J.ui.audio.duration*600,94,1,6);}rows.textContent=J.studioDensity(J.ui.plan.lines).map(d=>`${d.index+1}: ${d.count} chars / ${d.seconds.toFixed(2)}s / ${d.cps.toFixed(2)} chars/s`).join('\n');sections.value=(J.ui.project.studio.analysis.sections.length?J.ui.project.studio.analysis.sections:a.sections).map(s=>`${s.start.toFixed(3)}, ${s.end.toFixed(3)}, ${s.type}`).join('\n');}),status,cv,rows,el('label',tr('区間: 開始秒, 終了秒, 種別（1行ずつ）','Sections: start seconds, end seconds, type (one per line)')),sections,J.studioButton('studioSaveSections','区間を保存','Save sections',()=>{const parsed=sections.value.trim()?sections.value.trim().split('\n').map(row=>{const [start,end,...type]=row.split(',');return{start:+start,end:+end,type:type.join(',').trim()};}):[];const valid=J.normalizeStudioAnalysis({sections:parsed}).sections;if(valid.length!==parsed.length)throw new Error(tr('開始・終了と区間名を確認してください。','Check start/end and section names.'));for(let i=1;i<valid.length;i++)if(valid[i].start<valid[i-1].end)throw new Error(tr('区間を重ねないでください。','Sections must not overlap.'));J.uiApi.pushEdit();J.ui.project.studio.analysis.sections=valid;J.studioChanged();}),el('p',tr('区間変化とBPMは推定です。曲のVerse/Chorus判定は行いません。UnknownをIntro / Verse / Pre Chorus / Chorus / Bridge / Outroへ手動変更できます。','Changes and BPM are estimates. Verse/chorus labels are not inferred. Change Unknown manually to Intro / Verse / Pre Chorus / Chorus / Bridge / Outro.')));J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('musicAnalysis', '楽曲解析・歌詞密度・区間', 'Music analysis / lyric density / sections'), status = el('p', tr('音源読込後に解析してください。', 'Load audio, then analyze.'), 'studioAnalysisStatus'), cv = el('canvas', null, 'studioAnalysisGraph');
+        cv.width = 600;
+        cv.height = 100;
+        cv.style.width = '100%';
+        const rows = el('pre', null, 'studioDensity'), sections = el('textarea', null, 'studioSections');
+        sections.rows = 5;
+        sections.placeholder = '0, 10, Intro\n10, 30, Verse\n30, 50, Chorus';
+        root.append(J.studioButton('studioAnalyze', '音量・ビート・区間を解析', 'Analyze level / beats / sections', () => {
+            const a = J.studioAnalyze(J.ui.audio), ctx = cv.getContext('2d');
+            const peak = a.peak.reduce((m, v) => Math.max(m, v), 0);
+            status.textContent = `RMS / Peak / Energy / Onset · BPM ${a.bpm} (${a.confidence}) · Beat ${a.beats.length} · Peak ${peak.toFixed(3)}`;
+            ctx.clearRect(0, 0, 600, 100);
+            for (const [values, color] of [[a.rms, '#79d9ae'], [a.energy, '#ffffff'], [a.onset, '#e4bb72']]) {
+                const max = values.reduce((m, v) => Math.max(m, v), 1);
+                ctx.strokeStyle = color;
+                ctx.beginPath();
+                for (let i = 0; i < 600; i++) {
+                    const v = values[Math.floor(i / 600 * values.length)] || 0;
+                    ctx.lineTo(i, 98 - Math.min(1, v / max) * 90);
+                }
+                ctx.stroke();
+            }
+            for (const t of a.beats) {
+                ctx.fillStyle = '#e4bb72';
+                ctx.fillRect(t / J.ui.audio.duration * 600, 94, 1, 6);
+            }
+            rows.textContent = J.studioDensity(J.ui.plan.lines).map(d => `${d.index + 1}: ${d.count} chars / ${d.seconds.toFixed(2)}s / ${d.cps.toFixed(2)} chars/s`).join('\n');
+            sections.value = (J.ui.project.studio.analysis.sections.length ? J.ui.project.studio.analysis.sections : a.sections).map(s => `${s.start.toFixed(3)}, ${s.end.toFixed(3)}, ${s.type}`).join('\n');
+        }), status, cv, rows, el('label', tr('区間: 開始秒, 終了秒, 種別（1行ずつ）', 'Sections: start seconds, end seconds, type (one per line)')), sections, J.studioButton('studioSaveSections', '区間を保存', 'Save sections', () => {
+            const parsed = sections.value.trim() ? sections.value.trim().split('\n').map(row => { const [start, end, ...type] = row.split(','); return { start: +start, end: +end, type: type.join(',').trim() }; }) : [];
+            const valid = J.normalizeStudioAnalysis({ sections: parsed }).sections;
+            if (valid.length !== parsed.length)
+                throw new Error(tr('開始・終了と区間名を確認してください。', 'Check start/end and section names.'));
+            for (let i = 1; i < valid.length; i++)
+                if (valid[i].start < valid[i - 1].end)
+                    throw new Error(tr('区間を重ねないでください。', 'Sections must not overlap.'));
+            J.uiApi.pushEdit();
+            J.ui.project.studio.analysis.sections = valid;
+            J.studioChanged();
+        }), el('p', tr('区間変化とBPMは推定です。曲のVerse/Chorus判定は行いません。UnknownをIntro / Verse / Pre Chorus / Chorus / Bridge / Outroへ手動変更できます。', 'Changes and BPM are estimates. Verse/chorus labels are not inferred. Change Unknown manually to Intro / Verse / Pre Chorus / Chorus / Bridge / Outro.')));
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('autoMotion','3種類のおまかせ','Three auto modes'),snap=el('select',null,'studioBeatSnap');for(const value of[0,20,50,100,150]){const o=el('option',value?`±${value}ms`:'OFF');o.value=String(value);snap.append(o);}const label=el('label','Beat Snap');label.append(snap);root.append(label);snap.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.analysis.beatSnap=+snap.value;J.studioChanged();});const status=el('p',null,'studioAutoStatus');const run=full=>{const a=J.studioAnalyze(J.ui.audio);if(J.ui.tap)J.uiApi.stopTap();J.uiApi.pause();J.uiApi.pushEdit();if(full){document.getElementById('btnOmakaseTop').click();J.uiApi.pause();}const p=J.ui.project;if(p.studio.analysis.beatSnap){const cues=p.subtitleCues||J.studioPlanCues(J.ui.plan);p.subtitleCues=J.studioSnapCues(cues,a.beats,p.studio.analysis.beatSnap);p.lyrics=p.subtitleCues.map(c=>c.text).join('\n\n');p.timing.lineTimes={};J.uiApi.replan();}p.studio.motion.rows={...p.studio.motion.rows,...J.studioAutoRecipes(J.ui.plan,a,p.studio.analysis.sections.length?p.studio.analysis.sections:a.sections)};p.studio.flags.motionEditing=true;J.studioChanged();status.textContent=tr('楽曲エネルギー・文字密度・区間を反映しました。時刻補正: ','Energy, density and sections applied. Timing snap: ')+(p.studio.analysis.beatSnap?`±${p.studio.analysis.beatSnap}ms`:'OFF');};root.append(J.studioButton('studioDesignAuto','デザインおまかせ','Design Auto',()=>document.getElementById('btnOmakaseTop').click()),el('p',tr('従来のフォント・色・配置・動きのおまかせです。','Existing font, color, layout and motion auto design.')),J.studioButton('studioMusicAuto','楽曲連動おまかせ','Music Auto',()=>run(false)),el('p',tr('現在のデザインに音量・文字密度・区間別の強度とモーションを反映します。','Apply energy, density and section motion to the current design.')),J.studioButton('studioFullAuto','フルおまかせ','Full Auto',()=>run(true)),el('p',tr('従来のデザイン生成と楽曲連動をまとめて実行。Beat SnapがOFFならSRT開始・終了は保持します。音源のBPMは推定です。','Run existing design generation and music-driven motion together. SRT start/end are preserved with Beat Snap OFF. BPM is estimated.')),status);const old=J.syncLayerUI;J.syncLayerUI=()=>{old();snap.value=String(J.ui.project.studio.analysis.beatSnap);};J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('autoMotion', '3種類のおまかせ', 'Three auto modes'), snap = el('select', null, 'studioBeatSnap');
+        for (const value of [0, 20, 50, 100, 150]) {
+            const o = el('option', value ? `±${value}ms` : 'OFF');
+            o.value = String(value);
+            snap.append(o);
+        }
+        const label = el('label', 'Beat Snap');
+        label.append(snap);
+        root.append(label);
+        snap.addEventListener('change', () => { J.uiApi.pushEdit(); J.ui.project.studio.analysis.beatSnap = +snap.value; J.studioChanged(); });
+        const status = el('p', null, 'studioAutoStatus');
+        const run = full => {
+            const a = J.studioAnalyze(J.ui.audio);
+            if (J.ui.tap)
+                J.uiApi.stopTap();
+            J.uiApi.pause();
+            J.uiApi.pushEdit();
+            if (full) {
+                document.getElementById('btnOmakaseTop').click();
+                J.uiApi.pause();
+            }
+            const p = J.ui.project;
+            if (p.studio.analysis.beatSnap) {
+                const cues = p.subtitleCues || J.studioPlanCues(J.ui.plan);
+                p.subtitleCues = J.studioSnapCues(cues, a.beats, p.studio.analysis.beatSnap);
+                p.lyrics = p.subtitleCues.map(c => c.text).join('\n\n');
+                p.timing.lineTimes = {};
+                J.uiApi.replan();
+            }
+            p.studio.motion.rows = { ...p.studio.motion.rows, ...J.studioAutoRecipes(J.ui.plan, a, p.studio.analysis.sections.length ? p.studio.analysis.sections : a.sections) };
+            p.studio.flags.motionEditing = true;
+            J.studioChanged();
+            status.textContent = tr('楽曲エネルギー・文字密度・区間を反映しました。時刻補正: ', 'Energy, density and sections applied. Timing snap: ') + (p.studio.analysis.beatSnap ? `±${p.studio.analysis.beatSnap}ms` : 'OFF');
+        };
+        root.append(J.studioButton('studioDesignAuto', 'デザインおまかせ', 'Design Auto', () => document.getElementById('btnOmakaseTop').click()), el('p', tr('従来のフォント・色・配置・動きのおまかせです。', 'Existing font, color, layout and motion auto design.')), J.studioButton('studioMusicAuto', '楽曲連動おまかせ', 'Music Auto', () => run(false)), el('p', tr('現在のデザインに音量・文字密度・区間別の強度とモーションを反映します。', 'Apply energy, density and section motion to the current design.')), J.studioButton('studioFullAuto', 'フルおまかせ', 'Full Auto', () => run(true)), el('p', tr('従来のデザイン生成と楽曲連動をまとめて実行。Beat SnapがOFFならSRT開始・終了は保持します。音源のBPMは推定です。', 'Run existing design generation and music-driven motion together. SRT start/end are preserved with Beat Snap OFF. BPM is estimated.')), status);
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); snap.value = String(J.ui.project.studio.analysis.beatSnap); };
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('timeline','追加トラック・レイヤー','Additional tracks / layers'),track=el('canvas',null,'studioTracks');track.width=720;track.height=180;track.style.width='100%';track.style.touchAction='none';root.append(track);let selectedCue=null,drag=null;const labels=['Audio','Lyrics','Images','Videos','Effects','Background'];const startX=90,width=630,span=()=>Math.max(1,J.ui.plan.duration,...J.ui.project.studio.layers.filter(l=>l.end<86400).map(l=>l.end));
- const drawTracks=()=>{const ctx=track.getContext('2d'),dur=span();ctx.clearRect(0,0,720,180);ctx.font='12px sans-serif';labels.forEach((label,row)=>{ctx.fillStyle='#aeb7c7';ctx.fillText(label,2,row*30+18);ctx.fillStyle='#242936';ctx.fillRect(startX,row*30+3,width,24);});const block=(row,a,b,text,color)=>{const x=startX+a/dur*width,w=Math.max(3,(b-a)/dur*width);ctx.fillStyle=color;ctx.fillRect(x,row*30+4,w,22);ctx.fillStyle='#fff';ctx.save();ctx.beginPath();ctx.rect(x,row*30+4,w,22);ctx.clip();ctx.fillText(text,x+3,row*30+19);ctx.restore();};if(J.ui.audio)block(0,0,J.ui.audio.duration,J.ui.audio.name,'#365960');for(const line of J.ui.plan.lines)block(1,line.start,line.end,line.text||'—',selectedCue===line.cueId?'#78654a':'#414b75');for(const l of J.ui.project.studio.layers){const row={Image:2,Video:3,Effect:4,Overlay:4,Background:5,Text:1}[l.type];if(row!==undefined)block(row,l.start,Math.min(l.end,dur),l.name,'#4e6458');}if(J.layerSession.background)block(5,0,dur,J.layerSession.background.name,'#375b4b');};
- const point=e=>{const r=track.getBoundingClientRect();return{x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*180/r.height};};track.addEventListener('pointerdown',e=>{if(e.button!==0||J.ui.exporting||J.ui.tap)return;const p=point(e),dur=span();if(p.y<30||p.y>=60){if(p.x>=startX)J.uiApi.seek(Math.max(0,(p.x-startX)/width*dur));return;}const time=(p.x-startX)/width*dur,line=J.ui.plan.lines.find(l=>time>=l.start&&time<=l.end);if(!line)return;J.uiApi.pause();J.uiApi.pushEdit();const cues=J.studioEnsureCues(J.ui.project),cue=cues[line.index];selectedCue=cue.id;drag={cue:{...cue},time,dur,resize:Math.abs(p.x-(startX+cue.end/dur*width))<12};track.setPointerCapture(e.pointerId);e.preventDefault();J.studioChanged();});track.addEventListener('pointermove',e=>{if(!drag)return;const time=(point(e).x-startX)/width*drag.dur,delta=time-drag.time,index=J.ui.project.subtitleCues.findIndex(c=>c.id===selectedCue),cue=drag.cue;const start=Math.max(0,cue.start+delta);if(drag.resize)J.editLayerCue(J.ui.project,index,{end:Math.max(cue.start+.01,cue.end+delta)});else J.editLayerCue(J.ui.project,index,{start,end:start+(cue.end-cue.start)});J.studioChanged();});for(const event of['pointerup','pointercancel','lostpointercapture'])track.addEventListener(event,()=>{drag=null;});
- root.append(J.studioButton('studioDuplicateCue','選択字幕を複製','Duplicate selected cue',()=>{const i=J.ui.project.subtitleCues?.findIndex(c=>c.id===selectedCue);if(i==null||i<0)throw new Error(tr('字幕ブロックを選択してください。','Select a lyric block.'));J.uiApi.pushEdit();selectedCue=J.studioDuplicateCue(J.ui.project,i);J.studioChanged();}),J.studioButton('studioDeleteCue','選択字幕を削除','Delete selected cue',()=>{const i=J.ui.project.subtitleCues?.findIndex(c=>c.id===selectedCue);if(i==null||i<0)return;J.uiApi.pushEdit();J.deleteLayerCue(J.ui.project,i);selectedCue=null;J.studioChanged();}));
- const kind=el('select',null,'studioLayerType'),list=el('select',null,'studioLayerList');for(const type of J.STUDIO_LAYER_TYPES.filter(t=>t!=='Lyrics')){const o=el('option',type);o.value=type;kind.append(o);}root.append(kind,J.studioButton('studioAddLayer','レイヤー追加','Add layer',()=>{const p=J.ui.project;if(p.studio.layers.length>=64)throw new Error('Maximum 64 layers');J.uiApi.pushEdit();const layer=J.normalizeStudioLayers([{id:'layer-'+crypto.randomUUID(),type:kind.value,start:0,end:J.ui.plan.duration,text:'Text',transform:{opacity:['Overlay','Effect'].includes(kind.value)?.25:1},color:kind.value==='Background'?'#202733':'#ffffff'}]).find(l=>l.type!=='Lyrics');p.studio.layers.push(layer);active=layer.id;J.studioChanged();}),list);let active='lyrics';const fields={};for(const [key,label]of[['name','名前 / Name'],['text','Text'],['start','Start (s)'],['end','End (s)'],['color','Color'],['blend','Blend'],['x','X'],['y','Y'],['scale','Scale'],['rotation','Rotation'],['opacity','Opacity']]){const lab=el('label',label);let input;if(key==='blend'){input=el('select',null,'studioLayer-'+key);for(const b of J.STUDIO_BLENDS){const o=el('option',b);o.value=b;input.append(o);}}else{input=el('input',null,'studioLayer-'+key);input.type=key==='color'?'color':['name','text'].includes(key)?'text':'number';input.step=['scale','opacity'].includes(key)?'.05':'.01';}fields[key]=input;lab.append(input);root.append(lab);input.addEventListener('change',()=>{const l=J.ui.project.studio.layers.find(l=>l.id===active);if(!l)return;const next=structuredClone(l);if(['x','y','scale','rotation','opacity'].includes(key))next.transform[key]=+input.value;else next[key]=input.type==='number'?+input.value:input.value;if(next.end<=next.start){J.uiApi.toast('End must follow start');sync();return;}J.uiApi.pushEdit();J.ui.project.studio.layers=J.normalizeStudioLayers(J.ui.project.studio.layers.map(l=>l.id===active?next:l));J.studioChanged();});}
- const file=el('input',null,'studioLayerFile'),mediaLabel=el('label',tr('選択レイヤーの画像／動画を読み込む','Load selected layer image / video')),status=el('p',null,'studioLayerStatus');file.type='file';file.accept='image/*,video/*';mediaLabel.append(file);root.append(mediaLabel,status);file.addEventListener('change',async()=>{const l=J.ui.project.studio.layers.find(l=>l.id===active),f=file.files?.[0],project=J.ui.project,epoch=J.projectSessionEpoch;if(!l||!f||!['Image','Video'].includes(l.type))return;try{const m=await J.loadLayerMedia(f,l.type==='Video');if(m.video!==(l.type==='Video')){m.dispose();throw new Error('Media type does not match layer');}if(epoch!==J.projectSessionEpoch||project!==J.ui.project){m.dispose();return;}J.studioMedia.get(l.id)?.dispose();J.studioMedia.set(l.id,m);if(m.video)m.el.addEventListener('seeked',()=>{J.ui.need=true;});J.uiApi.pushEdit();l.fileName=f.name;J.studioChanged();}catch(e){status.textContent=e.message;}finally{file.value='';}});
- for(const [id,ja,en,delta]of[['studioLayerDown','下へ','Down',-1],['studioLayerUp','上へ','Up',1]])root.append(J.studioButton(String(id),String(ja),String(en),()=>{const a=J.ui.project.studio.layers,i=a.findIndex(l=>l.id===active),n=i+delta;if(n<0||n>=a.length)return;J.uiApi.pushEdit();[a[i],a[n]]=[a[n],a[i]];J.studioChanged();}));root.append(J.studioButton('studioRemoveLayer','選択レイヤーを削除','Delete selected layer',()=>{const a=J.ui.project.studio.layers,l=a.find(l=>l.id===active);if(!l||l.type==='Lyrics')return;J.uiApi.pushEdit();J.ui.project.studio.layers=a.filter(l=>l.id!==active);active='lyrics';J.studioChanged();}),el('p',tr('リストは下から上の描画順です。字幕ブロックはドラッグで移動、右端で長さ変更。画像・動画本体はJSONに含まれず、別途再読込が必要です。完成MP4には追加レイヤーも描画されます。','List order is bottom to top. Drag lyrics to move; drag the right edge to resize. Media files are not embedded in JSON; reload them separately. Additional layers are included in completed MP4 exports.')));
- const reset=J.resetLayerProjectSession;J.resetLayerProjectSession=()=>{reset();J.clearStudioMedia();};const pauseMedia=J.pausePreviewMedia;J.pausePreviewMedia=()=>{pauseMedia();for(const m of J.studioMedia.values())if(m.video)m.el.pause();};list.addEventListener('change',()=>{active=list.value;sync();});const sync=()=>{const layers=J.ui.project.studio.layers;if(!layers.some(l=>l.id===active))active=layers[0]?.id;list.replaceChildren(...layers.map((l,i)=>{const o=el('option',`${i}: ${l.name} [${l.type}]`);o.value=l.id;return o;}));list.value=active;const l=layers.find(l=>l.id===active);if(l)for(const k in fields)fields[k].value=String(['x','y','scale','rotation','opacity'].includes(k)?l.transform[k]:l[k]);file.disabled=!l||!['Image','Video'].includes(l.type);status.textContent=l?.fileName?(J.studioMedia.has(l.id)?'✓ ':'再読込が必要 / Reload: ')+l.fileName:'';drawTracks();};const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('timeline', '追加トラック・レイヤー', 'Additional tracks / layers'), track = el('canvas', null, 'studioTracks');
+        track.width = 720;
+        track.height = 180;
+        track.style.width = '100%';
+        track.style.touchAction = 'none';
+        root.append(track);
+        let selectedCue = null, drag = null;
+        const labels = ['Audio', 'Lyrics', 'Images', 'Videos', 'Effects', 'Background'];
+        const startX = 90, width = 630, span = () => Math.max(1, J.ui.plan.duration, ...J.ui.project.studio.layers.filter(l => l.end < 86400).map(l => l.end));
+        const drawTracks = () => {
+            const ctx = track.getContext('2d'), dur = span();
+            ctx.clearRect(0, 0, 720, 180);
+            ctx.font = '20px sans-serif';
+            labels.forEach((label, row) => { ctx.fillStyle = '#aeb7c7'; ctx.fillText(label, 2, row * 30 + 18); ctx.fillStyle = '#242936'; ctx.fillRect(startX, row * 30 + 3, width, 24); });
+            const block = (row, a, b, text, color) => { const x = startX + a / dur * width, w = Math.max(3, (b - a) / dur * width); ctx.fillStyle = color; ctx.fillRect(x, row * 30 + 4, w, 22); ctx.fillStyle = '#fff'; ctx.save(); ctx.beginPath(); ctx.rect(x, row * 30 + 4, w, 22); ctx.clip(); ctx.fillText(text, x + 3, row * 30 + 19); ctx.restore(); };
+            if (J.ui.audio)
+                block(0, 0, J.ui.audio.duration, J.ui.audio.name, '#365960');
+            for (const line of J.ui.plan.lines)
+                block(1, line.start, line.end, line.text || '—', selectedCue === line.cueId ? '#78654a' : '#414b75');
+            for (const l of J.ui.project.studio.layers) {
+                const row = { Image: 2, Video: 3, Effect: 4, Overlay: 4, Background: 5, Text: 1 }[l.type];
+                if (row !== undefined)
+                    block(row, l.start, Math.min(l.end, dur), l.name, '#4e6458');
+            }
+            if (J.layerSession.background)
+                block(5, 0, dur, J.layerSession.background.name, '#375b4b');
+        };
+        const point = e => { const r = track.getBoundingClientRect(); return { x: (e.clientX - r.left) * 720 / r.width, y: (e.clientY - r.top) * 180 / r.height }; };
+        track.addEventListener('pointerdown', e => {
+            if (e.button !== 0 || J.ui.exporting || J.ui.tap)
+                return;
+            const p = point(e), dur = span();
+            if (p.y < 30 || p.y >= 60) {
+                if (p.x >= startX)
+                    J.uiApi.seek(Math.max(0, (p.x - startX) / width * dur));
+                return;
+            }
+            const time = (p.x - startX) / width * dur, line = J.ui.plan.lines.find(l => time >= l.start && time <= l.end);
+            if (!line)
+                return;
+            J.uiApi.pause();
+            J.uiApi.pushEdit();
+            const cues = J.studioEnsureCues(J.ui.project), cue = cues[line.index];
+            selectedCue = cue.id;
+            drag = { cue: { ...cue }, time, dur, resize: Math.abs(p.x - (startX + cue.end / dur * width)) < 12 };
+            track.setPointerCapture(e.pointerId);
+            e.preventDefault();
+            J.studioChanged();
+        });
+        track.addEventListener('pointermove', e => {
+            if (!drag)
+                return;
+            const time = (point(e).x - startX) / width * drag.dur, delta = time - drag.time, index = J.ui.project.subtitleCues.findIndex(c => c.id === selectedCue), cue = drag.cue;
+            const start = Math.max(0, cue.start + delta);
+            if (drag.resize)
+                J.editLayerCue(J.ui.project, index, { end: Math.max(cue.start + .01, cue.end + delta) });
+            else
+                J.editLayerCue(J.ui.project, index, { start, end: start + (cue.end - cue.start) });
+            J.studioChanged();
+        });
+        for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
+            track.addEventListener(event, () => { drag = null; });
+        root.append(J.studioButton('studioDuplicateCue', '選択字幕を複製', 'Duplicate selected cue', () => {
+            const i = J.ui.project.subtitleCues?.findIndex(c => c.id === selectedCue);
+            if (i == null || i < 0)
+                throw new Error(tr('字幕ブロックを選択してください。', 'Select a lyric block.'));
+            J.uiApi.pushEdit();
+            selectedCue = J.studioDuplicateCue(J.ui.project, i);
+            J.studioChanged();
+        }), J.studioButton('studioDeleteCue', '選択字幕を削除', 'Delete selected cue', () => {
+            const i = J.ui.project.subtitleCues?.findIndex(c => c.id === selectedCue);
+            if (i == null || i < 0)
+                return;
+            J.uiApi.pushEdit();
+            J.deleteLayerCue(J.ui.project, i);
+            selectedCue = null;
+            J.studioChanged();
+        }));
+        const kind = el('select', null, 'studioLayerType'), list = el('select', null, 'studioLayerList');
+        for (const type of J.STUDIO_LAYER_TYPES.filter(t => t !== 'Lyrics')) {
+            const o = el('option', type);
+            o.value = type;
+            kind.append(o);
+        }
+        root.append(kind, J.studioButton('studioAddLayer', 'レイヤー追加', 'Add layer', () => {
+            const p = J.ui.project;
+            if (p.studio.layers.length >= 64)
+                throw new Error('Maximum 64 layers');
+            J.uiApi.pushEdit();
+            const layer = J.normalizeStudioLayers([{ id: 'layer-' + crypto.randomUUID(), type: kind.value, start: 0, end: J.ui.plan.duration, text: 'Text', transform: { opacity: ['Overlay', 'Effect'].includes(kind.value) ? .25 : 1 }, color: kind.value === 'Background' ? '#202733' : '#ffffff' }]).find(l => l.type !== 'Lyrics');
+            p.studio.layers.push(layer);
+            active = layer.id;
+            J.studioChanged();
+        }), list);
+        let active = 'lyrics';
+        const fields = {};
+        for (const [key, label] of [['name', '名前 / Name'], ['text', 'Text'], ['start', 'Start (s)'], ['end', 'End (s)'], ['color', 'Color'], ['blend', 'Blend'], ['x', 'X'], ['y', 'Y'], ['scale', 'Scale'], ['rotation', 'Rotation'], ['opacity', 'Opacity']]) {
+            const lab = el('label', label);
+            let input;
+            if (key === 'blend') {
+                input = el('select', null, 'studioLayer-' + key);
+                for (const b of J.STUDIO_BLENDS) {
+                    const o = el('option', b);
+                    o.value = b;
+                    input.append(o);
+                }
+            }
+            else {
+                input = el('input', null, 'studioLayer-' + key);
+                input.type = key === 'color' ? 'color' : ['name', 'text'].includes(key) ? 'text' : 'number';
+                input.step = ['scale', 'opacity'].includes(key) ? '.05' : '.01';
+            }
+            fields[key] = input;
+            lab.append(input);
+            root.append(lab);
+            input.addEventListener('change', () => {
+                const l = J.ui.project.studio.layers.find(l => l.id === active);
+                if (!l)
+                    return;
+                const next = structuredClone(l);
+                if (['x', 'y', 'scale', 'rotation', 'opacity'].includes(key))
+                    next.transform[key] = +input.value;
+                else
+                    next[key] = input.type === 'number' ? +input.value : input.value;
+                if (next.end <= next.start) {
+                    J.uiApi.toast('End must follow start');
+                    sync();
+                    return;
+                }
+                J.uiApi.pushEdit();
+                J.ui.project.studio.layers = J.normalizeStudioLayers(J.ui.project.studio.layers.map(l => l.id === active ? next : l));
+                J.studioChanged();
+            });
+        }
+        const file = el('input', null, 'studioLayerFile'), mediaLabel = el('label', tr('選択レイヤーの画像／動画を読み込む', 'Load selected layer image / video')), status = el('p', null, 'studioLayerStatus');
+        file.type = 'file';
+        file.accept = 'image/*,video/*';
+        mediaLabel.append(file);
+        root.append(mediaLabel, status);
+        file.addEventListener('change', async () => {
+            const l = J.ui.project.studio.layers.find(l => l.id === active), f = file.files?.[0], project = J.ui.project, epoch = J.projectSessionEpoch;
+            if (!l || !f || !['Image', 'Video'].includes(l.type))
+                return;
+            try {
+                const m = await J.loadLayerMedia(f, l.type === 'Video');
+                if (m.video !== (l.type === 'Video')) {
+                    m.dispose();
+                    throw new Error('Media type does not match layer');
+                }
+                if (epoch !== J.projectSessionEpoch || project !== J.ui.project || J.ui.exporting || J.layerSession.busy) {
+                    m.dispose();
+                    return;
+                }
+                J.studioMedia.get(l.id)?.dispose();
+                J.studioMedia.set(l.id, m);
+                if (m.video)
+                    m.el.addEventListener('seeked', () => { J.ui.need = true; });
+                J.uiApi.pushEdit();
+                l.fileName = f.name;
+                J.studioChanged();
+            }
+            catch (e) {
+                status.textContent = e.message;
+            }
+            finally {
+                file.value = '';
+            }
+        });
+        for (const [id, ja, en, delta] of [['studioLayerDown', '下へ', 'Down', -1], ['studioLayerUp', '上へ', 'Up', 1]])
+            root.append(J.studioButton(String(id), String(ja), String(en), () => {
+                const a = J.ui.project.studio.layers, i = a.findIndex(l => l.id === active), n = i + delta;
+                if (n < 0 || n >= a.length)
+                    return;
+                J.uiApi.pushEdit();
+                [a[i], a[n]] = [a[n], a[i]];
+                J.studioChanged();
+            }));
+        root.append(J.studioButton('studioRemoveLayer', '選択レイヤーを削除', 'Delete selected layer', () => {
+            const a = J.ui.project.studio.layers, l = a.find(l => l.id === active);
+            if (!l || l.type === 'Lyrics')
+                return;
+            J.uiApi.pushEdit();
+            J.ui.project.studio.layers = a.filter(l => l.id !== active);
+            active = 'lyrics';
+            J.studioChanged();
+        }), el('p', tr('リストは下から上の描画順です。字幕ブロックはドラッグで移動、右端で長さ変更。画像・動画本体はJSONに含まれず、別途再読込が必要です。完成MP4には追加レイヤーも描画されます。', 'List order is bottom to top. Drag lyrics to move; drag the right edge to resize. Media files are not embedded in JSON; reload them separately. Additional layers are included in completed MP4 exports.')));
+        const reset = J.resetLayerProjectSession;
+        J.resetLayerProjectSession = () => { reset(); J.clearStudioMedia(); };
+        const pauseMedia = J.pausePreviewMedia;
+        J.pausePreviewMedia = () => {
+            pauseMedia();
+            for (const m of J.studioMedia.values())
+                if (m.video)
+                    m.el.pause();
+        };
+        list.addEventListener('change', () => { active = list.value; sync(); });
+        const sync = () => {
+            const layers = J.ui.project.studio.layers;
+            if (!layers.some(l => l.id === active))
+                active = layers[0]?.id;
+            list.replaceChildren(...layers.map((l, i) => { const o = el('option', `${i}: ${l.name} [${l.type}]`); o.value = l.id; return o; }));
+            list.value = active;
+            const l = layers.find(l => l.id === active);
+            if (l)
+                for (const k in fields)
+                    fields[k].value = String(['x', 'y', 'scale', 'rotation', 'opacity'].includes(k) ? l.transform[k] : l[k]);
+            file.disabled = !l || !['Image', 'Video'].includes(l.type);
+            status.textContent = l?.fileName ? (J.studioMedia.has(l.id) ? '✓ ' : '再読込が必要 / Reload: ') + l.fileName : '';
+            drawTracks();
+        };
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); sync(); };
+        sync();
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('export','完成MP4・透過PNG連番','Completed MP4 / transparent PNG sequence'),filename=el('input',null,'studioExportName'),label=el('label',tr('出力ファイル名（拡張子を除く）','Output filename (without extension)')),status=el('p',null,'studioExportStatus'),cancel=el('button',tr('中止','Cancel'),'studioExportCancel');filename.type='text';filename.maxLength=100;label.append(filename);filename.addEventListener('change',()=>{J.uiApi.pushEdit();J.ui.project.studio.output.filename=filename.value.replace(/[\\/:*?"<>|\x00-\x1f]/g,'_').slice(0,100);J.studioChanged();});cancel.type='button';cancel.hidden=true;cancel.addEventListener('click',()=>J.ui.exporting?.abort());root.append(label,J.studioButton('studioCompletedMP4','完成MP4を書き出す','Export completed MP4',()=>document.getElementById('simpleExport').click()),J.studioButton('studioExportPNG','歌詞のみ透過PNG連番（ZIP）','Transparent lyric PNG sequence (ZIP)',async()=>{J.uiApi.pause();(/** @type {HTMLElement|null} */(document.activeElement))?.blur();if(J.layerCueEditsInvalid)throw new Error(tr('字幕の入力エラーを修正してください。','Fix invalid cue edits first.'));const project=structuredClone(J.ui.project),plan=J.ui.plan,range=J.uiApi.exportRange(),ac=new AbortController(),controls=[...(/** @type {NodeListOf<StudioControl>} */(document.querySelectorAll('#app button,#app input,#app textarea,#app select')))],disabled=controls.map(c=>c.disabled);J.ui.exporting=ac;J.layerSession.busy=true;controls.forEach(c=>c.disabled=true);cancel.disabled=false;cancel.hidden=false;try{await J.saveStudioSnapshot?.(project);const blob=await J.exportStudioPNG({project,plan,range,signal:ac.signal,onProgress:(progress,text)=>status.textContent=text});await J.saveFile(J.studioOutputName(project)+'_lyrics_png.zip',blob);status.textContent=tr('PNG連番を保存しました。','PNG sequence saved.');}catch(e){status.textContent=e.name==='AbortError'?tr('中止しました。','Cancelled.'):e.message;}finally{controls.forEach((c,i)=>c.disabled=disabled[i]);J.ui.exporting=null;J.layerSession.busy=false;cancel.hidden=true;J.syncLayerUI();}}),cancel,status,el('p',tr('完成MP4は既存H.264/AACエンジンで背景・歌詞・追加レイヤーを焼き込みます。追加動画の音声は使わず、読込音源を使います。PNGは歌詞だけを透明背景で出力。長さ・解像度は既存の完成動画設定／書き出し範囲を使います。透過WebMは標準機能にしていません。','Completed MP4 uses the existing H.264/AAC engine to burn in backgrounds, lyrics and additional layers. Added video audio is muted; imported audio is used. PNG contains the lyric layer on transparency. Duration, resolution and range use existing export settings. Alpha WebM is not enabled.')));const old=J.syncLayerUI;J.syncLayerUI=()=>{old();filename.value=J.ui.project.studio.output.filename;};J.syncLayerUI();}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('export', '完成MP4・透過PNG連番', 'Completed MP4 / transparent PNG sequence'), filename = el('input', null, 'studioExportName'), label = el('label', tr('出力ファイル名（拡張子を除く）', 'Output filename (without extension)')), status = el('p', null, 'studioExportStatus'), cancel = el('button', tr('中止', 'Cancel'), 'studioExportCancel');
+        filename.type = 'text';
+        filename.maxLength = 100;
+        label.append(filename);
+        filename.addEventListener('change', () => { J.uiApi.pushEdit(); J.ui.project.studio.output.filename = filename.value.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 100); J.studioChanged(); });
+        cancel.type = 'button';
+        cancel.hidden = true;
+        cancel.addEventListener('click', () => J.ui.exporting?.abort());
+        root.append(label, J.studioButton('studioCompletedMP4', '完成MP4を書き出す', 'Export completed MP4', () => document.getElementById('simpleExport').click()), J.studioButton('studioExportPNG', '歌詞のみ透過PNG連番（ZIP）', 'Transparent lyric PNG sequence (ZIP)', async () => {
+            J.uiApi.pause();
+            ( /** @type {HTMLElement|null} */(document.activeElement))?.blur();
+            if (J.layerCueEditsInvalid)
+                throw new Error(tr('字幕の入力エラーを修正してください。', 'Fix invalid cue edits first.'));
+            const project = structuredClone(J.ui.project), plan = J.ui.plan, range = J.uiApi.exportRange(), ac = new AbortController(), controls = [...( /** @type {NodeListOf<StudioControl>} */(document.querySelectorAll('#app button,#app input,#app textarea,#app select')))], disabled = controls.map(c => c.disabled);
+            J.ui.exporting = ac;
+            J.layerSession.busy = true;
+            controls.forEach(c => c.disabled = true);
+            cancel.disabled = false;
+            cancel.hidden = false;
+            try {
+                await J.saveStudioSnapshot?.(project);
+                const blob = await J.exportStudioPNG({ project, plan, range, signal: ac.signal, onProgress: (progress, text) => status.textContent = text });
+                await J.saveFile(J.studioOutputName(project) + '_lyrics_png.zip', blob);
+                status.textContent = tr('PNG連番を保存しました。', 'PNG sequence saved.');
+            }
+            catch (e) {
+                status.textContent = e.name === 'AbortError' ? tr('中止しました。', 'Cancelled.') : e.message;
+            }
+            finally {
+                controls.forEach((c, i) => c.disabled = disabled[i]);
+                J.ui.exporting = null;
+                J.layerSession.busy = false;
+                cancel.hidden = true;
+                J.syncLayerUI();
+            }
+        }), cancel, status, el('p', tr('完成MP4は既存H.264/AACエンジンで背景・歌詞・追加レイヤーを焼き込みます。追加動画の音声は使わず、読込音源を使います。PNGは歌詞だけを透明背景で出力。長さ・解像度は既存の完成動画設定／書き出し範囲を使います。透過WebMは標準機能にしていません。', 'Completed MP4 uses the existing H.264/AAC engine to burn in backgrounds, lyrics and additional layers. Added video audio is muted; imported audio is used. PNG contains the lyric layer on transparency. Duration, resolution and range use existing export settings. Alpha WebM is not enabled.')));
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); filename.value = J.ui.project.studio.output.filename; };
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 (() => {
-'use strict';
-async function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('autosave','ブラウザ自動保存・復元','Browser autosave / recovery'),status=el('p',null,'studioRecoveryStatus');status.setAttribute('role','status');J.studioRecoveryStatus=text=>status.textContent=text;root.append(J.studioButton('studioSaveNow','今すぐ自動保存','Save snapshot now',()=>J.saveStudioSnapshot()),status,el('p',tr('操作変更後・15秒ごと・完成MP4とPNG出力前にIndexedDBへ保存します。次回起動時に復元／破棄を選べます。音源・画像・動画は別途再読込が必要です。フォントファイルはプロジェクト内データから復元されます。拡張をOFFにすると復元用保存を削除します。','Save to IndexedDB after edits, every 15 seconds, and before completed MP4 / PNG export. Choose restore or discard on next launch. Reload audio, images and videos separately. Embedded fonts are restored. Turning this extension OFF deletes the recovery snapshot.')));
- let timer=null,wasEnabled=false;const schedule=()=>{clearTimeout(timer);if(J.studioRecoveryPending)return;const enabled=J.studioOn(J.ui.project,'autosave');if(!enabled){if(wasEnabled)J.deleteStudioSnapshot().catch(e=>J.studioRecoveryStatus(e.message));wasEnabled=false;return;}wasEnabled=true;timer=setTimeout(()=>{if(!J.ui.exporting)J.saveStudioSnapshot();},350);};const old=J.syncLayerUI;J.syncLayerUI=()=>{old();schedule();};J.syncLayerUI();setInterval(()=>{if(!J.studioRecoveryPending&&!J.ui.exporting)J.saveStudioSnapshot();},15000);
- try{const saved=await J.readStudioSnapshot();if(saved?.schema!==1||!Number.isFinite(saved.time)||!J.studioOn(saved.project,'autosave')){J.studioRecoveryPending=false;schedule();return;}J.uiApi.pause();const dialog=el('dialog',null,'studioRecoveryDialog'),heading=el('h2',tr('前回の編集内容があります','Previous editing data is available')),note=el('p',tr('復元すると前回のプロジェクトを開きます。破棄すると空のプロジェクトから始めます。素材は別途読み込んでください。','Restore opens the previous project. Discard starts a blank project. Load media files separately.')),feedback=el('p'),restore=el('button',tr('復元','Restore'),'studioRecover'),discard=el('button',tr('破棄','Discard'),'studioDiscard');heading.id='studioRecoveryHeading';dialog.setAttribute('aria-labelledby',heading.id);dialog.append(heading,el('p',new Date(saved.time).toLocaleString()),note,restore,discard,feedback);document.body.append(dialog);dialog.addEventListener('cancel',e=>e.preventDefault());restore.addEventListener('click',async()=>{restore.disabled=discard.disabled=true;try{await J.restoreStudioFonts(J.normalizeStudio(saved.project.studio).fontFiles);J.studioRecoveryPending=false;J.uiApi.restoreProject(saved.project);await J.saveStudioSnapshot();dialog.close();dialog.remove();}catch(e){feedback.textContent=e.message;J.studioRecoveryPending=true;restore.disabled=discard.disabled=false;}});discard.addEventListener('click',async()=>{restore.disabled=discard.disabled=true;try{await J.deleteStudioSnapshot();J.studioRecoveryPending=false;await J.uiApi.resetAll();wasEnabled=false;dialog.close();dialog.remove();}catch(e){feedback.textContent=e.message;restore.disabled=discard.disabled=false;}});dialog.showModal();restore.focus();}catch(e){J.studioRecoveryPending=false;J.studioRecoveryStatus(e.message);schedule();}
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+    'use strict';
+    async function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('autosave', 'ブラウザ自動保存・復元', 'Browser autosave / recovery'), status = el('p', null, 'studioRecoveryStatus');
+        status.setAttribute('role', 'status');
+        J.studioRecoveryStatus = text => status.textContent = text;
+        root.append(J.studioButton('studioSaveNow', '今すぐ自動保存', 'Save snapshot now', () => J.saveStudioSnapshot()), status, el('p', tr('操作変更後・15秒ごと・完成MP4とPNG出力前にIndexedDBへ保存します。次回起動時に復元／破棄を選べます。音源・画像・動画は別途再読込が必要です。フォントファイルはプロジェクト内データから復元されます。拡張をOFFにすると復元用保存を削除します。', 'Save to IndexedDB after edits, every 15 seconds, and before completed MP4 / PNG export. Choose restore or discard on next launch. Reload audio, images and videos separately. Embedded fonts are restored. Turning this extension OFF deletes the recovery snapshot.')));
+        let timer = null, wasEnabled = false;
+        const schedule = () => {
+            clearTimeout(timer);
+            if (J.studioRecoveryPending)
+                return;
+            const enabled = J.studioOn(J.ui.project, 'autosave');
+            if (!enabled) {
+                if (wasEnabled)
+                    J.deleteStudioSnapshot().catch(e => J.studioRecoveryStatus(e.message));
+                wasEnabled = false;
+                return;
+            }
+            wasEnabled = true;
+            timer = setTimeout(() => {
+                if (!J.ui.exporting)
+                    J.saveStudioSnapshot();
+            }, 350);
+        };
+        const old = J.syncLayerUI;
+        J.syncLayerUI = () => { old(); schedule(); };
+        J.syncLayerUI();
+        setInterval(() => {
+            if (!J.studioRecoveryPending && !J.ui.exporting)
+                J.saveStudioSnapshot();
+        }, 15000);
+        try {
+            const saved = await J.readStudioSnapshot();
+            if (saved?.schema !== 1 || !Number.isFinite(saved.time) || !J.studioOn(saved.project, 'autosave')) {
+                J.studioRecoveryPending = false;
+                schedule();
+                return;
+            }
+            J.uiApi.pause();
+            const dialog = el('dialog', null, 'studioRecoveryDialog'), heading = el('h2', tr('前回の編集内容があります', 'Previous editing data is available')), note = el('p', tr('復元すると前回のプロジェクトを開きます。破棄すると空のプロジェクトから始めます。素材は別途読み込んでください。', 'Restore opens the previous project. Discard starts a blank project. Load media files separately.')), feedback = el('p'), restore = el('button', tr('復元', 'Restore'), 'studioRecover'), discard = el('button', tr('破棄', 'Discard'), 'studioDiscard');
+            heading.id = 'studioRecoveryHeading';
+            dialog.setAttribute('aria-labelledby', heading.id);
+            dialog.append(heading, el('p', new Date(saved.time).toLocaleString()), note, restore, discard, feedback);
+            document.body.append(dialog);
+            dialog.addEventListener('cancel', e => e.preventDefault());
+            restore.addEventListener('click', async () => {
+                restore.disabled = discard.disabled = true;
+                try {
+                    await J.restoreStudioFonts(J.normalizeStudio(saved.project.studio).fontFiles);
+                    J.studioRecoveryPending = false;
+                    J.uiApi.restoreProject(saved.project);
+                    await J.saveStudioSnapshot();
+                    dialog.close();
+                    dialog.remove();
+                }
+                catch (e) {
+                    feedback.textContent = e.message;
+                    J.studioRecoveryPending = true;
+                    restore.disabled = discard.disabled = false;
+                }
+            });
+            discard.addEventListener('click', async () => {
+                restore.disabled = discard.disabled = true;
+                try {
+                    await J.deleteStudioSnapshot();
+                    J.studioRecoveryPending = false;
+                    await J.uiApi.resetAll();
+                    wasEnabled = false;
+                    dialog.close();
+                    dialog.remove();
+                }
+                catch (e) {
+                    feedback.textContent = e.message;
+                    restore.disabled = discard.disabled = false;
+                }
+            });
+            dialog.showModal();
+            restore.focus();
+        }
+        catch (e) {
+            J.studioRecoveryPending = false;
+            J.studioRecoveryStatus(e.message);
+            schedule();
+        }
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
 })();
 
 /* Finish pointer-operated controls without stealing keyboard/text editing focus. */

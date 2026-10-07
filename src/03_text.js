@@ -178,6 +178,7 @@ J.drawItem = (env, it) => {
   const col = ghostPass ? env.passColor : (it.color || '#fff');
   const sCol = ghostPass ? env.passColor : (it.strokeColor || it.color || '#fff');
   const fill = it.fill !== false;
+  const studioLineMatrix = env.studioGlyph ? ctx.getTransform() : null;
   ctx.save();
   ctx.translate(it.x, it.y);
   if (it.rot) ctx.rotate(it.rot * J.DEG);
@@ -221,8 +222,9 @@ J.drawItem = (env, it) => {
     const csx = sx * cs * (c && c.sx ? c.sx : 1), csy = sy * cs * (c && c.sy ? c.sy : 1);
     const gcol = (!ghostPass && c && c.color) || col;
     if (env.studioGlyph) {
+      const studioCharacterMatrix = ctx.getTransform();
       ctx.save(); ctx.translate(gx, gy); if (crot) ctx.rotate(crot * J.DEG); ctx.scale(csx, csy);
-      env.studioGlyph(g, ctx.getTransform()); ctx.restore();
+      env.studioGlyph(g, ctx.getTransform(), {line:studioLineMatrix,character:studioCharacterMatrix}); ctx.restore();
     }
     boxes.push({ x: gx, y: gy, w: g.w * sx * cs / (g.fs || 1), h: g.h * sy * cs / (g.fs || 1) });
     // モーフ: record where each glyph ends up (device space) / leave the glyphs out while the morph draws them

@@ -16,8 +16,9 @@ FILES = [
     'dev/transition_test.js', 'dev/coverage_review_test.js', 'dev/global_taste_test.js', 'dev/preview_audio_test.js', 'dev/text_test.js', 'dev/local_fonts_test.js',
     'dev/background_color_test.js', 'dev/theme_test.js',
     'dev/user_theme_test.js', 'dev/appearance_test.js', 'dev/motion_library_test.js',
+    'dev/studio_types.d.ts', 'dev/tsconfig.studio.json',
 ]
-PATTERNS = ['src/*.js', 'app/*.py', 'app/*.js', 'app/*.html', 'app/*.css',
+PATTERNS = ['src/*.js', 'app/*.py', 'app/*.js', 'app/*.html', 'app/*.css', 'dev/studio_*_test.js',
             'vendor/*.js', 'vendor/*.txt', 'vendor/*.tgz', 'docs/*.md']
 LANGUAGES = ['en']
 
