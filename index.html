@@ -6201,12 +6201,12 @@ J.analyzeAudio = async (file) => {
   const mono = new Float32Array(len);
   for (let c = 0; c < ch; c++) { const d = audioBuffer.getChannelData(c); for (let i = 0; i < len; i++) mono[i] += d[i] / ch; }
   const rate = 50, hop = Math.round(sr / rate), n = Math.floor(len / hop);
-  const energy = new Float32Array(n), flux = new Float32Array(n);
+  const energy = new Float32Array(n), flux = new Float32Array(n), framePeaks = new Float32Array(n);
   let prevHP = 0, prevX = 0;
   for (let f = 0; f < n; f++) {
     let e = 0, eh = 0;
     for (let i = f * hop, end = Math.min(len, (f + 1) * hop); i < end; i++) {
-      const x = mono[i]; e += x * x;
+      const x = mono[i]; e += x * x; framePeaks[f] = Math.max(framePeaks[f], Math.abs(x));
       const hp = 0.92 * (prevHP + x - prevX); prevHP = hp; prevX = x; eh += hp * hp;
     }
     energy[f] = Math.sqrt(e / hop);
@@ -6254,7 +6254,7 @@ J.analyzeAudio = async (file) => {
   for (let b = 0; b < bins; b++) { let m = 0; for (let i = b * per, e = Math.min(len, (b + 1) * per); i < e; i += 4) { const v = Math.abs(mono[i]); if (v > m) m = v; } peaks[b] = m; }
   return {
     name: file.name, duration: audioBuffer.duration, sampleRate: sr, buffer: audioBuffer,
-    bpm: Math.round(60 / period * 10) / 10, beats, energy: energyN, energyRate: rate, peaks,
+    bpm: Math.round(60 / period * 10) / 10, beats, energy: energyN, energyRate: rate, peaks, rms: energy, onset, framePeaks,
   };
 };
 
@@ -39049,6 +39049,7 @@ J.normalizeStudio = value => ({
   characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
   fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
   motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
+  analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : {sections:[],beatSnap:0},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
@@ -39151,6 +39152,15 @@ J.studioPreset=(name)=>{const recipe=J.STUDIO_PRESETS[name]||J.STUDIO_PRESETS.Mi
 const planner=J.plan;J.plan=(project,audio)=>{const plan=planner(project,audio);if(!J.studioOn(project,'motionEditing'))return plan;for(const cut of plan.cuts){const line=plan.lines.find(l=>l.index===cut.line);if(!line||line.interlude)continue;const row=plan.studio.motion.rows[J.studioLineKey(line)];if(!row)continue;for(const [stage,table]of[['enter',J.ENTER],['hold',J.HOLD],['exit',J.EXIT]]){const def=table[row[stage]];if(def&&(!def.maxChars||[...cut.text].length<=def.maxChars)&&(!def.minDur||cut.dur>=def.minDur))cut[stage]=row[stage];}const speed=.5+plan.studio.motion.controls.speed/100;cut.inDur=Math.min(cut.dur/2,cut.inDur/speed);cut.outDur=Math.min(cut.dur/2,cut.outDur/speed);cut.studioMotion=row;}return plan;};
 const make=J.Renderer.prototype.makeEnv;J.Renderer.prototype.makeEnv=function(ctx,plan,cut,sc,opt){const env=make.call(this,ctx,plan,cut,sc,opt);if(plan.studio?.flags.motionEditing&&cut?.studioMotion){const row=cut.studioMotion,c=plan.studio.motion.controls,amt=row.intensity*(1-c.calm/125);env.fx={...env.fx,motion:amt*(.5+c.impact/100),glitch:(env.fx.glitch||0)*c.glitch/100};env.studioAmount=amt;}return env;};
 const draw=J.drawItem;J.drawItem=(env,it)=>{if(!env.cut?.studioMotion||!env.plan.studio?.flags.motionEditing||env.inLayer||it._studioMotion||!env.cut.text.includes(it.text))return draw(env,it);const c=env.plan.studio.motion.controls,a=env.studioAmount||0,old=it.charFn,phase=Math.sin(env.t*(2+c.speed/10)),pulse=1+.035*a*phase*c.impact/100;return draw(env,{...it,_studioMotion:true,sx:(it.sx||1)*pulse,sy:(it.sy||1)*pulse,blur:(it.blur||0)*(1-c.sharpness/100),charFn:(i,g,n)=>{const t=old?.(i,g,n)||{};return{...t,dx:(t.dx||0)+(i-(n-1)/2)*a*c.spread/10,dy:(t.dy||0)+Math.sin(env.t*14+i)*a*c.shake/10,rot:(t.rot||0)+phase*a*c.impact/30};}});};
+})();
+
+(() => {
+'use strict';
+const cache=new WeakMap();J.STUDIO_SECTIONS=['Unknown','Intro','Verse','Pre Chorus','Chorus','Bridge','Outro'];
+J.normalizeStudioAnalysis=v=>({beatSnap:[20,50,100,150].includes(v?.beatSnap)?v.beatSnap:0,sections:(Array.isArray(v?.sections)?v.sections:[]).slice(0,500).filter(s=>Number.isFinite(s?.start)&&Number.isFinite(s?.end)&&s.start>=0&&s.end>s.start&&J.STUDIO_SECTIONS.includes(s.type)).map(s=>({start:s.start,end:s.end,type:s.type})).sort((a,b)=>a.start-b.start)});
+J.studioDensity=lines=>lines.map(l=>{const count=[...(l.text||'').replace(/\s/g,'')].length,seconds=Math.max(.001,l.end-l.start);return{index:l.index,key:J.studioLineKey(l),count,seconds,cps:count/seconds};});
+J.studioAnalyze=audio=>{if(!audio?.buffer)throw new Error(J.layerText('音源を先に読み込んでください。','Load audio first.'));if(cache.has(audio.buffer))return cache.get(audio.buffer);const rate=audio.energyRate||50,energy=audio.energy||[],sections=[];let start=0,previous=0;const average=(a,b)=>{let sum=0;for(let i=a;i<b;i++)sum+=energy[i]||0;return sum/Math.max(1,b-a);};for(let i=0;i<energy.length;i+=rate*5){const mean=average(i,Math.min(energy.length,i+rate*5));if(i>0&&Math.abs(mean-previous)>.25){sections.push({start,end:i/rate,type:'Unknown'});start=i/rate;}previous=mean;}if(audio.duration>start)sections.push({start,end:audio.duration,type:'Unknown'});const result={rate,rms:audio.rms||[],peak:audio.framePeaks||[],energy,onset:audio.onset||[],beats:audio.beats||[],bpm:audio.bpm,confidence:(audio.onset||[]).some(v=>v>.1)?'estimated':'low',sections};cache.set(audio.buffer,result);return result;};
+J.studioLineEnergy=(analysis,line)=>{const a=Math.floor(line.start*analysis.rate),b=Math.min(analysis.energy.length,Math.ceil(line.end*analysis.rate));let sum=0;for(let i=a;i<b;i++)sum+=analysis.energy[i]||0;return Math.max(0,Math.min(1,sum/Math.max(1,b-a)));};
 })();
 
 /* ============================================================
@@ -42761,6 +42771,12 @@ function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('mo
  const selected=()=>J.ui.plan.lines.find(l=>J.studioLineKey(l)===line.value),save=()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.rows[line.value]=J.studioMotionRow({enter:fields.enter.value,hold:fields.hold.value,exit:fields.exit.value,intensity:+intensity.value});J.studioChanged();};
  root.append(J.studioButton('studioApplyPreset','選択行にプリセットを適用','Apply preset to selected line',()=>{if(!selected())return;J.uiApi.pushEdit();J.ui.project.studio.motion.preset=preset.value;J.ui.project.studio.motion.rows[line.value]=J.studioPreset(preset.value);J.studioChanged();}));
  const sync=()=>{const value=line.value,lines=J.ui.plan.lines.filter(l=>l.text);line.replaceChildren(...lines.map(l=>{const o=el('option',`${l.index+1}: ${l.text.slice(0,32)}`);o.value=J.studioLineKey(l);return o;}));if(lines.some(l=>J.studioLineKey(l)===value))line.value=value;const m=J.ui.project.studio.motion,row=J.studioMotionRow(m.rows[line.value]);for(const k in fields)fields[k].value=row[k];intensity.value=String(row.intensity);for(const k in controls)controls[k].value=String(m.controls[k]);preset.value=m.preset;};line.addEventListener('change',()=>{sync();const l=selected();if(l)J.uiApi.seek(l.start+Math.min(.5,(l.end-l.start)/2));});const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
+(() => {
+'use strict';
+function boot(){const el=J.studioElement,tr=J.layerText,root=J.studioSection('musicAnalysis','楽曲解析・歌詞密度・区間','Music analysis / lyric density / sections'),status=el('p',tr('音源読込後に解析してください。','Load audio, then analyze.'),'studioAnalysisStatus'),cv=el('canvas',null,'studioAnalysisGraph');cv.width=600;cv.height=100;cv.style.width='100%';const rows=el('pre',null,'studioDensity'),sections=el('textarea',null,'studioSections');sections.rows=5;sections.placeholder='0, 10, Intro\n10, 30, Verse\n30, 50, Chorus';root.append(J.studioButton('studioAnalyze','音量・ビート・区間を解析','Analyze level / beats / sections',()=>{const a=J.studioAnalyze(J.ui.audio),ctx=cv.getContext('2d');const peak=a.peak.reduce((m,v)=>Math.max(m,v),0);status.textContent=`RMS / Peak / Energy / Onset · BPM ${a.bpm} (${a.confidence}) · Beat ${a.beats.length} · Peak ${peak.toFixed(3)}`;ctx.clearRect(0,0,600,100);for(const [values,color]of[[a.rms,'#79d9ae'],[a.energy,'#ffffff'],[a.onset,'#e4bb72']]){const max=values.reduce((m,v)=>Math.max(m,v),1);ctx.strokeStyle=color;ctx.beginPath();for(let i=0;i<600;i++){const v=values[Math.floor(i/600*values.length)]||0;ctx.lineTo(i,98-Math.min(1,v/max)*90);}ctx.stroke();}for(const t of a.beats){ctx.fillStyle='#e4bb72';ctx.fillRect(t/J.ui.audio.duration*600,94,1,6);}rows.textContent=J.studioDensity(J.ui.plan.lines).map(d=>`${d.index+1}: ${d.count} chars / ${d.seconds.toFixed(2)}s / ${d.cps.toFixed(2)} chars/s`).join('\n');sections.value=(J.ui.project.studio.analysis.sections.length?J.ui.project.studio.analysis.sections:a.sections).map(s=>`${s.start.toFixed(3)}, ${s.end.toFixed(3)}, ${s.type}`).join('\n');}),status,cv,rows,el('label',tr('区間: 開始秒, 終了秒, 種別（1行ずつ）','Sections: start seconds, end seconds, type (one per line)')),sections,J.studioButton('studioSaveSections','区間を保存','Save sections',()=>{const parsed=sections.value.trim()?sections.value.trim().split('\n').map(row=>{const [start,end,...type]=row.split(',');return{start:+start,end:+end,type:type.join(',').trim()};}):[];const valid=J.normalizeStudioAnalysis({sections:parsed}).sections;if(valid.length!==parsed.length)throw new Error(tr('開始・終了と区間名を確認してください。','Check start/end and section names.'));for(let i=1;i<valid.length;i++)if(valid[i].start<valid[i-1].end)throw new Error(tr('区間を重ねないでください。','Sections must not overlap.'));J.uiApi.pushEdit();J.ui.project.studio.analysis.sections=valid;J.studioChanged();}),el('p',tr('区間変化とBPMは推定です。曲のVerse/Chorus判定は行いません。UnknownをIntro / Verse / Pre Chorus / Chorus / Bridge / Outroへ手動変更できます。','Changes and BPM are estimates. Verse/chorus labels are not inferred. Change Unknown manually to Intro / Verse / Pre Chorus / Chorus / Bridge / Outro.')));J.syncLayerUI();}
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 

@@ -14,12 +14,12 @@ J.analyzeAudio = async (file) => {
   const mono = new Float32Array(len);
   for (let c = 0; c < ch; c++) { const d = audioBuffer.getChannelData(c); for (let i = 0; i < len; i++) mono[i] += d[i] / ch; }
   const rate = 50, hop = Math.round(sr / rate), n = Math.floor(len / hop);
-  const energy = new Float32Array(n), flux = new Float32Array(n);
+  const energy = new Float32Array(n), flux = new Float32Array(n), framePeaks = new Float32Array(n);
   let prevHP = 0, prevX = 0;
   for (let f = 0; f < n; f++) {
     let e = 0, eh = 0;
     for (let i = f * hop, end = Math.min(len, (f + 1) * hop); i < end; i++) {
-      const x = mono[i]; e += x * x;
+      const x = mono[i]; e += x * x; framePeaks[f] = Math.max(framePeaks[f], Math.abs(x));
       const hp = 0.92 * (prevHP + x - prevX); prevHP = hp; prevX = x; eh += hp * hp;
     }
     energy[f] = Math.sqrt(e / hop);
@@ -67,7 +67,7 @@ J.analyzeAudio = async (file) => {
   for (let b = 0; b < bins; b++) { let m = 0; for (let i = b * per, e = Math.min(len, (b + 1) * per); i < e; i += 4) { const v = Math.abs(mono[i]); if (v > m) m = v; } peaks[b] = m; }
   return {
     name: file.name, duration: audioBuffer.duration, sampleRate: sr, buffer: audioBuffer,
-    bpm: Math.round(60 / period * 10) / 10, beats, energy: energyN, energyRate: rate, peaks,
+    bpm: Math.round(60 / period * 10) / 10, beats, energy: energyN, energyRate: rate, peaks, rms: energy, onset, framePeaks,
   };
 };
 

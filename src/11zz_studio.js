@@ -10,6 +10,7 @@ J.normalizeStudio = value => ({
   characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
   fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
   motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : {preset:'Minimal',controls:{},rows:{}},
+  analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : {sections:[],beatSnap:0},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;

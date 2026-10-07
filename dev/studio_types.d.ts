@@ -4,6 +4,9 @@ interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLin
 interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; fontFiles?:StudioState['fontFiles']; motion?:StudioMotion; }
 interface StudioMotion {preset:string;controls:Record<string,number>;rows:Record<string,{enter:string;hold:string;exit:string;intensity:number}>;}
 interface StudioState {motion:StudioMotion;}
+interface StudioAnalysis {sections:{start:number;end:number;type:string}[];beatSnap:number;}
+interface StudioState {analysis:StudioAnalysis;}
+interface StudioInput {analysis?:StudioAnalysis;}
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
 interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }
