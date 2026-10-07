@@ -7,5 +7,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "skipLibCheck": false
   },
-  "files": ["studio_types.d.ts", "../src/11zz_studio.js", "../src/13g_studio_ui.js"]
+  "files": ["studio_types.d.ts", "../src/11zz_studio.js", "../src/11zz_timing.js", "../src/13g_studio_ui.js", "../src/13h_timing_ui.js"]
 }

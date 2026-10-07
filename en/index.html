@@ -39081,6 +39081,24 @@ const planner = J.plan;
 J.plan = (project, audio) => J.studioTapGap(planner(project, audio), project);
 })();
 
+/* Timing interchange reuses the legacy lyric/SRT parsers and cue validator. */
+(() => {
+'use strict';
+J.studioPlanCues = plan => J.validateCues(plan.lines.map((line,index)=>({id:String(line.cueId||'line-'+index),start:line.start,end:line.end,text:line.text})));
+J.studioSRT = cues => {
+ const clock=t=>{const ms=Math.round(t*1000);return [Math.floor(ms/3600000),Math.floor(ms/60000)%60,Math.floor(ms/1000)%60].map(v=>String(v).padStart(2,'0')).join(':')+','+String(ms%1000).padStart(3,'0');};
+ return J.validateCues(cues).filter(c=>c.text.length).map((c,i)=>`${i+1}\n${clock(c.start)} --> ${clock(c.end)}\n${c.text}`).join('\n\n')+'\n';
+};
+J.studioLRC = cues => J.validateCues(cues).map(c=>{const ms=Math.round(c.start*1000),minutes=Math.floor(ms/60000),seconds=Math.floor(ms/1000)%60;return `[${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}.${String(ms%1000).padStart(3,'0')}]${c.text.replace(/\r?\n/g,' ')}`;}).join('\n')+'\n';
+J.studioParseLRC = (raw, duration = 0, gap = 0) => {
+ const parsed=J.parseLyrics(String(raw).replace(/^\uFEFF/,'')),offset=Number(parsed.meta.offset||0)/1000;
+ if(!parsed.lines.length||parsed.lines.some(l=>!Number.isFinite(l.lrc)))throw new Error(J.layerText('各行にLRCタイムスタンプを付けてください。','Every lyric line needs an LRC timestamp.'));
+ const lines=parsed.lines.map(l=>({...l,start:Math.max(0,l.lrc+offset)})).sort((a,b)=>a.start-b.start);
+ return J.validateCues(lines.map((l,i)=>({id:'lrc-'+i,start:l.start,end:i+1<lines.length?Math.max(l.start+.001,lines[i+1].start-gap/1000):Math.max(l.start+3,duration),text:l.text})));
+};
+J.studioPasteLyrics = (raw, keep) => String(raw).replace(/^\uFEFF/,'').replace(/\r\n?/g,'\n').split('\n').map(line=>!line.trim()&&keep?'[間奏]':line).join('\n');
+})();
+
 /* English labels are applied after all expression packs register, before the editor starts.
    Internal IDs and project JSON remain language independent. */
 (() => {
@@ -42877,6 +42895,25 @@ function boot(){
  function sync(){const studio=J.ui.project.studio||(J.ui.project.studio=J.normalizeStudio());for(const key of J.STUDIO_FEATURES){$('studioFlag-'+key).checked=studio.flags[key];const section=$('studio-'+key);if(section)section.hidden=!studio.flags[key];}gapLabel.hidden=!studio.flags.tapSync;gap.value=String(studio.tapGap);document.documentElement.classList.toggle('studio-tap-enhanced',studio.flags.tapSync);}
  function tapInfo(){if(!J.ui.tap||!J.studioOn(J.ui.project,'tapSync')){meta.hidden=true;return;}meta.hidden=false;const {i,done}=J.ui.tap,lines=J.ui.plan.lines;meta.textContent=tr(`現在 ${Math.min(i+1,lines.length)} / ${lines.length} · 打刻済み ${done.length} · 残り ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}秒\n次: ${lines[i+1]?.text||'—'}`,`Line ${Math.min(i+1,lines.length)} / ${lines.length} · Stamped ${done.length} · Remaining ${Math.max(0,lines.length-i)}\n♪ ${J.ui.t.toFixed(3)}s\nNext: ${lines[i+1]?.text||'—'}`);$('tapBtn').disabled=i>=lines.length;}
  setInterval(tapInfo,100);sync();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
+(() => {
+'use strict';
+const tr=J.layerText,el=J.studioElement,button=J.studioButton;
+function boot(){
+ const root=J.studioSection('lyricsTiming','歌詞・タイミング / SRT / LRC','Lyrics / timing / SRT / LRC');
+ const paste=el('textarea',null,'studioLyricsPaste');paste.rows=5;paste.setAttribute('aria-label',tr('貼り付ける歌詞','Lyrics to paste'));paste.placeholder=tr('歌詞を1行ずつ貼り付け','Paste one lyric per line');
+ const label=el('label',tr('空行','Blank lines')),blanks=el('select',null,'studioBlankLines');for(const [value,ja,en] of [['skip','区切りとして扱う','Treat as a section break'],['keep','間奏として残す','Keep as an interlude']]){const o=el('option',tr(ja,en));o.value=value;blanks.append(o);}label.append(blanks);root.append(paste,label);
+ root.append(button('studioPasteApply','歌詞を適用（Tap Sync用）','Apply lyrics (for Tap Sync)',()=>{if(J.ui.tap)J.uiApi.stopTap();if(!paste.value.trim())throw new Error(tr('歌詞を入力してください。','Enter lyrics.'));J.uiApi.pushEdit();const p=J.ui.project;p.studio.blankLines=blanks.value==='keep'?'keep':'skip';p.lyrics=J.studioPasteLyrics(paste.value,blanks.value==='keep');delete p.subtitleCues;p.overrides={};p.localLooks=null;p.timing.lineTimes={};p.exportRange=null;J.studioChanged();}));
+ const fileLabel=el('label',tr('LRCを読み込む','Import LRC')),file=el('input',null,'studioLRCFile');file.type='file';file.accept='.lrc,text/plain';fileLabel.className='file';fileLabel.append(file);root.append(fileLabel);
+ file.addEventListener('change',async()=>{const f=file.files?.[0];if(!f)return;const epoch=J.projectSessionEpoch;try{const cues=J.studioParseLRC(await f.text(),J.ui.audio?.duration||0,J.ui.project.studio.tapGap);if(epoch!==J.projectSessionEpoch)return;if(J.ui.tap)J.uiApi.stopTap();J.uiApi.pushEdit();Object.assign(J.ui.project,{subtitleCues:cues,lyrics:cues.map(c=>c.text).join('\n\n'),overrides:{},localLooks:null,exportRange:null});J.ui.project.timing.lineTimes={};J.studioChanged();}catch(error){J.uiApi.toast(error.message);}finally{file.value='';}});
+ const cues=()=>J.ui.project.subtitleCues||J.studioPlanCues(J.ui.plan),name=()=>((J.ui.project.title||'lyrics').replace(/[\\/:*?"<>|]/g,'_').slice(0,60)||'lyrics');
+ root.append(button('studioExportSRT','SRTを保存','Save SRT',()=>J.saveFile(name()+'.srt',J.studioSRT(cues()))),button('studioExportLRC','LRCを保存','Save LRC',()=>J.saveFile(name()+'.lrc',J.studioLRC(cues()))));
+ root.append(button('studioTimingEdit','現在の歌詞を字幕時刻編集へ','Edit current lyrics as timed cues',()=>{if(Array.isArray(J.ui.project.subtitleCues))return;const next=J.studioPlanCues(J.ui.plan);J.uiApi.pushEdit();J.ui.project.subtitleCues=next;J.studioChanged();J.editLayerCueText(0);}));
+ root.append(el('p',tr('SRTの開始・終了はそのまま保存します。文字なしの字幕はSRT出力で省略します。LRCは開始時刻のみの形式です。複数行本文は1行にまとめ、読込時の終了は次行または音源長から補完します。空行を間奏にした歌詞は文字を描画しません。','SRT preserves start/end times; empty cues are omitted. LRC stores starts only and combines multiline text. Imported ends use the next start or audio duration. Blank interludes draw no lyric text.')));
+ J.syncLayerUI();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

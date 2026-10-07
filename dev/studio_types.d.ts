@@ -3,7 +3,7 @@ interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLin
 interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; }
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
-interface StudioLine { start:number; end:number; }
+interface StudioLine { start:number; end:number; text?:string; cueId?:string; }
 interface StudioCut extends StudioLine { line:number; layout:string; dur:number; inDur:number; outDur:number; }
 interface StudioPlan { lines:StudioLine[]; cuts:StudioCut[]; }
 declare const J: {
@@ -17,4 +17,9 @@ declare const J: {
  studioButton:(id:string,ja:string,en:string,action:()=>any)=>HTMLButtonElement;
  studioSection:(flag:string,ja:string,en:string)=>HTMLDetailsElement;
  studioChanged:()=>void;
+ studioPlanCues:(plan:StudioPlan)=>StudioCue[];
+ studioSRT:(cues:StudioCue[])=>string;
+ studioLRC:(cues:StudioCue[])=>string;
+ studioParseLRC:(raw:string,duration?:number,gap?:number)=>StudioCue[];
+ studioPasteLyrics:(raw:string,keep:boolean)=>string;
 };
