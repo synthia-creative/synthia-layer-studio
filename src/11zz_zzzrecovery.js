@@ -1,0 +1,50 @@
+(() => {
+    'use strict';
+    let database = null, revision = 0, saveSequence = 0;
+    J.studioRecoveryPending = true;
+    J.openStudioRecovery = () => {
+        if (database)
+            return database;
+        database = new Promise((resolve, reject) => {
+            if (typeof indexedDB === 'undefined') {
+                reject(new Error('IndexedDB unavailable'));
+                return;
+            }
+            const req = indexedDB.open('synthia-layer-studio-recovery-v1', 1);
+            req.onupgradeneeded = () => req.result.createObjectStore('projects');
+            req.onsuccess = () => { const db = req.result; db.onversionchange = () => { db.close(); database = null; }; resolve(db); };
+            req.onerror = () => { database = null; reject(req.error); };
+            req.onblocked = () => { database = null; reject(new Error('Recovery database is blocked by another tab')); };
+        });
+        return database;
+    };
+    J.readStudioSnapshot = async () => {
+        const db = await J.openStudioRecovery();
+        return new Promise((resolve, reject) => {
+            const tx = db.transaction('projects', 'readonly');
+            const req = tx.objectStore('projects').get('latest');
+            // Wait for the transaction, so callers may safely navigate after reading.
+            tx.oncomplete = () => resolve(req.result);
+            tx.onabort = () => reject(tx.error);
+            tx.onerror = () => reject(tx.error);
+        });
+    };
+    J.deleteStudioSnapshot = async () => { revision++; const db = await J.openStudioRecovery(); return new Promise((resolve, reject) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').delete('latest'); tx.oncomplete = () => resolve(true); tx.onabort = () => reject(tx.error); tx.onerror = () => reject(tx.error); }); };
+    J.saveStudioSnapshot = async (project = J.ui.project) => {
+        if (J.studioRecoveryPending || !J.studioOn(project, 'autosave'))
+            return false;
+        const rev = revision, sequence = ++saveSequence, source = J.ui.project;
+        try {
+            const snapshot = { schema: 1, time: Date.now(), project: structuredClone(project) }, db = await J.openStudioRecovery();
+            if (rev !== revision || sequence !== saveSequence || source !== J.ui.project)
+                return false;
+            await new Promise((resolve, reject) => { const tx = db.transaction('projects', 'readwrite'); tx.objectStore('projects').put(snapshot, 'latest'); tx.oncomplete = () => resolve(true); tx.onabort = () => reject(tx.error); tx.onerror = () => reject(tx.error); });
+            J.studioRecoveryStatus?.(J.layerText('保存済み ', 'Saved ') + new Date(snapshot.time).toLocaleTimeString());
+            return true;
+        }
+        catch (e) {
+            J.studioRecoveryStatus?.(J.layerText('自動保存に失敗: ', 'Autosave failed: ') + e.message);
+            return false;
+        }
+    };
+})();

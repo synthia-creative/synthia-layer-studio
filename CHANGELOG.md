@@ -1,3 +1,10 @@
+## 1.6.0 — 2026-10-07
+
+- 既存UI・version 1プロジェクト・MP4エンジンを維持して10個のオプトイン拡張を追加。Tap Syncの入力ガードと末尾Undo、終了余白、SRT/LRC入出力、文字／行の直接編集、TTF/OTF/WOFF/WOFF2、IN/HOLD/OUT、独自10プリセット、音源解析、Music/Full Auto、明示的Beat Snap、追加トラック／レイヤー、指定ファイル名の完成MP4、透過歌詞PNG連番ZIP、IndexedDB自動保存・復元／破棄に対応。
+- Preserve the existing UI, version 1 project format and MP4 engine while adding ten opt-in extensions. Add guarded Tap Sync and final Undo, timing export, character/line editing, embedded fonts, staged motion, audio analysis, Music/Full Auto, explicit bounded Beat Snap, tracks/layers, named completed MP4, transparent lyric PNG ZIP and IndexedDB recovery.
+- 拡張OFFは従来の編集・出力を使用。既存SRT時刻はおまかせで変更せず、素材はプロジェクトを再読込した後に再指定。フォント本体はJSON・IndexedDBに保存。WebM/透過動画は未追加。[使い方](docs/INTEGRATED_STUDIO.md)。Lyrics Studioは変更していません。
+- Feature OFF uses legacy editing/export. Auto preserves SRT timestamps; reload media after opening a project. Font binaries are embedded in JSON/IndexedDB. WebM/alpha video remains optional and unimplemented. [Guide](docs/INTEGRATED_STUDIO.en.md). Lyrics Studio is unchanged.
+
 ## 1.5.0 — 2026-10-03
 
 - 公開前レビューの修正：全体配色のJSON・自動保存復元、個別編集と全体変更を混ぜたUndo/Redo、スペースを含む日本語の保存済みカット構成、ライブラリ再選択時の管理ボタン、書体変更後のモーション再生成時の配置保持を修正。Undoの説明を日英マニュアル・利用ガイドへ反映。

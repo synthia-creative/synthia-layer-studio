@@ -167,7 +167,7 @@ J.drawItem = (env, it) => {
   if (ghostPass && it.ghost === false) return null;
   if (!it.text || it.size <= 0.5) return null;
   if (J.hideDecoText(env, it.text)) return null;
-  if (!env.inLayer && !env.glyphLog && !env.hideText && env.allowFilter && !it.pieceFn && ((it.blur || 0) > 0.4 || (it.shadow && !ghostPass && (it.shadow.blur || 0) * (env.scale || 1) > 6))) {
+  if (!env.inLayer && !env.glyphLog && !env.studioGlyph && !env.hideText && env.allowFilter && !it.pieceFn && ((it.blur || 0) > 0.4 || (it.shadow && !ghostPass && (it.shadow.blur || 0) * (env.scale || 1) > 6))) {
     const r = drawItemLayered(env, it);
     if (r !== undefined) return r;
   }
@@ -178,6 +178,7 @@ J.drawItem = (env, it) => {
   const col = ghostPass ? env.passColor : (it.color || '#fff');
   const sCol = ghostPass ? env.passColor : (it.strokeColor || it.color || '#fff');
   const fill = it.fill !== false;
+  const studioLineMatrix = env.studioGlyph ? ctx.getTransform() : null;
   ctx.save();
   ctx.translate(it.x, it.y);
   if (it.rot) ctx.rotate(it.rot * J.DEG);
@@ -220,6 +221,11 @@ J.drawItem = (env, it) => {
     const crot = (c ? c.rot || 0 : 0) + (g.r90 ? 90 : 0);
     const csx = sx * cs * (c && c.sx ? c.sx : 1), csy = sy * cs * (c && c.sy ? c.sy : 1);
     const gcol = (!ghostPass && c && c.color) || col;
+    if (env.studioGlyph) {
+      const studioCharacterMatrix = ctx.getTransform();
+      ctx.save(); ctx.translate(gx, gy); if (crot) ctx.rotate(crot * J.DEG); ctx.scale(csx, csy);
+      env.studioGlyph(g, ctx.getTransform(), {line:studioLineMatrix,character:studioCharacterMatrix}); ctx.restore();
+    }
     boxes.push({ x: gx, y: gy, w: g.w * sx * cs / (g.fs || 1), h: g.h * sy * cs / (g.fs || 1) });
     // モーフ: record where each glyph ends up (device space) / leave the glyphs out while the morph draws them
     if (env.glyphLog && !ghostPass) {

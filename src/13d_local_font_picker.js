@@ -44,6 +44,8 @@ function mount() {
 }
 J.createLocalFontPickerButton = onSelect => {
   const button = el('button', tr('PCのフォントから選ぶ…', 'Choose installed PC font…')); button.type = 'button'; button.className = 'local-font-open';
+  button.disabled = !window.isSecureContext || typeof window.queryLocalFonts !== 'function';
+  if (button.disabled) button.title = tr('この環境は書体一覧の取得に対応していません。フォント名の入力またはフォントファイル読込を利用してください。', 'Font enumeration is unavailable. Enter a family name or import a font file.');
   button.addEventListener('click', async () => {
     mount(); const seq = ++request; selectFamily = onSelect; origin = button;
     families = []; search.value = ''; search.disabled = true; list.replaceChildren(); list.disabled = true; apply.disabled = true; sample.style.fontFamily = 'sans-serif';

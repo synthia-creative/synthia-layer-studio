@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "skipLibCheck": false
+  },
+  "files": [
+    "studio_types.d.ts",
+    "../src/11zz_studio.js",
+    "../src/11zz_timing.js",
+    "../src/11zz_xcharacters.js",
+    "../src/13g_studio_ui.js",
+    "../src/13h_timing_ui.js",
+    "../src/13i_character_ui.js",
+    "../src/11zz_yfonts.js",
+    "../src/13j_font_ui.js",
+    "../src/11zz_zmotion.js",
+    "../src/13k_motion_ui.js",
+    "../src/11zz_zmusic.js",
+    "../src/13l_analysis_ui.js",
+    "../src/11zz_zxauto.js",
+    "../src/13m_auto_ui.js",
+    "../src/11zz_zytimeline.js",
+    "../src/13n_timeline_ui.js",
+    "../src/11zz_zzexport.js",
+    "../src/13o_export_ui.js",
+    "../src/11zz_zzzrecovery.js",
+    "../src/13p_recovery_ui.js"
+  ]
+}

@@ -1,0 +1,50 @@
+(() => {
+    'use strict';
+    function boot() {
+        const el = J.studioElement, tr = J.layerText, root = J.studioSection('musicAnalysis', '楽曲解析・歌詞密度・区間', 'Music analysis / lyric density / sections'), status = el('p', tr('音源読込後に解析してください。', 'Load audio, then analyze.'), 'studioAnalysisStatus'), cv = el('canvas', null, 'studioAnalysisGraph');
+        cv.width = 600;
+        cv.height = 100;
+        cv.style.width = '100%';
+        const rows = el('pre', null, 'studioDensity'), sections = el('textarea', null, 'studioSections');
+        sections.rows = 5;
+        sections.placeholder = '0, 10, Intro\n10, 30, Verse\n30, 50, Chorus';
+        root.append(J.studioButton('studioAnalyze', '音量・ビート・区間を解析', 'Analyze level / beats / sections', () => {
+            const a = J.studioAnalyze(J.ui.audio), ctx = cv.getContext('2d');
+            const peak = a.peak.reduce((m, v) => Math.max(m, v), 0);
+            status.textContent = `RMS / Peak / Energy / Onset · BPM ${a.bpm} (${a.confidence}) · Beat ${a.beats.length} · Peak ${peak.toFixed(3)}`;
+            ctx.clearRect(0, 0, 600, 100);
+            for (const [values, color] of [[a.rms, '#79d9ae'], [a.energy, '#ffffff'], [a.onset, '#e4bb72']]) {
+                const max = values.reduce((m, v) => Math.max(m, v), 1);
+                ctx.strokeStyle = color;
+                ctx.beginPath();
+                for (let i = 0; i < 600; i++) {
+                    const v = values[Math.floor(i / 600 * values.length)] || 0;
+                    ctx.lineTo(i, 98 - Math.min(1, v / max) * 90);
+                }
+                ctx.stroke();
+            }
+            for (const t of a.beats) {
+                ctx.fillStyle = '#e4bb72';
+                ctx.fillRect(t / J.ui.audio.duration * 600, 94, 1, 6);
+            }
+            rows.textContent = J.studioDensity(J.ui.plan.lines).map(d => `${d.index + 1}: ${d.count} chars / ${d.seconds.toFixed(2)}s / ${d.cps.toFixed(2)} chars/s`).join('\n');
+            sections.value = (J.ui.project.studio.analysis.sections.length ? J.ui.project.studio.analysis.sections : a.sections).map(s => `${s.start.toFixed(3)}, ${s.end.toFixed(3)}, ${s.type}`).join('\n');
+        }), status, cv, rows, el('label', tr('区間: 開始秒, 終了秒, 種別（1行ずつ）', 'Sections: start seconds, end seconds, type (one per line)')), sections, J.studioButton('studioSaveSections', '区間を保存', 'Save sections', () => {
+            const parsed = sections.value.trim() ? sections.value.trim().split('\n').map(row => { const [start, end, ...type] = row.split(','); return { start: +start, end: +end, type: type.join(',').trim() }; }) : [];
+            const valid = J.normalizeStudioAnalysis({ sections: parsed }).sections;
+            if (valid.length !== parsed.length)
+                throw new Error(tr('開始・終了と区間名を確認してください。', 'Check start/end and section names.'));
+            for (let i = 1; i < valid.length; i++)
+                if (valid[i].start < valid[i - 1].end)
+                    throw new Error(tr('区間を重ねないでください。', 'Sections must not overlap.'));
+            J.uiApi.pushEdit();
+            J.ui.project.studio.analysis.sections = valid;
+            J.studioChanged();
+        }), el('p', tr('区間変化とBPMは推定です。曲のVerse/Chorus判定は行いません。UnknownをIntro / Verse / Pre Chorus / Chorus / Bridge / Outroへ手動変更できます。', 'Changes and BPM are estimates. Verse/chorus labels are not inferred. Change Unknown manually to Intro / Verse / Pre Chorus / Chorus / Bridge / Outro.')));
+        J.syncLayerUI();
+    }
+    if (document.readyState === 'loading')
+        document.addEventListener('DOMContentLoaded', boot);
+    else
+        boot();
+})();

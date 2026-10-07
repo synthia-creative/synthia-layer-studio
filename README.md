@@ -29,7 +29,9 @@ Repository: https://github.com/synthia-creative/synthia-layer-studio
 Forkではないため、参考元の更新は自動同期されません。必要な変更だけ差分を確認して取り込みます。
 
 
-**字幕レイヤー制作ツール · SYNTHIA customization · v1.5.0**
+**字幕レイヤー制作ツール · SYNTHIA customization · v1.6.0**
+
+「統合制作ツール」から必要な拡張だけを有効にできます。Tap Sync、SRT/LRC、文字単位編集、フォントファイル、段階別モーション、楽曲解析、Music/Full Auto、追加レイヤー、PNG連番、自動保存・復元を追加しました。[拡張機能の使い方と制約](docs/INTEGRATED_STUDIO.md)。既存プロジェクトの拡張は初期状態でOFFです。
 
 「モーションライブラリ…」で、気に入った字幕の演出を保存し、別の歌詞で試写・適用できます。共通ライブラリのJSON持ち出しにも対応します。[使い方](user_guide.md#モーションライブラリ)
 

@@ -28,7 +28,9 @@ Repository: https://github.com/synthia-creative/synthia-layer-studio
 
 This independent repository does not automatically synchronize upstream updates. Compare changes and manually adopt only what is needed. See [CUSTOMIZATION.md](CUSTOMIZATION.md).
 
-**Animated subtitle layers · SYNTHIA customization · v1.5.0**
+**Animated subtitle layers · SYNTHIA customization · v1.6.0**
+
+Enable only the extensions you need in **Integrated studio tools**: enhanced Tap Sync, SRT/LRC, character transforms, embedded fonts, staged motion, audio analysis, Music/Full Auto, additional layers, PNG sequences and browser recovery. Extensions default to OFF for existing projects. [Guide and limits](docs/INTEGRATED_STUDIO.en.md).
 
 **Motion library…** saves a subtitle’s motion for previewing and applying to new lyrics. Export/import the shared collection as dedicated JSON. [Instructions](user_guide.en.md#motion-library)
 
