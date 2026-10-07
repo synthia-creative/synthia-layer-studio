@@ -7,6 +7,7 @@ J.normalizeStudio = value => ({
   flags: Object.fromEntries(J.STUDIO_FEATURES.map(k => [k, value?.flags?.[k] === true])),
   tapGap: finite(value?.tapGap, 0, 0, 1000),
   blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
+  characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
 });
 J.studioOn = (project, feature) => project?.studio?.flags?.[feature] === true;
 const defaults = J.defaultProject, upgrade = J.upgradeLayerProject;
@@ -38,10 +39,14 @@ J.studioTapGap = (plan, project) => {
       cut.dur = cut.end - cut.start;
       cut.inDur = Math.min(cut.inDur, cut.dur / 2); cut.outDur = Math.min(cut.outDur, cut.dur / 2);
     }
-    line.end = end;
+    line.end = end; line.visEnd = Math.min(line.visEnd ?? end, end);
   }
   return plan;
 };
 const planner = J.plan;
-J.plan = (project, audio) => J.studioTapGap(planner(project, audio), project);
+J.plan = (project, audio) => {
+  const plan=J.studioTapGap(planner(project, audio), project);
+  if (Array.isArray(project.subtitleCues)) for (const line of plan.lines) line.cueId=project.subtitleCues[line.index]?.id;
+  return Object.assign(plan, {studio:J.normalizeStudio(project.studio)});
+};
 })();

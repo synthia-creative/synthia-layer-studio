@@ -1,9 +1,10 @@
 // Incremental contracts: existing engine APIs stay behind the legacy bridge.
-interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; }
-interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; }
+interface StudioTransform {x:number;y:number;scale:number;rotation:number;opacity:number;kerning:number;}
+interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; characters:Record<string,{line:StudioTransform;glyphs:Record<string,StudioTransform>}>; }
+interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; }
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
-interface StudioLine { start:number; end:number; text?:string; cueId?:string; }
+interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }
 interface StudioCut extends StudioLine { line:number; layout:string; dur:number; inDur:number; outDur:number; }
 interface StudioPlan { lines:StudioLine[]; cuts:StudioCut[]; }
 declare const J: {
