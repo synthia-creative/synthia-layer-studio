@@ -28,7 +28,9 @@ Repository: https://github.com/synthia-creative/synthia-layer-studio
 
 This independent repository does not automatically synchronize upstream updates. Compare changes and manually adopt only what is needed. See [CUSTOMIZATION.md](CUSTOMIZATION.md).
 
-**Animated subtitle layers · SYNTHIA customization · v1.6.0**
+**Animated subtitle layers · SYNTHIA customization · v1.7.0 (local, unpublished)**
+
+**Video analysis** adds independent analysis/display switches, explicit start/cancel, motion/scenes/brightness/faces/people, Safe Zone candidates, manual protection, explicit placement with Undo and JSON recovery. Person analysis requires HTTP and bundled `vendor/vision/` assets. [Startup, guide and limitations](docs/VIDEO_ANALYSIS.en.html). Public links still point to the previous release; this development version has not been published.
 
 Enable only the extensions you need in **Integrated studio tools**: enhanced Tap Sync, SRT/LRC, character transforms, embedded fonts, staged motion, audio analysis, Music/Full Auto, additional layers, PNG sequences and browser recovery. Extensions default to OFF for existing projects. [Guide and limits](docs/INTEGRATED_STUDIO.en.md).
 

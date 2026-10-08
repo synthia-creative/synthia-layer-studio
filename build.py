@@ -6,6 +6,7 @@ from html import escape
 from app.english import localize_body, localize_js
 from app import i18n
 from app import publication
+from app.guide import render as render_guide
 ROOT = os.path.dirname(os.path.abspath(__file__))
 os.chdir(ROOT)
 read = lambda p: open(p, encoding='utf-8').read()
@@ -80,8 +81,16 @@ def build(lang):
     print(target, len(html), 'bytes')
 for code, _, _, _ in i18n.EDITIONS:
     build(code)
+for suffix, lang in [('', 'ja'), ('.en', 'en')]:
+    source = 'docs/VIDEO_ANALYSIS' + suffix + '.md'
+    target = source[:-3] + '.html'
+    open(target, 'w', encoding='utf-8').write(render_guide(open(source, encoding='utf-8-sig').read(), lang))
+    print(target, 'UTF-8 guide')
 if '--dev' in sys.argv:
     os.makedirs('dev/www', exist_ok=True)
     open('dev/www/jizura.js', 'w', encoding='utf-8').write(js)
-    open('dev/www/test.html', 'w', encoding='utf-8').write(read('dev/test.html'))
-    print('dev/www ready: cd dev/www && python3 -m http.server 8765')
+    if os.path.isfile('dev/test.html'):
+        open('dev/www/test.html', 'w', encoding='utf-8').write(read('dev/test.html'))
+        print('dev/www ready: cd dev/www && python3 -m http.server 8765')
+    else:
+        print('dev/www/jizura.js ready; optional dev/test.html is not included in this edition')

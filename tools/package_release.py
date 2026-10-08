@@ -10,7 +10,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 FILES = [
-    '.gitignore', 'index.html', 'VERSION', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
+    '.gitignore', '.gitattributes', 'index.html', 'VERSION', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
     'README.md', 'README.en.md', 'CUSTOMIZATION.md', 'user_guide.md', 'user_guide.en.md', 'tools/obsolete_files.txt',
     'CHANGELOG.md', 'build.py', 'tools/package_release.py', 'dev/layer_test.js', 'dev/filler_test.js', 'dev/simple_export_test.js', 'dev/native_spectrum_test.js',
     'dev/transition_test.js', 'dev/coverage_review_test.js', 'dev/global_taste_test.js', 'dev/preview_audio_test.js', 'dev/text_test.js', 'dev/local_fonts_test.js',
@@ -18,8 +18,8 @@ FILES = [
     'dev/user_theme_test.js', 'dev/appearance_test.js', 'dev/motion_library_test.js',
     'dev/studio_types.d.ts', 'dev/tsconfig.studio.json',
 ]
-PATTERNS = ['src/*.js', 'app/*.py', 'app/*.js', 'app/*.html', 'app/*.css', 'dev/studio_*_test.js',
-            'vendor/*.js', 'vendor/*.txt', 'vendor/*.tgz', 'docs/*.md']
+PATTERNS = ['src/*.js', 'app/*.py', 'app/*.js', 'app/*.html', 'app/*.css', 'dev/studio_*_test.js', 'dev/video_analysis*_test.js',
+            'vendor/*.js', 'vendor/*.txt', 'vendor/*.tgz', 'vendor/vision/**/*', 'docs/*.md', 'docs/*.html']
 LANGUAGES = ['en']
 
 
@@ -35,7 +35,7 @@ def main():
     paths = {ROOT / name for name in FILES}
     paths.update(ROOT / lang / 'index.html' for lang in LANGUAGES)
     for pattern in PATTERNS:
-        paths.update(ROOT.glob(pattern))
+        paths.update(p for p in ROOT.glob(pattern) if p.is_file())
     obsolete = [line for line in (ROOT / 'tools/obsolete_files.txt').read_text(encoding='utf-8').splitlines() if line and not line.startswith('#')]
     for name in obsolete:
         relative = Path(name)

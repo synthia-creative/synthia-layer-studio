@@ -11,6 +11,7 @@
         cancel.addEventListener('click', () => J.ui.exporting?.abort());
         root.append(label, J.studioButton('studioCompletedMP4', '完成MP4を書き出す', 'Export completed MP4', () => document.getElementById('simpleExport').click()), J.studioButton('studioExportPNG', '歌詞のみ透過PNG連番（ZIP）', 'Transparent lyric PNG sequence (ZIP)', async () => {
             J.uiApi.pause();
+            J.videoAnalysisBeforeExport?.();
             ( /** @type {HTMLElement|null} */(document.activeElement))?.blur();
             if (J.layerCueEditsInvalid)
                 throw new Error(tr('字幕の入力エラーを修正してください。', 'Fix invalid cue edits first.'));

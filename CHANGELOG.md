@@ -1,3 +1,9 @@
+## 1.7.1 — 2026-10-08
+
+- Safe Zoneの過剰な暫定判定を修正。字幕の出入り全体の矩形結合から、各時刻の描画範囲・同時表示字幕・時間付き保護領域へ変更。解析間隔は対象字幕区間で判定し、候補ごとに衝突・検出項目・範囲・コントラストの理由と調整方法を表示。
+- 操作ガイドをUTF-8 HTMLへ変更。日本語・英語、静的配布ZIP、Markdown直接参照時のUTF-8識別情報に対応。
+- Evaluate animated subtitle bounds at sampled times; evaluate other subtitles and manual protection at matching times, assess local coverage, and show specific review reasons. Add UTF-8 HTML guides to both editions and release packages.
+
 ## 1.6.0 — 2026-10-07
 
 - 既存UI・version 1プロジェクト・MP4エンジンを維持して10個のオプトイン拡張を追加。Tap Syncの入力ガードと末尾Undo、終了余白、SRT/LRC入出力、文字／行の直接編集、TTF/OTF/WOFF/WOFF2、IN/HOLD/OUT、独自10プリセット、音源解析、Music/Full Auto、明示的Beat Snap、追加トラック／レイヤー、指定ファイル名の完成MP4、透過歌詞PNG連番ZIP、IndexedDB自動保存・復元／破棄に対応。
@@ -388,3 +394,8 @@ JIZURA のバージョンは `メジャー.マイナー.パッチ` の形で付�
 - 画面の固定表示、歌詞を消す、初期化、はじめての案内
 - 行ごとの再抽選と鍵（鍵をかけた行は、ほかの再抽選でもそのまま残る）
 - After Effects パネル（スクリプト版・CEP 版、日本語 / English）。長い曲の分割生成、軽量モード、範囲指定
+## 1.7.0 — 2026-10-08 (local implementation; unpublished)
+
+- Video Analysis Engine v1.0を追加。独立した解析／表示スイッチ、明示開始・中止、基礎計測、固定MediaPipe顔／人物モデル、時間区間のSafe Zone候補、手動保護領域、明示的字幕位置適用・一括適用・Undo、解析JSON・プロジェクト復元を追加。通常編集・MP4エンジンを保持。[操作と制限](docs/VIDEO_ANALYSIS.html)。
+- Add independent analysis/display switches, explicit start/cancel, motion/scene/brightness measurements, bundled fixed-version face/person models, timed Safe Zone candidates, manual protection, explicit single/batch lyric placement with Undo, and analysis/project JSON persistence. Preserve the editor and MP4 engines. [Guide and limits](docs/VIDEO_ANALYSIS.en.md).
+- 人物解析はHTTP配信から利用。モデルは解析開始時だけ読み込み、素材は送信しない。ガイドと未適用の位置プレビューは出力に含めない。推定精度の限界を明記。GitHub Pagesの公開版に同梱。
