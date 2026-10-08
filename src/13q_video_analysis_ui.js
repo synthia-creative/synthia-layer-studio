@@ -59,7 +59,7 @@ function boot() {
   const deleteButton = act('vaDelete', '解析結果の削除', 'Delete analysis results', () => { if (!controller.result) return; if (!confirm(tr('解析結果だけを削除します。手動保護領域と適用済み字幕位置は保持します。', 'Delete analysis results? Manual regions and applied lyric positions are retained.'))) return; controller.cancel(); data().result = null; controller.result = null; controller.state = 'idle'; state.valid = false; clearCandidates(); J.uiApi.flushSave(); });
   const storage = el('div'); storage.className = 'va-actions'; storage.append(saveButton, fileLabel, deleteButton);
   const privacy = el('p', tr('素材はブラウザ内で処理します。解析モデルは同梱済み・初期状態では読み込みません。解析枠は完成動画へ入りません。', 'Media stays in your browser. Bundled models load only on explicit analysis. Guides are excluded from exports.'));
-  const guide = el('a', tr('起動方法・操作ガイド・既知の制限', 'Startup, guide and known limitations')); guide.href = document.documentElement.lang === 'en' ? '../docs/VIDEO_ANALYSIS.en.md' : 'docs/VIDEO_ANALYSIS.md'; guide.target = '_blank'; guide.rel = 'noopener';
+  const guide = el('a', tr('起動方法・操作ガイド・既知の制限', 'Startup, guide and known limitations')); guide.href = document.documentElement.lang === 'en' ? '../docs/VIDEO_ANALYSIS.en.html' : 'docs/VIDEO_ANALYSIS.html'; guide.target = '_blank'; guide.rel = 'noopener';
   root.append(switchRow, status, progress, overview, settings, features, qualityInfo, actions, storage, privacy, guide);
 
   const safe = el('details', null, 'vaSafePanel'); safe.append(el('summary', tr('Safe Zone候補と字幕位置', 'Safe Zone / lyric placement')));
@@ -73,18 +73,31 @@ function boot() {
     const measurement = await V.measureLine(plan, line, ac.signal, p => { candidateInfo.textContent = tr('字幕の描画範囲を測定中 ', 'Measuring lyric bounds ') + Math.round(p * 100) + '%'; });
     if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
     const fit = V.fit(controller.result.source, plan.W, plan.H), envelope = V.toVideo(measurement.rect, fit);
-    const evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, envelope, measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+    const evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, envelope, measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal, videoGeometry(measurement, fit));
     if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
     state.candidates = evaluated; state.measured = measurement; state.line = { ...line }; state.candidatePlan = plan; state.selectedCandidate = -1;
     controller.result.safeZones ||= {}; controller.result.safeZones[V.lineKey(line)] = { text: line.text, start: line.start, end: line.end, candidates: state.candidates };
     J.uiApi.flushSave(); renderCandidates(); dirty();
   });
+  function videoGeometry(measurement, fit) { return measurement.geometry.map(f => ({ t: f.t, rect: V.toVideo(f.rect, fit), others: f.others.map(r => V.toVideo(r, fit)) })); }
+  const reasonLabels = {
+    coverage: ['字幕の区間を解析し、解析間隔を1秒以内にしてください（範囲・フレーム上限を確認）。', 'Analyze the subtitle interval with spacing of at most one second; check range and frame limit.'],
+    'face-unavailable': ['顔検出が未利用です。顔検出をONにして再解析し、読込エラーがあればHTTPで起動してください。', 'Face detection unavailable. Enable it and reanalyze; use HTTP if model loading failed.'],
+    'person-unavailable': ['人物領域が未利用です。人物領域をONにして再解析してください。', 'Person detection unavailable. Enable it and reanalyze.'],
+    'brightness-unavailable': ['明暗の解析が未利用です。明暗・コントラストをONにして再解析してください。', 'Brightness analysis unavailable. Enable it and reanalyze.'],
+    'face-overlap': ['字幕の動きが顔の保護範囲に重なります。文字サイズ・モーション・位置を調整してください。', 'Animated text overlaps protected faces. Adjust size, motion or position.'],
+    'person-overlap': ['字幕が人物領域に重なります。文字サイズ・モーション・位置を調整してください。', 'Text overlaps people. Adjust size, motion or position.'],
+    'protected-overlap': ['手動保護領域に重なります。字幕サイズ・位置・保護領域の時間を確認してください。', 'Text overlaps a manual protected region. Check size, position and region timing.'],
+    'subtitle-overlap': ['同時に表示される別の字幕に重なります。字幕の位置・タイミングを確認してください。', 'Text overlaps another visible subtitle. Check position and timing.'],
+    contrast: ['現在の文字色と背景のコントラストが低い評価です。推奨色や縁取りを確認してください。', 'Current text has low estimated contrast. Check the suggested color or outline.']
+  };
   function renderCandidates() {
     candidates.replaceChildren(); const safeFound = state.candidates.some(c => c.safe);
-    candidateInfo.textContent = safeFound ? tr('候補は推定です。文字の動きと人物をプレビューで確認してください。', 'Candidates are estimates. Check animation and people in the preview.') : tr('安全な配置候補が見つかりません。暫定候補には検出不足・衝突・範囲不足の可能性があります。', 'No verified safe candidate. Provisional candidates may have missing detection, collisions or incomplete coverage.');
+    candidateInfo.textContent = safeFound ? tr('低リスクの配置候補があります。文字の動きと人物をプレビューで確認してください。', 'Low-risk candidates found. Check animation and people in the preview.') : state.candidates.length ? tr('要確認の配置候補です。各候補に表示した理由を確認してください。', 'Candidates need review. Check the specific reasons below.') : state.measured && (state.measured.rect.w > .94 || state.measured.rect.h > .94) ? tr('字幕が大きく、背景内に収まる候補を作れません。文字サイズを小さくして再計算してください。', 'The subtitle is too large to fit. Reduce text size and recompute.') : tr('字幕の表示区間に解析結果がありません。開始・終了秒を確認して再解析してください。', 'No analysis for this subtitle interval. Check the range and reanalyze.');
     state.candidates.forEach((c, i) => {
       const entry = el('div'); entry.className = 'va-candidate';
-      entry.append(el('strong', `${i + 1}. ${tr(...positionLabel(c.position))} · ${c.score}/100`), el('p', tr('顔との重複 ', 'Face overlap ') + Math.round(c.faceRisk * 100) + '% · ' + tr('人物との重複 ', 'Person overlap ') + Math.round(c.personRisk * 100) + '% · ' + tr('視認性 ', 'Readability ') + Math.round(c.readable * 100) + '% · ' + tr('解析信頼度 ', 'Analysis confidence ') + Math.round(c.confidence * 100) + '%'), el('p', (c.safe ? tr('低い人物衝突リスク、表示区間のカバーあり。', 'Low detected collision risk; interval covered.') : tr('暫定評価。人物検出・解析間隔・衝突を確認してください。', 'Provisional. Check missing detections, sample spacing and collisions.')) + tr(' 推奨色: ', ' Suggested color: ') + c.recommendedColor), act('vaCandidate-' + i, '候補をプレビュー', 'Preview candidate', () => { state.selectedCandidate = i; controller.setDisplay(true); J.uiApi.seek((state.line.start + state.line.end) / 2); dirty(); })); candidates.append(entry);
+      entry.append(el('strong', `${i + 1}. ${tr(...positionLabel(c.position))} · ${c.score}/100`), el('p', tr('顔との重複 ', 'Face overlap ') + Math.round(c.faceRisk * 100) + '% · ' + tr('人物との重複 ', 'Person overlap ') + Math.round(c.personRisk * 100) + '% · ' + tr('視認性 ', 'Readability ') + Math.round(c.readable * 100) + '% · ' + tr('解析信頼度 ', 'Analysis confidence ') + Math.round(c.confidence * 100) + '%'), el('p', (c.safe ? tr('低い人物衝突リスク、表示区間のカバーあり。', 'Low detected collision risk; interval covered.') : tr('要確認。以下の理由に応じて調整してください。', 'Needs review. Adjust according to the reasons below.')) + tr(' 推奨色: ', ' Suggested color: ') + c.recommendedColor), act('vaCandidate-' + i, '候補をプレビュー', 'Preview candidate', () => { state.selectedCandidate = i; controller.setDisplay(true); J.uiApi.seek((state.line.start + state.line.end) / 2); dirty(); })); candidates.append(entry);
+      if (!c.safe) for (const reason of c.reasons || []) if (reasonLabels[reason]) entry.append(el('p', tr(...reasonLabels[reason])));
     });
   }
   function positionLabel(value) { const [x, y] = value.split('-'); return [{ left: '左', center: '中央', right: '右' }[x] + { top: '上', middle: '中央', bottom: '下' }[y], value]; }
@@ -121,7 +134,7 @@ function boot() {
     for (const index of selected) {
       const line = plan.lines.find(l => l.index === index); if (!line) continue;
       if (locked(line)) throw new Error(tr('ロック中の字幕があります。', 'A selected subtitle is locked.'));
-      const measurement = await V.measureLine(plan, line, ac.signal), evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, V.toVideo(measurement.rect, fit), measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+      const measurement = await V.measureLine(plan, line, ac.signal), evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, V.toVideo(measurement.rect, fit), measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal, videoGeometry(measurement, fit));
       if (!evaluated.length) throw new Error(tr('候補のない字幕があります: ', 'No candidate for subtitle: ') + (index + 1));
       pending.push({ line: { ...line }, measurement, candidates: evaluated, previewed: false });
       if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;

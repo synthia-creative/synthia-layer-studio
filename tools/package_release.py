@@ -19,7 +19,7 @@ FILES = [
     'dev/studio_types.d.ts', 'dev/tsconfig.studio.json',
 ]
 PATTERNS = ['src/*.js', 'app/*.py', 'app/*.js', 'app/*.html', 'app/*.css', 'dev/studio_*_test.js', 'dev/video_analysis*_test.js',
-            'vendor/*.js', 'vendor/*.txt', 'vendor/*.tgz', 'vendor/vision/**/*', 'docs/*.md']
+            'vendor/*.js', 'vendor/*.txt', 'vendor/*.tgz', 'vendor/vision/**/*', 'docs/*.md', 'docs/*.html']
 LANGUAGES = ['en']
 
 

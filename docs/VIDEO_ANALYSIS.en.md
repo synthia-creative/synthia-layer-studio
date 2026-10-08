@@ -1,4 +1,4 @@
-# Video Analysis Engine v1.0
+﻿# Video Analysis Engine v1.0
 
 This optional tool estimates motion, scenes, brightness, faces, people and lyric placement from a background video or image. The existing editor, renderer and MP4 engines remain in use. No automatic motion generation or video editing is added.
 
@@ -63,3 +63,9 @@ Lyric bounds use 480px, about 8 fps and up to 160 regular samples plus cut bound
 Future integration can consume `J.VideoAnalysis.run(media, options, signal, onProgress)`, `evaluateSafeAsync(...)`, source/range/mapping, per-timestamp motion/brightness/faces/person/change, scenes and safeZones. Applied positions use `videoAnalysis.placements[cue-ID/line-index]` with a matching-text guard. Automatic motion generation is outside this version.
 
 Fixed MediaPipe Tasks Vision 0.10.21 and float16 model version 1 are included with hashes/provenance in `vendor/vision/manifest.json`. See [notices](../THIRD_PARTY_NOTICES.md), [Face Detector](https://developers.google.com/edge/mediapipe/solutions/vision/face_detector/web_js), [Image Segmenter](https://developers.google.com/edge/mediapipe/solutions/vision/image_segmenter/web_js), [BlazeFace model card](https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20%28Short%20Range%29.pdf), and [Selfie Segmentation model card](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf).
+
+## Candidates needing review (v1.7.1)
+
+Each candidate shows specific reasons and corrective actions. Animated text is assessed at sampled times rather than as a single union of its whole path. The candidate rectangle and manual-position anchor use the frame nearest the subtitle interval midpoint. Only simultaneously visible subtitles count as other-text collisions. Coverage is assessed within the target interval. Actual face, person and protected-region collisions still require review. Contrast is a single-color approximation; inspect outlines, gradients and shadows visually.
+
+Use the [HTML guide](VIDEO_ANALYSIS.en.html) in browsers. The Markdown file also includes a UTF-8 byte-order mark for direct viewing.

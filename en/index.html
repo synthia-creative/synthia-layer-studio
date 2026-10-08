@@ -678,7 +678,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.7.0</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.7.1</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -959,7 +959,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.7.0</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.7.1</p></div>
     <p>SYNTHIA Layer Studio is an independent customized derivative based on JIZURA by hakoniwa and JIZURA Layer Studio modifications by cityedge. The original authors do not maintain this edition. Original and third-party copyrights and licenses remain with their respective owners.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -1470,7 +1470,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.7.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.7.1 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1534,7 +1534,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.7.0</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.7.1</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4561,7 +4561,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.7.0', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.7.1', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -39135,7 +39135,7 @@ V.validateResult = value => {
   const scenes = (Array.isArray(value.scenes) ? value.scenes : []).slice(0, V.maxSamples).map((s, i) => ({ id: 'scene-' + i, start: V.finite(s.start, range.start, range.start, range.end), end: V.finite(s.end, range.end, range.start, range.end) })).filter(s => s.end > s.start);
   const safeZones = {};
   for (const [key, zone] of Object.entries(value.safeZones || {}).slice(0, 2000)) if (/^line-\d+$|^cue-.{1,100}$/.test(key)) {
-    try { safeZones[key] = { text: String(zone.text || '').slice(0, 10000), start: V.finite(zone.start, 0), end: V.finite(zone.end, 0), candidates: (Array.isArray(zone.candidates) ? zone.candidates : []).slice(0, 3).map(c => ({ rect: V.rect(c.rect), score: V.finite(c.score, 0, 0, 100), safe: c.safe === true, faceRisk: V.finite(c.faceRisk, 0, 0, 1), personRisk: V.finite(c.personRisk, 0, 0, 1), manualRisk: V.finite(c.manualRisk, 0, 0, 1), subtitleRisk: V.finite(c.subtitleRisk, 0, 0, 1), confidence: V.finite(c.confidence, 0, 0, 1), readable: V.finite(c.readable, 0, 0, 1), covered: c.covered === true, position: String(c.position || '').slice(0, 50), recommendedColor: /^#[0-9a-f]{6}$/i.test(c.recommendedColor || '') ? c.recommendedColor : '#ffffff' })) }; } catch (_) { /* Invalid suggestions never prevent ordinary editing. */ }
+    try { safeZones[key] = { text: String(zone.text || '').slice(0, 10000), start: V.finite(zone.start, 0), end: V.finite(zone.end, 0), candidates: (Array.isArray(zone.candidates) ? zone.candidates : []).slice(0, 3).map(c => ({ rect: V.rect(c.rect), score: V.finite(c.score, 0, 0, 100), safe: c.safe === true, reasons: (Array.isArray(c.reasons) ? c.reasons : []).filter(r => ['coverage','face-unavailable','person-unavailable','brightness-unavailable','face-overlap','person-overlap','protected-overlap','subtitle-overlap','contrast'].includes(r)), faceRisk: V.finite(c.faceRisk, 0, 0, 1), personRisk: V.finite(c.personRisk, 0, 0, 1), manualRisk: V.finite(c.manualRisk, 0, 0, 1), subtitleRisk: V.finite(c.subtitleRisk, 0, 0, 1), confidence: V.finite(c.confidence, 0, 0, 1), readable: V.finite(c.readable, 0, 0, 1), covered: c.covered === true, position: String(c.position || '').slice(0, 50), recommendedColor: /^#[0-9a-f]{6}$/i.test(c.recommendedColor || '') ? c.recommendedColor : '#ffffff' })) }; } catch (_) { /* Invalid suggestions never prevent ordinary editing. */ }
   }
   return { format: value.format, schemaVersion: V.schema, engineVersion: V.version, source, options, range, samples, scenes, safeZones, createdAt: String(value.createdAt || '').slice(0, 40), elapsedMs: V.finite(value.elapsedMs, 0, 0, 1e12), mapping: { projectStart: 0, videoStart: 0, speed: 1, loop: false, holdLastFrame: true }, models: { runtime: String(value.models?.runtime || '').slice(0, 100), face: String(value.models?.face || '').slice(0, 100), person: String(value.models?.person || '').slice(0, 100) }, warnings: (Array.isArray(value.warnings) ? value.warnings : []).slice(0, 30).map(w => String(w).slice(0, 500)) };
 };
@@ -39225,11 +39225,12 @@ V.gridMean = (grid, cols, rows, rect) => {
   for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) { const cell = { x: x / cols, y: y / rows, w: 1 / cols, h: 1 / rows }, a = V.overlap(rect, cell); sum += a * grid[y * cols + x]; weight += a; }
   return weight ? sum / weight : 0;
 };
-V.evaluateSafe = (result, regions, interval, envelope, textLuminance = 1, others = []) => {
+V.clipVisible = rect => { const x = Math.max(0, rect.x), y = Math.max(0, rect.y), w = Math.min(1, rect.x + rect.w) - x, h = Math.min(1, rect.y + rect.h) - y; return w > 0 && h > 0 ? { x, y, w, h } : null; };
+V.evaluateSafe = (result, regions, interval, envelope, textLuminance = 1, others = [], geometry = []) => {
   if (!result || !envelope || !result.options.features.safe) return [];
-  const gap = result.samples.length > 1 ? Math.max(...result.samples.slice(1).map((s, i) => s.t - result.samples[i].t)) : 0;
+  const gap = Math.max(0, ...result.samples.slice(1).map((s, i) => s.t > interval.start && result.samples[i].t < interval.end ? s.t - result.samples[i].t : 0));
   const hold = result.source.kind === 'video' && result.range.end >= result.source.duration - .01;
-  const active = result.source.kind === 'image' ? result.samples : hold && interval.start >= result.source.duration ? [result.samples.at(-1)] : result.samples.filter(s => s.t >= interval.start - gap && s.t <= interval.end + gap);
+  const active = result.source.kind === 'image' ? result.samples : hold && interval.start >= result.source.duration ? [result.samples.at(-1)] : result.samples.filter(s => s.t >= interval.start - Math.max(1, gap * 2) && s.t <= interval.end + Math.max(1, gap * 2));
   if (!active.length || envelope.w > .94 || envelope.h > .94) return [];
   const covered = result.source.kind === 'image' || interval.start >= result.range.start && (interval.end <= result.range.end + .001 || hold) && (interval.start >= result.source.duration && hold || gap <= 1.1);
   const faceReady = !!result.models.face, personReady = !!result.models.person, brightnessReady = result.options.features.brightness;
@@ -39238,44 +39239,60 @@ V.evaluateSafe = (result, regions, interval, envelope, textLuminance = 1, others
   const sameScene = (a, b) => result.scenes.length ? result.scenes.some(s => a.t >= s.start && a.t <= s.end && b.t >= s.start && b.t <= s.end) : Math.abs(a.t - b.t) <= Math.max(1, gap * 2);
   for (let iy = 0; iy < 9; iy++) for (let ix = 0; ix < 13; ix++) {
     const rect = { x: .03 + ix / 12 * (.94 - envelope.w), y: .03 + iy / 8 * (.94 - envelope.h), w: envelope.w, h: envelope.h };
-    let faceRisk = 0, personRisk = 0, complexity = 0, motion = 0, readable = 1, faceConfidence = .6, collisions = 0;
-    const manualRisk = Math.max(0, ...manual.map(r => V.overlap(rect, r))), subtitleRisk = Math.max(0, ...others.map(r => V.overlap(rect, r)));
-    for (const sample of active) {
+    let faceRisk = 0, personRisk = 0, manualRisk = 0, subtitleRisk = 0, complexity = 0, motion = 0, readable = 1, faceConfidence = .6, collisions = 0, evaluated = 0;
+    const frames = geometry.length ? geometry : active.map(s => ({ t: s.t, rect: { x: envelope.x || 0, y: envelope.y || 0, w: envelope.w, h: envelope.h }, others }));
+    for (const frame of frames) {
+      const visible = V.clipVisible({ ...frame.rect, x: frame.rect.x + rect.x - (envelope.x || 0), y: frame.rect.y + rect.y - (envelope.y || 0) });
+      if (!visible) continue;
+      const sample = active.reduce((best, s) => Math.abs(s.t - frame.t) < Math.abs(best.t - frame.t) ? s : best, active[0]);
+      evaluated++;
+      manualRisk = Math.max(manualRisk, ...manual.filter(r => r.start <= frame.t && r.end >= frame.t).map(r => V.overlap(visible, r)));
+      subtitleRisk = Math.max(subtitleRisk, ...(frame.others || []).map(r => V.overlap(visible, r)));
       const nearby = active.filter(s => s.visionSample && Math.abs(s.t - sample.t) <= Math.max(1, gap * 2) && sameScene(sample, s));
       const faces = nearby.flatMap(s => s.faces || []);
-      const risk = Math.max(0, ...faces.map(f => { const protectedFace = V.expand(f, margin + (f.estimated ? .2 : 0)); return Math.max(V.overlap(rect, protectedFace), V.overlap(protectedFace, rect)); }));
+      const risk = Math.max(0, ...faces.map(f => { const protectedFace = V.expand(f, margin + (f.estimated ? .2 : 0)); return Math.max(V.overlap(visible, protectedFace), V.overlap(protectedFace, visible)); }));
       faceRisk = Math.max(faceRisk, risk); if (risk > .01) collisions++;
       if (faces.length) faceConfidence = Math.min(faceConfidence, ...faces.map(f => f.score));
-      personRisk = Math.max(personRisk, ...nearby.map(s => V.gridMean(s.person?.grid, 16, 9, rect) || 0));
-      complexity += V.gridMean(sample.brightness?.complexity, 8, 6, rect) || 0;
-      motion += V.gridMean(sample.motion?.regions, 8, 6, rect) || 0;
-      const lum = V.gridMean(sample.brightness?.light, 8, 6, rect);
+      personRisk = Math.max(personRisk, ...nearby.map(s => V.gridMean(s.person?.grid, 16, 9, visible) || 0));
+      complexity += V.gridMean(sample.brightness?.complexity, 8, 6, visible) || 0;
+      motion += V.gridMean(sample.motion?.regions, 8, 6, visible) || 0;
+      const lum = V.gridMean(sample.brightness?.light, 8, 6, visible);
       if (lum != null) { const bg = lum <= .04045 ? lum / 12.92 : ((lum + .055) / 1.055) ** 2.4, ratio = (Math.max(textLuminance, bg) + .05) / (Math.min(textLuminance, bg) + .05); readable = Math.min(readable, Math.min(1, ratio / 4.5)); }
     }
-    complexity /= active.length; motion /= active.length;
+    complexity /= Math.max(1, evaluated); motion /= Math.max(1, evaluated);
     const edge = Math.max(0, 1 - Math.min(rect.x, rect.y, 1 - rect.x - rect.w, 1 - rect.y - rect.h) / .06), weights = V.weights;
-    let penalty = weights.face * Math.max(faceRisk, collisions / active.length * .5) + weights.person * personRisk + weights.complexity * complexity + weights.readability * (1 - readable) + weights.motion * motion + weights.edge * edge;
+    let penalty = weights.face * Math.max(faceRisk, collisions / Math.max(1, evaluated) * .5) + weights.person * personRisk + weights.complexity * complexity + weights.readability * (1 - readable) + weights.motion * motion + weights.edge * edge;
     if (manualRisk > 0 || subtitleRisk > 0) penalty = Math.max(.85, penalty);
     const score = Math.max(0, Math.round(100 * (1 - penalty))), safe = covered && faceRisk < .02 && manualRisk === 0 && subtitleRisk === 0 && personRisk < .2 && readable >= .5 && faceReady && personReady && brightnessReady;
     const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
-    candidates.push({ rect, score, safe, faceRisk, personRisk, manualRisk, subtitleRisk, readable: V.round(readable), confidence: V.round((faceReady ? faceConfidence : .25) * (personReady ? 1 : .5) * (covered ? 1 : .5)), covered, position: [cx < .4 ? 'left' : cx > .6 ? 'right' : 'center', cy < .4 ? 'top' : cy > .6 ? 'bottom' : 'middle'].join('-'), recommendedColor: active.reduce((sum, s) => sum + (V.gridMean(s.brightness?.light, 8, 6, rect) || 0), 0) / active.length > .5 ? '#000000' : '#ffffff' });
+    const reasons = [];
+    if (!covered) reasons.push('coverage');
+    if (!faceReady) reasons.push('face-unavailable');
+    if (!personReady) reasons.push('person-unavailable');
+    if (!brightnessReady) reasons.push('brightness-unavailable');
+    if (faceRisk >= .02) reasons.push('face-overlap');
+    if (personRisk >= .2) reasons.push('person-overlap');
+    if (manualRisk > 0) reasons.push('protected-overlap');
+    if (subtitleRisk > 0) reasons.push('subtitle-overlap');
+    if (readable < .5) reasons.push('contrast');
+    candidates.push({ rect, score, safe, reasons, faceRisk, personRisk, manualRisk, subtitleRisk, readable: V.round(readable), confidence: V.round((faceReady ? faceConfidence : .25) * (personReady ? 1 : .5) * (covered ? 1 : .5)), covered, position: [cx < .4 ? 'left' : cx > .6 ? 'right' : 'center', cy < .4 ? 'top' : cy > .6 ? 'bottom' : 'middle'].join('-'), recommendedColor: active.reduce((sum, s) => sum + (V.gridMean(s.brightness?.light, 8, 6, rect) || 0), 0) / active.length > .5 ? '#000000' : '#ffffff' });
   }
     candidates.sort((a, b) => Number(b.safe) - Number(a.safe) || b.score - a.score);
   const chosen = [];
   for (const c of candidates) if (chosen.every(r => Math.hypot(c.rect.x - r.rect.x, c.rect.y - r.rect.y) > .18)) { chosen.push(c); if (chosen.length === 3) break; }
   return chosen;
 };
-V.evaluateSafeAsync = (result, regions, interval, envelope, luminance, others, signal) => new Promise((resolve, reject) => {
+V.evaluateSafeAsync = (result, regions, interval, envelope, luminance, others, signal, geometry = []) => new Promise((resolve, reject) => {
   let url, worker;
   const stop = () => { clean(); reject(new DOMException('Cancelled', 'AbortError')); }, clean = () => { signal?.removeEventListener('abort', stop); worker?.terminate(); if (url) URL.revokeObjectURL(url); };
   try {
     V.abort(signal);
-    const functions = ['round', 'overlap', 'expand', 'gridMean', 'evaluateSafe'];
+    const functions = ['round', 'overlap', 'expand', 'gridMean', 'clipVisible', 'evaluateSafe'];
     const code = 'const V={weights:' + JSON.stringify(V.weights) + '};' + functions.map(k => 'V.' + k + '=' + V[k].toString() + ';').join('') + 'self.onmessage=e=>{try{self.postMessage({result:V.evaluateSafe(...e.data)});}catch(error){self.postMessage({error:error.message});}};';
     url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' })); worker = new Worker(url); signal?.addEventListener('abort', stop, { once: true });
     worker.onmessage = e => { clean(); if (e.data.error) reject(new Error(e.data.error)); else resolve(e.data.result); };
     worker.onerror = e => { clean(); reject(new Error(e.message)); };
-    worker.postMessage([result, regions, interval, envelope, luminance, others]);
+    worker.postMessage([result, regions, interval, envelope, luminance, others, geometry]);
   } catch (e) { clean(); reject(e); }
 });
 })();
@@ -40160,20 +40177,24 @@ V.measureLine = async (plan, line, signal, onProgress = () => {}) => {
   const width = 480, height = Math.max(8, Math.round(width * plan.H / plan.W)), renderer = new J.LayerRenderer(width, height, J.normalizeLayerMode(J.ui.project.layerMode));
   const times = new Set(V.times(line.start, line.end, 8, 160).map(t => Math.min(line.end - .001, t)));
   for (const c of plan.cuts.filter(c => c.line === line.index)) for (const t of [c.start + .001, c.start + c.inDur, c.end - c.outDur, c.end - .001]) if (t >= line.start && t < line.end) times.add(t);
-  const bounds = [], others = [], colors = []; let i = 0;
+  const bounds = [], others = [], colors = [], geometry = []; let i = 0;
   try {
     for (const t of [...times].sort((a, b) => a - b)) {
       V.abort(signal); V.capture = []; renderer.draw(plan, t, false);
       const hits = V.capture; V.capture = null;
       const lyric = hits.filter(h => h.key === V.lineKey(line)), rect = V.union(lyric);
-      if (rect) { bounds.push(V.layerRect(plan, rect)); colors.push(...lyric.map(h => h.color)); }
-      for (const other of hits.filter(h => h.key !== V.lineKey(line))) others.push(V.layerRect(plan, other));
+      const current = rect && V.layerRect(plan, rect), currentOthers = hits.filter(h => h.key !== V.lineKey(line)).map(h => V.layerRect(plan, h));
+      if (current) { bounds.push({ t, rect: current }); colors.push(...lyric.map(h => h.color)); geometry.push({ t, rect: current, others: currentOthers }); }
+      others.push(...currentOthers);
       onProgress(++i / times.size);
       if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
     }
-    const rect = V.union(bounds); if (!rect) throw new Error(J.layerText('字幕の描画領域を測定できません。時刻と表示設定を確認してください。', 'No lyric bounds were captured. Check timing and display settings.'));
+    // Position the visible middle frame; assess the sampled animation at its own times.
+    // A union over the entire entrance/exit path incorrectly fills empty space between frames.
+    const rect = bounds.sort((a, b) => Math.abs(a.t - (line.start + line.end) / 2) - Math.abs(b.t - (line.start + line.end) / 2))[0]?.rect;
+    if (!rect) throw new Error(J.layerText('字幕の描画領域を測定できません。時刻と表示設定を確認してください。', 'No lyric bounds were captured. Check timing and display settings.'));
     const color = colors.find(c => /^#[0-9a-f]{6}$/i.test(c)) || '#ffffff', components = [1, 3, 5].map(i => parseInt(color.slice(i, i + 2), 16) / 255), linear = components.map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
-    return { rect, others, color, luminance: .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2], frames: times.size };
+    return { rect, others, geometry, color, luminance: .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2], frames: times.size };
   } finally { V.capture = null; renderer.layer.width = renderer.layer.height = 1; }
 };
 })();
@@ -42305,7 +42326,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.7.0' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.7.1' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -44960,7 +44981,7 @@ function boot() {
   const deleteButton = act('vaDelete', '解析結果の削除', 'Delete analysis results', () => { if (!controller.result) return; if (!confirm(tr('解析結果だけを削除します。手動保護領域と適用済み字幕位置は保持します。', 'Delete analysis results? Manual regions and applied lyric positions are retained.'))) return; controller.cancel(); data().result = null; controller.result = null; controller.state = 'idle'; state.valid = false; clearCandidates(); J.uiApi.flushSave(); });
   const storage = el('div'); storage.className = 'va-actions'; storage.append(saveButton, fileLabel, deleteButton);
   const privacy = el('p', tr('素材はブラウザ内で処理します。解析モデルは同梱済み・初期状態では読み込みません。解析枠は完成動画へ入りません。', 'Media stays in your browser. Bundled models load only on explicit analysis. Guides are excluded from exports.'));
-  const guide = el('a', tr('起動方法・操作ガイド・既知の制限', 'Startup, guide and known limitations')); guide.href = document.documentElement.lang === 'en' ? '../docs/VIDEO_ANALYSIS.en.md' : 'docs/VIDEO_ANALYSIS.md'; guide.target = '_blank'; guide.rel = 'noopener';
+  const guide = el('a', tr('起動方法・操作ガイド・既知の制限', 'Startup, guide and known limitations')); guide.href = document.documentElement.lang === 'en' ? '../docs/VIDEO_ANALYSIS.en.html' : 'docs/VIDEO_ANALYSIS.html'; guide.target = '_blank'; guide.rel = 'noopener';
   root.append(switchRow, status, progress, overview, settings, features, qualityInfo, actions, storage, privacy, guide);
 
   const safe = el('details', null, 'vaSafePanel'); safe.append(el('summary', tr('Safe Zone候補と字幕位置', 'Safe Zone / lyric placement')));
@@ -44974,18 +44995,31 @@ function boot() {
     const measurement = await V.measureLine(plan, line, ac.signal, p => { candidateInfo.textContent = tr('字幕の描画範囲を測定中 ', 'Measuring lyric bounds ') + Math.round(p * 100) + '%'; });
     if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
     const fit = V.fit(controller.result.source, plan.W, plan.H), envelope = V.toVideo(measurement.rect, fit);
-    const evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, envelope, measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+    const evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, envelope, measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal, videoGeometry(measurement, fit));
     if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
     state.candidates = evaluated; state.measured = measurement; state.line = { ...line }; state.candidatePlan = plan; state.selectedCandidate = -1;
     controller.result.safeZones ||= {}; controller.result.safeZones[V.lineKey(line)] = { text: line.text, start: line.start, end: line.end, candidates: state.candidates };
     J.uiApi.flushSave(); renderCandidates(); dirty();
   });
+  function videoGeometry(measurement, fit) { return measurement.geometry.map(f => ({ t: f.t, rect: V.toVideo(f.rect, fit), others: f.others.map(r => V.toVideo(r, fit)) })); }
+  const reasonLabels = {
+    coverage: ['字幕の区間を解析し、解析間隔を1秒以内にしてください（範囲・フレーム上限を確認）。', 'Analyze the subtitle interval with spacing of at most one second; check range and frame limit.'],
+    'face-unavailable': ['顔検出が未利用です。顔検出をONにして再解析し、読込エラーがあればHTTPで起動してください。', 'Face detection unavailable. Enable it and reanalyze; use HTTP if model loading failed.'],
+    'person-unavailable': ['人物領域が未利用です。人物領域をONにして再解析してください。', 'Person detection unavailable. Enable it and reanalyze.'],
+    'brightness-unavailable': ['明暗の解析が未利用です。明暗・コントラストをONにして再解析してください。', 'Brightness analysis unavailable. Enable it and reanalyze.'],
+    'face-overlap': ['字幕の動きが顔の保護範囲に重なります。文字サイズ・モーション・位置を調整してください。', 'Animated text overlaps protected faces. Adjust size, motion or position.'],
+    'person-overlap': ['字幕が人物領域に重なります。文字サイズ・モーション・位置を調整してください。', 'Text overlaps people. Adjust size, motion or position.'],
+    'protected-overlap': ['手動保護領域に重なります。字幕サイズ・位置・保護領域の時間を確認してください。', 'Text overlaps a manual protected region. Check size, position and region timing.'],
+    'subtitle-overlap': ['同時に表示される別の字幕に重なります。字幕の位置・タイミングを確認してください。', 'Text overlaps another visible subtitle. Check position and timing.'],
+    contrast: ['現在の文字色と背景のコントラストが低い評価です。推奨色や縁取りを確認してください。', 'Current text has low estimated contrast. Check the suggested color or outline.']
+  };
   function renderCandidates() {
     candidates.replaceChildren(); const safeFound = state.candidates.some(c => c.safe);
-    candidateInfo.textContent = safeFound ? tr('候補は推定です。文字の動きと人物をプレビューで確認してください。', 'Candidates are estimates. Check animation and people in the preview.') : tr('安全な配置候補が見つかりません。暫定候補には検出不足・衝突・範囲不足の可能性があります。', 'No verified safe candidate. Provisional candidates may have missing detection, collisions or incomplete coverage.');
+    candidateInfo.textContent = safeFound ? tr('低リスクの配置候補があります。文字の動きと人物をプレビューで確認してください。', 'Low-risk candidates found. Check animation and people in the preview.') : state.candidates.length ? tr('要確認の配置候補です。各候補に表示した理由を確認してください。', 'Candidates need review. Check the specific reasons below.') : state.measured && (state.measured.rect.w > .94 || state.measured.rect.h > .94) ? tr('字幕が大きく、背景内に収まる候補を作れません。文字サイズを小さくして再計算してください。', 'The subtitle is too large to fit. Reduce text size and recompute.') : tr('字幕の表示区間に解析結果がありません。開始・終了秒を確認して再解析してください。', 'No analysis for this subtitle interval. Check the range and reanalyze.');
     state.candidates.forEach((c, i) => {
       const entry = el('div'); entry.className = 'va-candidate';
-      entry.append(el('strong', `${i + 1}. ${tr(...positionLabel(c.position))} · ${c.score}/100`), el('p', tr('顔との重複 ', 'Face overlap ') + Math.round(c.faceRisk * 100) + '% · ' + tr('人物との重複 ', 'Person overlap ') + Math.round(c.personRisk * 100) + '% · ' + tr('視認性 ', 'Readability ') + Math.round(c.readable * 100) + '% · ' + tr('解析信頼度 ', 'Analysis confidence ') + Math.round(c.confidence * 100) + '%'), el('p', (c.safe ? tr('低い人物衝突リスク、表示区間のカバーあり。', 'Low detected collision risk; interval covered.') : tr('暫定評価。人物検出・解析間隔・衝突を確認してください。', 'Provisional. Check missing detections, sample spacing and collisions.')) + tr(' 推奨色: ', ' Suggested color: ') + c.recommendedColor), act('vaCandidate-' + i, '候補をプレビュー', 'Preview candidate', () => { state.selectedCandidate = i; controller.setDisplay(true); J.uiApi.seek((state.line.start + state.line.end) / 2); dirty(); })); candidates.append(entry);
+      entry.append(el('strong', `${i + 1}. ${tr(...positionLabel(c.position))} · ${c.score}/100`), el('p', tr('顔との重複 ', 'Face overlap ') + Math.round(c.faceRisk * 100) + '% · ' + tr('人物との重複 ', 'Person overlap ') + Math.round(c.personRisk * 100) + '% · ' + tr('視認性 ', 'Readability ') + Math.round(c.readable * 100) + '% · ' + tr('解析信頼度 ', 'Analysis confidence ') + Math.round(c.confidence * 100) + '%'), el('p', (c.safe ? tr('低い人物衝突リスク、表示区間のカバーあり。', 'Low detected collision risk; interval covered.') : tr('要確認。以下の理由に応じて調整してください。', 'Needs review. Adjust according to the reasons below.')) + tr(' 推奨色: ', ' Suggested color: ') + c.recommendedColor), act('vaCandidate-' + i, '候補をプレビュー', 'Preview candidate', () => { state.selectedCandidate = i; controller.setDisplay(true); J.uiApi.seek((state.line.start + state.line.end) / 2); dirty(); })); candidates.append(entry);
+      if (!c.safe) for (const reason of c.reasons || []) if (reasonLabels[reason]) entry.append(el('p', tr(...reasonLabels[reason])));
     });
   }
   function positionLabel(value) { const [x, y] = value.split('-'); return [{ left: '左', center: '中央', right: '右' }[x] + { top: '上', middle: '中央', bottom: '下' }[y], value]; }
@@ -45022,7 +45056,7 @@ function boot() {
     for (const index of selected) {
       const line = plan.lines.find(l => l.index === index); if (!line) continue;
       if (locked(line)) throw new Error(tr('ロック中の字幕があります。', 'A selected subtitle is locked.'));
-      const measurement = await V.measureLine(plan, line, ac.signal), evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, V.toVideo(measurement.rect, fit), measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+      const measurement = await V.measureLine(plan, line, ac.signal), evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, V.toVideo(measurement.rect, fit), measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal, videoGeometry(measurement, fit));
       if (!evaluated.length) throw new Error(tr('候補のない字幕があります: ', 'No candidate for subtitle: ') + (index + 1));
       pending.push({ line: { ...line }, measurement, candidates: evaluated, previewed: false });
       if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;

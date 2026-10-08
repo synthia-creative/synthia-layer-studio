@@ -1,4 +1,4 @@
-# 映像自動解析 — Video Analysis Engine v1.0
+﻿# 映像自動解析 — Video Analysis Engine v1.0
 
 この機能は、背景動画・静止画から人物や動きなどを推定して、字幕の配置を検討するための補助機能です。従来の編集・描画・MP4出力エンジンを使い続けます。文字モーションの自動生成や動画自動編集は行いません。
 
@@ -100,3 +100,11 @@ MediaPipe Tasks Visionは0.10.21、モデルはそれぞれfloat16のバージ�
 - [MediaPipe Image Segmenter](https://developers.google.com/edge/mediapipe/solutions/vision/image_segmenter/web_js)
 - [BlazeFace short-rangeモデルカード](https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20%28Short%20Range%29.pdf)
 - [Selfie Segmentationモデルカード](https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf)
+
+## 候補が要確認になる場合（v1.7.1）
+
+候補ごとに具体的な理由と対処を表示します。文字の出入りを1個の巨大な範囲にまとめず、約8fpsの各時刻で描画範囲・人物・同時表示の別字幕を評価します。候補の矩形と手動位置の中心は字幕区間の中央付近の描画範囲です。実際に顔・人物・保護領域へ重なる場合は要確認のままです。文字を小さくする、モーションを変える、推奨色を確認するなど、表示理由に合わせて調整してください。
+
+長い動画の別の区間に大きな解析間隔があっても、対象字幕の区間が十分に解析されていれば範囲不足とは扱いません。書体の縁取り・グラデーション・影の見やすさは単色近似で、目視確認してください。
+
+ブラウザー用ガイドは [HTML版](VIDEO_ANALYSIS.html) です。Markdown版にはUTF-8の識別情報を付けています。

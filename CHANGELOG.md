@@ -1,3 +1,9 @@
+## 1.7.1 — 2026-10-08（ローカル開発版・未公開）
+
+- Safe Zoneの過剰な暫定判定を修正。字幕の出入り全体の矩形結合から、各時刻の描画範囲・同時表示字幕・時間付き保護領域へ変更。解析間隔は対象字幕区間で判定し、候補ごとに衝突・検出項目・範囲・コントラストの理由と調整方法を表示。
+- 操作ガイドをUTF-8 HTMLへ変更。日本語・英語、静的配布ZIP、Markdown直接参照時のUTF-8識別情報に対応。
+- Evaluate animated subtitle bounds at sampled times; evaluate other subtitles and manual protection at matching times, assess local coverage, and show specific review reasons. Add UTF-8 HTML guides to both editions and release packages.
+
 ## 1.6.0 — 2026-10-07
 
 - 既存UI・version 1プロジェクト・MP4エンジンを維持して10個のオプトイン拡張を追加。Tap Syncの入力ガードと末尾Undo、終了余白、SRT/LRC入出力、文字／行の直接編集、TTF/OTF/WOFF/WOFF2、IN/HOLD/OUT、独自10プリセット、音源解析、Music/Full Auto、明示的Beat Snap、追加トラック／レイヤー、指定ファイル名の完成MP4、透過歌詞PNG連番ZIP、IndexedDB自動保存・復元／破棄に対応。
