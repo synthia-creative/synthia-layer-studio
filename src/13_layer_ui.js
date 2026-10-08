@@ -96,6 +96,7 @@ function syncCueErrors() {
 function changed() { const a = J.uiApi; a.pause(); a.syncUI(); a.replan(); a.flushSave(); }
 async function loadMedia(key, file, videoOnly) {
   const n = session.generation[key] = (session.generation[key] || 0) + 1;
+  if (key === 'background') J.videoAnalysisMediaChanged?.(true);
   status(tr('読み込み中…', 'Loading…'));
   const m = await J.loadLayerMedia(file, videoOnly);
   if (key === 'background' && m.video) {
@@ -109,6 +110,7 @@ async function loadMedia(key, file, videoOnly) {
   }
   if (key === 'front' && session.front) clearMedia('matte');
   session[key]?.dispose(); session[key] = m;
+  if (key === 'background') J.videoAnalysisMediaChanged?.();
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
@@ -180,6 +182,7 @@ function spectrumControls(panel) {
 function clearMedia(key) {
   session.generation[key] = (session.generation[key] || 0) + 1;
   session[key]?.dispose(); session[key] = null; $('layerName-' + key).textContent = tr('未選択', 'None');
+  if (key === 'background') J.videoAnalysisMediaChanged?.();
   if (key !== 'background') {
     J.uiApi.replan();
     if (key === 'matte' && session.front) status(tr('マットを解除しました。RGB 000000だけを透明にします。', 'Matte removed. Only RGB 000000 is transparent.'));
@@ -233,6 +236,7 @@ async function exportVideo(simple, frontOnly = false) {
   let spectrum = null;
   try {
     spectrum = J.getSpectrumForExport();
+    J.videoAnalysisBeforeExport?.();
     J.uiApi.pause();
     const ac = new AbortController(); J.ui.exporting = ac; session.busy = true;
     for (const m of [session.background, session.front, session.matte]) if (m?.video) m.el.pause();

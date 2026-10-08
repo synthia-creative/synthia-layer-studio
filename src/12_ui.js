@@ -478,6 +478,7 @@ function drawTimeline() {
   }
   const px = X(S.t);
   x.fillStyle = '#f5a50c'; x.fillRect(Math.round(px) - dpr, 0, 2 * dpr, h);
+  J.drawVideoAnalysisMarkers?.(x, X, h, dpr);
 }
 // Keep endpoint handles inside the canvas; use the same plot for drawing and pointer mapping.
 function tlPlot(width, scale = 1) {
@@ -881,7 +882,7 @@ function editLine(li, ln) {
 // old per-cue snapshots can undo a later global palette/font change piecemeal.
 const HKEYS = ['style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
 const ED = { undo: [], redo: [] };
-const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
+const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, videoAnalysisEdits: { regions: S.project.videoAnalysis?.regions || [], placements: S.project.videoAnalysis?.placements || {} }, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
 function pushEdit() { const s = edSnap(); if (ED.undo[ED.undo.length - 1] !== s) ED.undo.push(s); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = []; updateEditBtns(); }
 function edGo(d) {
   const from = d < 0 ? ED.undo : ED.redo, to = d < 0 ? ED.redo : ED.undo;
@@ -891,6 +892,7 @@ function edGo(d) {
   to.push(JSON.stringify(cur));
   if (o.look) Object.assign(S.project, o.look);
   if ('studio' in o) S.project.studio = J.normalizeStudio(o.studio);
+  if (o.videoAnalysisEdits && S.project.videoAnalysis) { S.project.videoAnalysis.regions = J.VideoAnalysis.regions(o.videoAnalysisEdits.regions); S.project.videoAnalysis.placements = J.VideoAnalysis.placements(o.videoAnalysisEdits.placements); }
   S.project.subtitleCues = o.subtitleCues || null;
   S.project.localLooks = o.localLooks || null;
   S.project.fillerSettings = J.normalizeFillerSettings(o.fillerSettings);
@@ -921,6 +923,7 @@ async function resetAll() {
   if (S.tap) stopTap();
   pause();
   S.project = mergeProject(null); S.project.lyrics = '';
+  J.videoAnalysisProjectLoaded?.();
   S.audio = null; AP.clear(); audioSeq++; setPreviewRate(1); if ($('audioFile')) $('audioFile').value = '';
   J.resetLayerProjectSession?.();
   J.resetNativeSpectrumSession?.();
@@ -1898,6 +1901,7 @@ function bind() {
       if (S.tap) stopTap();
       pause();
       S.project = next;
+      J.videoAnalysisProjectLoaded?.();
       // Both edit history and look proposals belong to the project that was closed.
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
       fontKey = '';
@@ -2069,6 +2073,7 @@ J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSa
     if (S.exporting) return;
     if (S.tap) stopTap(); pause(); J.projectSessionEpoch++;
     S.project = mergeProject(project); ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
+    J.videoAnalysisProjectLoaded?.();
     fontKey = ''; syncUI(); replan(); commit(); updateEditBtns(); flushSave();
     seek(J.firstCuePreviewTime(S.plan));
   },
