@@ -388,3 +388,8 @@ JIZURA のバージョンは `メジャー.マイナー.パッチ` の形で付�
 - 画面の固定表示、歌詞を消す、初期化、はじめての案内
 - 行ごとの再抽選と鍵（鍵をかけた行は、ほかの再抽選でもそのまま残る）
 - After Effects パネル（スクリプト版・CEP 版、日本語 / English）。長い曲の分割生成、軽量モード、範囲指定
+## 1.7.0 — 2026-10-08 (local implementation; unpublished)
+
+- Video Analysis Engine v1.0を追加。独立した解析／表示スイッチ、明示開始・中止、基礎計測、固定MediaPipe顔／人物モデル、時間区間のSafe Zone候補、手動保護領域、明示的字幕位置適用・一括適用・Undo、解析JSON・プロジェクト復元を追加。通常編集・MP4エンジンを保持。[操作と制限](docs/VIDEO_ANALYSIS.md)。
+- Add independent analysis/display switches, explicit start/cancel, motion/scene/brightness measurements, bundled fixed-version face/person models, timed Safe Zone candidates, manual protection, explicit single/batch lyric placement with Undo, and analysis/project JSON persistence. Preserve the editor and MP4 engines. [Guide and limits](docs/VIDEO_ANALYSIS.en.md).
+- 人物解析はHTTP配信から利用。モデルは解析開始時だけ読み込み、素材は送信しない。ガイドと未適用の位置プレビューは出力に含めない。推定精度の限界を明記。本変更はローカル作業ブランチのみで、GitHub Pagesや本番には未公開。

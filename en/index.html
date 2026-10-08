@@ -645,6 +645,21 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .studio-tools label { display:block; margin:8px 0; }
 .studio-tools input[type=number] { width:95px; margin-left:8px; }
 .studio-section { margin:12px 0; padding:10px 0; border-top:1px solid #303540; }
+.va-switches, .va-feature-grid, .va-settings { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px 12px; }
+.va-switches label, .va-feature-grid label { display:flex; align-items:center; gap:8px; }
+.va-switches input[type=checkbox], .va-feature-grid input[type=checkbox] { flex:0 0 auto; }
+.va-actions { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin:10px 0; }
+.va-settings label { display:flex; flex-wrap:wrap; align-items:center; gap:6px; }
+.va-settings input[type=number] { margin:0; max-width:100%; }
+#vaProgress { width:100%; }
+#vaOverview, #vaStatus { white-space:pre-wrap; overflow-wrap:anywhere; }
+#vaCandidates { display:grid; gap:10px; margin:10px 0; }
+.va-candidate { border-left:2px solid #79d9ae; padding:8px 10px; }
+#vaLine, #vaRegion { max-width:100%; }
+#vaProtection, #vaSafePanel { margin:14px 0; padding:10px 0; border-top:1px solid #303540; }
+#vaOverlay { position:absolute; z-index:2; pointer-events:none; touch-action:none; }
+#vaOverlay[hidden] { display:none; }
+@media(max-width:500px) { .va-settings { grid-template-columns:minmax(0,1fr); } }
 .studio-tap-enhanced #tapPanel .hint { display:block; }
 .studio-tap-enhanced #tapBtn { width:100%; min-height:120px; touch-action:none; font-size:28px; }
 #studioTapMeta { white-space:pre-line; margin:10px 0; font-size:14px; }
@@ -663,7 +678,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.6.0</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.7.0</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -944,7 +959,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.6.0</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.7.0</p></div>
     <p>SYNTHIA Layer Studio is an independent customized derivative based on JIZURA by hakoniwa and JIZURA Layer Studio modifications by cityedge. The original authors do not maintain this edition. Original and third-party copyrights and licenses remain with their respective owners.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -975,6 +990,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 </pre></details>
     <details class="terms-oss"><summary>Third-party software and fonts</summary><pre class="license-text"># Third-party notices
+
+## MediaPipe Tasks Vision 0.10.21 and fixed vision models (bundled, Apache-2.0)
+
+Copyright Google LLC and MediaPipe contributors. Unmodified runtime assets are
+included in `vendor/vision/`: `vision_bundle.mjs`, SIMD/no-SIMD WASM loaders and
+binaries. The full upstream Apache License 2.0, including its existing notices,
+is retained in `vendor/vision/LICENSE.txt`.
+
+Bundled, unmodified model weights:
+
+- BlazeFace short-range float16 version 1 (`blaze_face_short_range-v1.tflite`).
+- MediaPipe Selfie Segmenter float16 version 1 (`selfie_segmenter-v1.tflite`).
+
+The model cards identify Apache License 2.0. Original download URLs, exact sizes
+and SHA-256 are recorded in `vendor/vision/manifest.json`. Our frame processing,
+tiling, tracking and coarse-grid conversion are separate application code; the
+models/runtime have not been modified. Preserve these assets and notices when
+redistributing a package. Models are loaded lazily from this package, not a CDN.
+
+Upstream: https://github.com/google-ai-edge/mediapipe/tree/v0.10.21
+
+Model cards:
+https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20%28Short%20Range%29.pdf
+
+https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf
+
+No QA portrait, generated illustration or sample video is included in the app
+or release package. Existing application and Mediabunny licensing is unchanged.
 
 ## Mediabunny 1.60.0 (bundled, MPL-2.0)
 
@@ -1427,7 +1470,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.6.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.7.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1491,7 +1534,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.6.0</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.7.0</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4518,7 +4561,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.6.0', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.7.0', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -39042,6 +39085,434 @@ J.parseMotionLibrary = data => {
 };
 })();
 
+/* Video analysis is optional project data; master switches are session-only. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis = { version: '1.0.0', schema: 1, maxSamples: 1200, maxBytes: 16 * 1024 * 1024 };
+V.finite = (n, fallback, min = 0, max = 86400) => Number.isFinite(n) ? Math.max(min, Math.min(max, n)) : fallback;
+V.round = n => Math.round(n * 10000) / 10000;
+V.abort = signal => { if (signal?.aborted) throw new DOMException('Cancelled', 'AbortError'); };
+V.options = value => ({
+  quality: ['fast', 'standard', 'high'].includes(value?.quality) ? value.quality : 'standard',
+  start: V.finite(value?.start, 0), end: V.finite(value?.end, 0),
+  maxFrames: Math.round(V.finite(value?.maxFrames, 600, 2, V.maxSamples)),
+  faceMargin: V.finite(value?.faceMargin, .15, 0, .8),
+  features: Object.fromEntries(['motion', 'scene', 'brightness', 'face', 'person', 'safe'].map(k => [k, value?.features?.[k] !== false]))
+});
+V.quality = { fast: { width: 160, visionWidth: 320, fps: 1, visionEvery: 3 }, standard: { width: 240, visionWidth: 512, fps: 2, visionEvery: 2 }, high: { width: 320, visionWidth: 640, fps: 4, visionEvery: 1 } };
+V.rect = value => {
+  if (!value || !['x', 'y', 'w', 'h'].every(k => Number.isFinite(value[k]))) throw new Error('Invalid analysis rectangle');
+  const x = V.finite(value.x, 0, 0, 1), y = V.finite(value.y, 0, 0, 1);
+  return { x, y, w: V.finite(value.w, 0, 0, 1 - x), h: V.finite(value.h, 0, 0, 1 - y) };
+};
+V.regions = value => (Array.isArray(value) ? value : []).slice(0, 100).flatMap((r, i) => {
+  try { const rect = V.rect(r), start = V.finite(r.start, 0), end = V.finite(r.end, 86400); if (rect.w <= 0 || rect.h <= 0 || end <= start) return [];
+    return [{ ...rect, id: String(r.id || 'region-' + i).slice(0, 100), start, end, sourceHash: String(r.sourceHash || '').slice(0, 64) }];
+  } catch (_) { return []; }
+});
+V.source = value => {
+  if (!value || !Number.isFinite(value.size) || value.size < 1 || !Number.isFinite(value.width) || !Number.isFinite(value.height) || value.width < 1 || value.height < 1 || !/^[a-f0-9]{64}$/.test(value.hash || '')) throw new Error('Invalid analysis source');
+  if (value.kind !== 'image' && value.kind !== 'video') throw new Error('Invalid media kind');
+  if (value.kind === 'video' && (!Number.isFinite(value.duration) || value.duration <= 0)) throw new Error('Invalid video duration');
+  return { name: String(value.name || '').slice(0, 256), size: value.size, width: value.width, height: value.height, duration: value.kind === 'video' ? value.duration : null, fps: null, kind: value.kind, hash: value.hash, hashMode: value.hashMode === 'full' ? 'full' : 'sampled-3x1MiB' };
+};
+V.sameSource = (a, b) => !!a && !!b && a.hash === b.hash && a.size === b.size && a.width === b.width && a.height === b.height && a.kind === b.kind && (a.kind === 'image' || Math.abs(a.duration - b.duration) < .01);
+V.numberArray = (a, length) => { if (!Array.isArray(a) || a.length !== length || !a.every(Number.isFinite)) throw new Error('Invalid analysis grid'); return a.map(n => V.round(V.finite(n, 0, 0, 1))); };
+V.validateResult = value => {
+  if (value?.format !== 'synthia-video-analysis' || value.schemaVersion !== V.schema) throw new Error('Unsupported analysis schema');
+  if (!Array.isArray(value.samples) || !value.samples.length || value.samples.length > V.maxSamples) throw new Error('Invalid analysis sample count');
+  const source = V.source(value.source), options = V.options(value.options), range = { start: V.finite(value.range?.start, NaN), end: V.finite(value.range?.end, NaN) };
+  if (!(range.end > range.start)) throw new Error('Invalid analysis range');
+  let last = -Infinity;
+  const samples = value.samples.map(s => {
+    if (!Number.isFinite(s.t) || s.t < range.start - .001 || s.t > range.end + .001 || s.t <= last) throw new Error('Invalid analysis timestamps'); last = s.t;
+    const faces = (Array.isArray(s.faces) ? s.faces : []).slice(0, 32).map(f => ({ ...V.rect(f), score: V.finite(f.score, 0, 0, 1), trackId: String(f.trackId || '').slice(0, 60), estimated: f.estimated === true }));
+    const motion = s.motion ? { dx: V.finite(s.motion.dx, 0, -100, 100), dy: V.finite(s.motion.dy, 0, -100, 100), strength: V.finite(s.motion.strength, 0, 0, 1), confidence: V.finite(s.motion.confidence, 0, 0, 1), regions: V.numberArray(s.motion.regions, 48) } : null;
+    const brightness = s.brightness ? { mean: V.finite(s.brightness.mean, 0, 0, 1), min: V.finite(s.brightness.min, 0, 0, 1), max: V.finite(s.brightness.max, 1, 0, 1), contrast: V.finite(s.brightness.contrast, 0, 0, 1), rgb: V.numberArray(s.brightness.rgb, 3), light: V.numberArray(s.brightness.light, 48), complexity: V.numberArray(s.brightness.complexity, 48) } : null;
+    const person = s.person ? { grid: V.numberArray(s.person.grid, 144), occupancy: V.finite(s.person.occupancy, 0, 0, 1), confidence: V.finite(s.person.confidence, 0, 0, 1), box: s.person.box ? V.rect(s.person.box) : null, estimated: s.person.estimated === true } : null;
+    return { t: s.t, videoTime: V.finite(s.videoTime, s.t), brightness, motion, faces, person, visionSample: s.visionSample === true, change: ['cut', 'flash', 'fade'].includes(s.change) ? s.change : null, changeScore: V.finite(s.changeScore, 0, 0, 1) };
+  });
+  const scenes = (Array.isArray(value.scenes) ? value.scenes : []).slice(0, V.maxSamples).map((s, i) => ({ id: 'scene-' + i, start: V.finite(s.start, range.start, range.start, range.end), end: V.finite(s.end, range.end, range.start, range.end) })).filter(s => s.end > s.start);
+  const safeZones = {};
+  for (const [key, zone] of Object.entries(value.safeZones || {}).slice(0, 2000)) if (/^line-\d+$|^cue-.{1,100}$/.test(key)) {
+    try { safeZones[key] = { text: String(zone.text || '').slice(0, 10000), start: V.finite(zone.start, 0), end: V.finite(zone.end, 0), candidates: (Array.isArray(zone.candidates) ? zone.candidates : []).slice(0, 3).map(c => ({ rect: V.rect(c.rect), score: V.finite(c.score, 0, 0, 100), safe: c.safe === true, faceRisk: V.finite(c.faceRisk, 0, 0, 1), personRisk: V.finite(c.personRisk, 0, 0, 1), manualRisk: V.finite(c.manualRisk, 0, 0, 1), subtitleRisk: V.finite(c.subtitleRisk, 0, 0, 1), confidence: V.finite(c.confidence, 0, 0, 1), readable: V.finite(c.readable, 0, 0, 1), covered: c.covered === true, position: String(c.position || '').slice(0, 50), recommendedColor: /^#[0-9a-f]{6}$/i.test(c.recommendedColor || '') ? c.recommendedColor : '#ffffff' })) }; } catch (_) { /* Invalid suggestions never prevent ordinary editing. */ }
+  }
+  return { format: value.format, schemaVersion: V.schema, engineVersion: V.version, source, options, range, samples, scenes, safeZones, createdAt: String(value.createdAt || '').slice(0, 40), elapsedMs: V.finite(value.elapsedMs, 0, 0, 1e12), mapping: { projectStart: 0, videoStart: 0, speed: 1, loop: false, holdLastFrame: true }, models: { runtime: String(value.models?.runtime || '').slice(0, 100), face: String(value.models?.face || '').slice(0, 100), person: String(value.models?.person || '').slice(0, 100) }, warnings: (Array.isArray(value.warnings) ? value.warnings : []).slice(0, 30).map(w => String(w).slice(0, 500)) };
+};
+V.placements = value => {
+  const out = {};
+  for (const [key, p] of Object.entries(value || {}).slice(0, 20000)) if (/^line-\d+$|^cue-.{1,100}$/.test(key) && !['__proto__', 'constructor', 'prototype'].includes(key) && Number.isFinite(p.dx) && Number.isFinite(p.dy)) out[key] = { dx: V.finite(p.dx, 0, -2, 2), dy: V.finite(p.dy, 0, -2, 2), text: String(p.text || '').slice(0, 10000) };
+  return out;
+};
+J.normalizeVideoAnalysis = value => {
+  let result = null, warning = '';
+  if (value?.result) try { result = V.validateResult(value.result); } catch (e) { warning = e.message; }
+  return { options: V.options(value?.options), regions: V.regions(value?.regions), placements: V.placements(value?.placements), result, loadWarning: warning };
+};
+const defaults = J.defaultProject, upgrade = J.upgradeLayerProject, planner = J.plan;
+J.defaultProject = () => ({ ...defaults(), videoAnalysis: J.normalizeVideoAnalysis() });
+J.upgradeLayerProject = (project, source) => { upgrade(project, source); project.videoAnalysis = J.normalizeVideoAnalysis(source?.videoAnalysis); return project; };
+J.plan = (project, audio) => Object.assign(planner(project, audio), { videoPlacements: V.placements(project.videoAnalysis?.placements) });
+})();
+
+/* Bounded CPU block matching, luminance/chroma histograms and regional statistics. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis;
+V.metrics = function metrics(rgba, w, h, previous, dt, useMotion) {
+  const gray = new Uint8Array(w * h), hist = new Float32Array(48), count = new Uint32Array(48), light = new Float32Array(48), complex = new Float32Array(48), motionRegions = Array(48).fill(0), rgb = [0, 0, 0];
+  let sum = 0, sum2 = 0, min = 255, max = 0, diff = 0, structured = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = y * w + x, j = i * 4, r = rgba[j], g = rgba[j + 1], b = rgba[j + 2], l = gray[i] = Math.round(.2126 * r + .7152 * g + .0722 * b), region = Math.min(5, Math.floor(y / h * 6)) * 8 + Math.min(7, Math.floor(x / w * 8));
+    count[region]++; light[region] += l / 255; sum += l; sum2 += l * l; min = Math.min(min, l); max = Math.max(max, l);
+    rgb[0] += r; rgb[1] += g; rgb[2] += b;
+    // Chromatic differences resist global exposure changes.
+    hist[Math.min(15, Math.floor((r - g + 255) / 511 * 16))]++; hist[16 + Math.min(15, Math.floor((b - g + 255) / 511 * 16))]++; hist[32 + Math.min(15, l >> 4)]++;
+    if (x > 0) complex[region] += Math.abs(l - gray[i - 1]) > 25 ? 1 : 0;
+    if (y > 0) complex[region] += Math.abs(l - gray[i - w]) > 25 ? 1 : 0;
+    if (previous && previous.gray.length === gray.length) diff += Math.abs(l - previous.gray[i]) / 255;
+  }
+  const n = w * h, mean = sum / n / 255, contrast = Math.sqrt(Math.max(0, sum2 / n - (sum / n) ** 2)) / 255;
+  for (let i = 0; i < 48; i++) { light[i] /= count[i] || 1; complex[i] /= 2 * (count[i] || 1); hist[i] /= n; }
+  const chroma = previous ? hist.slice(0, 32).reduce((s, v, i) => s + Math.abs(v - previous.hist[i]), 0) / 4 : 0;
+  const lumaDiff = previous ? Math.abs(mean - previous.mean) : 0;
+  const edgeDiff = previous ? complex.reduce((s, v, i) => s + Math.abs(v - previous.complex[i]), 0) / 48 : 0;
+  const changeScore = Math.min(1, chroma * .6 + diff / n * .4);
+  let change = previous && (chroma > .32 || (diff / n > .32 && edgeDiff > .08)) ? 'cut' : previous && lumaDiff > .25 && chroma < .12 ? 'flash' : previous && lumaDiff > .08 && chroma < .2 ? 'fade' : null;
+  const vectors = [];
+  if (useMotion && previous && previous.gray.length === gray.length && !change && dt > 0) {
+    // Sparse textured blocks; an aperture/untextured match is not evidence of motion.
+    const step = Math.max(10, Math.floor(Math.min(w, h) / 6)), radius = Math.min(6, Math.max(2, Math.floor(w / 40)));
+    for (let y = 5 + radius; y < h - 5 - radius; y += step) for (let x = 5 + radius; x < w - 5 - radius; x += step) {
+      let energy = 0; for (let by = -3; by <= 3; by += 2) for (let bx = -3; bx <= 3; bx += 2) energy += Math.abs(previous.gray[(y + by) * w + x + bx] - previous.gray[(y + by) * w + x + bx + 1]);
+      if (energy < 70) continue; structured++;
+      let best = Infinity, second = Infinity, dx = 0, dy = 0;
+      for (let vy = -radius; vy <= radius; vy++) for (let vx = -radius; vx <= radius; vx++) {
+        let err = 0; for (let by = -3; by <= 3; by += 2) for (let bx = -3; bx <= 3; bx += 2) err += Math.abs(previous.gray[(y + by) * w + x + bx] - gray[(y + by + vy) * w + x + bx + vx]);
+        if (err < best || (err === best && Math.hypot(vx, vy) < Math.hypot(dx, dy))) { second = best; best = err; dx = vx; dy = vy; } else second = Math.min(second, err);
+      }
+      if (best > 1000 || second - best < 8) continue;
+      const region = Math.min(5, Math.floor(y / h * 6)) * 8 + Math.min(7, Math.floor(x / w * 8)), strength = Math.min(1, Math.hypot(dx / w, dy / h) / dt * 10);
+      motionRegions[region] = Math.max(motionRegions[region], strength); vectors.push({ dx: dx / w / dt, dy: dy / h / dt, confidence: Math.min(1, (second - best) / (second + 1)) });
+    }
+  }
+  const median = a => a.length ? a.sort((a, b) => a - b)[Math.floor(a.length / 2)] : 0;
+  const dx = median(vectors.map(v => v.dx)), dy = median(vectors.map(v => v.dy)), strength = vectors.length ? vectors.reduce((s, v) => s + Math.hypot(v.dx, v.dy), 0) / vectors.length : 0;
+  const round = v => Math.round(v * 10000) / 10000;
+  return { state: { gray, hist, mean, complex }, brightness: { mean: round(mean), min: round(min / 255), max: round(max / 255), contrast: round(contrast), rgb: rgb.map(v => round(v / n / 255)), light: Array.from(light, round), complexity: Array.from(complex, round) }, motion: { dx: round(dx), dy: round(dy), strength: round(Math.min(1, strength * 10)), confidence: round(vectors.length / Math.max(1, structured) * (vectors.length ? vectors.reduce((s, v) => s + v.confidence, 0) / vectors.length : 0)), regions: motionRegions.map(round) }, change, changeScore: round(changeScore) };
+};
+V.finalizeScenes = (samples, range, enabled) => {
+  if (!enabled) { for (const s of samples) { s.change = null; s.changeScore = 0; } return []; }
+  // A brief returning brightness event is a flash, not two scene boundaries.
+  for (let i = 1; i < samples.length - 1; i++) if (samples[i].change === 'flash' && samples[i + 1].change === 'flash') samples[i + 1].change = 'flash';
+  const starts = [range.start, ...samples.filter(s => s.change === 'cut' && s.t > range.start && s.t < range.end).map(s => s.t)];
+  return starts.map((start, i) => ({ id: 'scene-' + i, start, end: starts[i + 1] ?? range.end }));
+};
+})();
+
+/* Safe Zone scores are heuristic preferences, separate from model confidence. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis;
+V.weights = { face: .45, person: .22, complexity: .1, readability: .1, motion: .08, edge: .05 };
+V.overlap = (a, b) => Math.max(0, Math.min(a.x + a.w, b.x + b.w) - Math.max(a.x, b.x)) * Math.max(0, Math.min(a.y + a.h, b.y + b.h) - Math.max(a.y, b.y)) / Math.max(.000001, a.w * a.h);
+V.expand = (r, margin) => { const x = Math.max(0, r.x - r.w * margin), y = Math.max(0, r.y - r.h * margin); return { x, y, w: Math.min(1, r.x + r.w * (1 + margin)) - x, h: Math.min(1, r.y + r.h * (1 + margin)) - y }; };
+V.fit = (source, width, height) => { const scale = Math.min(width / source.width, height / source.height), w = source.width * scale / width, h = source.height * scale / height; return { x: (1 - w) / 2, y: (1 - h) / 2, w, h }; };
+V.toVideo = (rect, fit) => ({ x: (rect.x - fit.x) / fit.w, y: (rect.y - fit.y) / fit.h, w: rect.w / fit.w, h: rect.h / fit.h });
+V.toProject = (rect, fit) => ({ x: fit.x + rect.x * fit.w, y: fit.y + rect.y * fit.h, w: rect.w * fit.w, h: rect.h * fit.h });
+V.gridMean = (grid, cols, rows, rect) => {
+  if (!grid) return null; let weight = 0, sum = 0;
+  for (let y = 0; y < rows; y++) for (let x = 0; x < cols; x++) { const cell = { x: x / cols, y: y / rows, w: 1 / cols, h: 1 / rows }, a = V.overlap(rect, cell); sum += a * grid[y * cols + x]; weight += a; }
+  return weight ? sum / weight : 0;
+};
+V.evaluateSafe = (result, regions, interval, envelope, textLuminance = 1, others = []) => {
+  if (!result || !envelope || !result.options.features.safe) return [];
+  const gap = result.samples.length > 1 ? Math.max(...result.samples.slice(1).map((s, i) => s.t - result.samples[i].t)) : 0;
+  const hold = result.source.kind === 'video' && result.range.end >= result.source.duration - .01;
+  const active = result.source.kind === 'image' ? result.samples : hold && interval.start >= result.source.duration ? [result.samples.at(-1)] : result.samples.filter(s => s.t >= interval.start - gap && s.t <= interval.end + gap);
+  if (!active.length || envelope.w > .94 || envelope.h > .94) return [];
+  const covered = result.source.kind === 'image' || interval.start >= result.range.start && (interval.end <= result.range.end + .001 || hold) && (interval.start >= result.source.duration && hold || gap <= 1.1);
+  const faceReady = !!result.models.face, personReady = !!result.models.person, brightnessReady = result.options.features.brightness;
+  const manual = regions.filter(r => r.sourceHash === result.source.hash && r.start < interval.end && r.end > interval.start);
+  const candidates = [], margin = result.options.faceMargin;
+  const sameScene = (a, b) => result.scenes.length ? result.scenes.some(s => a.t >= s.start && a.t <= s.end && b.t >= s.start && b.t <= s.end) : Math.abs(a.t - b.t) <= Math.max(1, gap * 2);
+  for (let iy = 0; iy < 9; iy++) for (let ix = 0; ix < 13; ix++) {
+    const rect = { x: .03 + ix / 12 * (.94 - envelope.w), y: .03 + iy / 8 * (.94 - envelope.h), w: envelope.w, h: envelope.h };
+    let faceRisk = 0, personRisk = 0, complexity = 0, motion = 0, readable = 1, faceConfidence = .6, collisions = 0;
+    const manualRisk = Math.max(0, ...manual.map(r => V.overlap(rect, r))), subtitleRisk = Math.max(0, ...others.map(r => V.overlap(rect, r)));
+    for (const sample of active) {
+      const nearby = active.filter(s => s.visionSample && Math.abs(s.t - sample.t) <= Math.max(1, gap * 2) && sameScene(sample, s));
+      const faces = nearby.flatMap(s => s.faces || []);
+      const risk = Math.max(0, ...faces.map(f => { const protectedFace = V.expand(f, margin + (f.estimated ? .2 : 0)); return Math.max(V.overlap(rect, protectedFace), V.overlap(protectedFace, rect)); }));
+      faceRisk = Math.max(faceRisk, risk); if (risk > .01) collisions++;
+      if (faces.length) faceConfidence = Math.min(faceConfidence, ...faces.map(f => f.score));
+      personRisk = Math.max(personRisk, ...nearby.map(s => V.gridMean(s.person?.grid, 16, 9, rect) || 0));
+      complexity += V.gridMean(sample.brightness?.complexity, 8, 6, rect) || 0;
+      motion += V.gridMean(sample.motion?.regions, 8, 6, rect) || 0;
+      const lum = V.gridMean(sample.brightness?.light, 8, 6, rect);
+      if (lum != null) { const bg = lum <= .04045 ? lum / 12.92 : ((lum + .055) / 1.055) ** 2.4, ratio = (Math.max(textLuminance, bg) + .05) / (Math.min(textLuminance, bg) + .05); readable = Math.min(readable, Math.min(1, ratio / 4.5)); }
+    }
+    complexity /= active.length; motion /= active.length;
+    const edge = Math.max(0, 1 - Math.min(rect.x, rect.y, 1 - rect.x - rect.w, 1 - rect.y - rect.h) / .06), weights = V.weights;
+    let penalty = weights.face * Math.max(faceRisk, collisions / active.length * .5) + weights.person * personRisk + weights.complexity * complexity + weights.readability * (1 - readable) + weights.motion * motion + weights.edge * edge;
+    if (manualRisk > 0 || subtitleRisk > 0) penalty = Math.max(.85, penalty);
+    const score = Math.max(0, Math.round(100 * (1 - penalty))), safe = covered && faceRisk < .02 && manualRisk === 0 && subtitleRisk === 0 && personRisk < .2 && readable >= .5 && faceReady && personReady && brightnessReady;
+    const cx = rect.x + rect.w / 2, cy = rect.y + rect.h / 2;
+    candidates.push({ rect, score, safe, faceRisk, personRisk, manualRisk, subtitleRisk, readable: V.round(readable), confidence: V.round((faceReady ? faceConfidence : .25) * (personReady ? 1 : .5) * (covered ? 1 : .5)), covered, position: [cx < .4 ? 'left' : cx > .6 ? 'right' : 'center', cy < .4 ? 'top' : cy > .6 ? 'bottom' : 'middle'].join('-'), recommendedColor: active.reduce((sum, s) => sum + (V.gridMean(s.brightness?.light, 8, 6, rect) || 0), 0) / active.length > .5 ? '#000000' : '#ffffff' });
+  }
+    candidates.sort((a, b) => Number(b.safe) - Number(a.safe) || b.score - a.score);
+  const chosen = [];
+  for (const c of candidates) if (chosen.every(r => Math.hypot(c.rect.x - r.rect.x, c.rect.y - r.rect.y) > .18)) { chosen.push(c); if (chosen.length === 3) break; }
+  return chosen;
+};
+V.evaluateSafeAsync = (result, regions, interval, envelope, luminance, others, signal) => new Promise((resolve, reject) => {
+  let url, worker;
+  const stop = () => { clean(); reject(new DOMException('Cancelled', 'AbortError')); }, clean = () => { signal?.removeEventListener('abort', stop); worker?.terminate(); if (url) URL.revokeObjectURL(url); };
+  try {
+    V.abort(signal);
+    const functions = ['round', 'overlap', 'expand', 'gridMean', 'evaluateSafe'];
+    const code = 'const V={weights:' + JSON.stringify(V.weights) + '};' + functions.map(k => 'V.' + k + '=' + V[k].toString() + ';').join('') + 'self.onmessage=e=>{try{self.postMessage({result:V.evaluateSafe(...e.data)});}catch(error){self.postMessage({error:error.message});}};';
+    url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' })); worker = new Worker(url); signal?.addEventListener('abort', stop, { once: true });
+    worker.onmessage = e => { clean(); if (e.data.error) reject(new Error(e.data.error)); else resolve(e.data.result); };
+    worker.onerror = e => { clean(); reject(new Error(e.message)); };
+    worker.postMessage([result, regions, interval, envelope, luminance, others]);
+  } catch (e) { clean(); reject(e); }
+});
+})();
+
+/* Analysis owns its decoder/media element. Preview currentTime is never touched. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis;
+V.event = (el, name, signal, begin) => new Promise((resolve, reject) => {
+  let timer; const clean = () => { clearTimeout(timer); el.removeEventListener(name, done); el.removeEventListener('error', fail); signal?.removeEventListener('abort', stop); };
+  const done = () => { clean(); resolve(); }, fail = () => { clean(); reject(new Error('MEDIA_DECODE: ' + (el.error?.message || 'Unsupported or unreadable media'))); }, stop = () => { clean(); reject(new DOMException('Cancelled', 'AbortError')); };
+  el.addEventListener(name, done, { once: true }); el.addEventListener('error', fail, { once: true }); signal?.addEventListener('abort', stop, { once: true });
+  timer = setTimeout(() => { clean(); reject(new Error('MEDIA_TIMEOUT')); }, 15000);
+  if (signal?.aborted) return stop();
+  try { begin?.(); } catch (e) { clean(); reject(e); }
+});
+V.sourceInfo = async (media, signal) => {
+  V.abort(signal);
+  const file = media.file, full = file.size <= 12 * 1024 * 1024, chunk = 1024 * 1024;
+  const blob = full ? file : new Blob([String(file.size), file.slice(0, chunk), file.slice(Math.max(0, Math.floor(file.size / 2) - chunk / 2), Math.floor(file.size / 2) + chunk / 2), file.slice(-chunk)]);
+  const data = await blob.arrayBuffer(); V.abort(signal);
+  const digest = await crypto.subtle.digest('SHA-256', data); V.abort(signal);
+  return V.source({ name: file.name, size: file.size, width: media.width, height: media.height, duration: media.video ? (media.videoDuration || media.duration) : null, kind: media.video ? 'video' : 'image', hash: [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join(''), hashMode: full ? 'full' : 'sampled-3x1MiB' });
+};
+V.times = (start, end, fps, cap) => {
+  if (!(end > start) || !(fps > 0) || !(cap >= 2)) throw new Error('Invalid analysis range');
+  const n = Math.min(cap, Math.ceil((end - start) * fps) + 1), step = (end - start) / (n - 1);
+  return Array.from({ length: n }, (_, i) => V.round(start + step * i));
+};
+V.FrameProvider = class {
+  async open(media, width, signal) {
+    this.signal = signal; this.media = media; this.url = URL.createObjectURL(media.file);
+    this.el = document.createElement(media.video ? 'video' : 'img');
+    if (media.video) { this.el.muted = true; this.el.playsInline = true; this.el.preload = 'auto'; }
+    this.onAbort = () => this.close(); signal.addEventListener('abort', this.onAbort, { once: true });
+    try {
+      await V.event(this.el, media.video ? 'loadeddata' : 'load', signal, () => { this.el.src = this.url; if (media.video) this.el.load(); });
+      V.abort(signal);
+      const ratio = Math.min(1, width / Math.max(media.width, media.height));
+      this.canvas = document.createElement('canvas'); this.canvas.width = Math.max(8, Math.round(media.width * ratio)); this.canvas.height = Math.max(8, Math.round(media.height * ratio));
+      this.ctx = this.canvas.getContext('2d', { willReadFrequently: true }); return this;
+    } catch (e) { this.close(); throw e; }
+  }
+  async frame(t) {
+    V.abort(this.signal);
+    if (this.media.video) {
+      const target = Math.max(0, Math.min(t, this.el.duration - .001));
+      if (Math.abs(this.el.currentTime - target) > .00001 || this.el.seeking) await V.event(this.el, 'seeked', this.signal, () => { this.el.currentTime = target; });
+      if (this.el.readyState < 2) await V.event(this.el, 'loadeddata', this.signal);
+    }
+    V.abort(this.signal); this.ctx.drawImage(this.el, 0, 0, this.canvas.width, this.canvas.height);
+    return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+  }
+  close() {
+    this.signal?.removeEventListener('abort', this.onAbort);
+    if (this.el) { if (this.media.video) this.el.pause(); this.el.removeAttribute('src'); if (this.media.video) this.el.load(); this.el = null; }
+    if (this.url) URL.revokeObjectURL(this.url); this.url = null;
+    if (this.canvas) this.canvas.width = this.canvas.height = 1; this.canvas = null; this.ctx = null;
+  }
+};
+})();
+
+/* Models and all per-frame CPU work run in an on-demand classic Worker. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis;
+V.workerMain = function workerMain(metrics) {
+  let options, metricWidth = 240, previous = null, previousT = 0, canvas, context, small, smallContext, face, person, labels = [], personMaskIndex = 1, faceTrack = [], nextTrack = 0;
+  self.onmessage = async e => {
+    const { id, kind, payload } = e.data;
+    try {
+      if (kind === 'init') {
+        options = payload.options; metricWidth = payload.metricWidth || 240; const warnings = [];
+        if (options.features.face || options.features.person) {
+          try {
+            const vision = await import(payload.base + 'vision_bundle.mjs');
+            const files = await vision.FilesetResolver.forVisionTasks(payload.base + 'wasm');
+            if (options.features.face) try { face = await vision.FaceDetector.createFromOptions(files, { baseOptions: { modelAssetPath: payload.base + 'blaze_face_short_range-v1.tflite', delegate: 'CPU' }, runningMode: 'IMAGE', minDetectionConfidence: .45 }); } catch (e) { warnings.push('FACE_MODEL: ' + e.message); }
+            if (options.features.person) try {
+              person = await vision.ImageSegmenter.createFromOptions(files, { baseOptions: { modelAssetPath: payload.base + 'selfie_segmenter-v1.tflite', delegate: 'CPU' }, runningMode: 'IMAGE', outputCategoryMask: false, outputConfidenceMasks: true });
+              labels = person.getLabels();
+              // Never assume an arbitrary segmenter's foreground represents people.
+              if (labels.length === 1 && labels[0] === 'selfie') personMaskIndex = 0; // Fixed v1 model: one sigmoid foreground confidence channel.
+              else if (labels.length === 2 && /person/i.test(labels[1] || '') && /background/i.test(labels[0] || '')) personMaskIndex = 1;
+              else { person.close(); person = null; throw new Error('Labels do not match the fixed person model: ' + JSON.stringify(labels)); }
+            } catch (e) { warnings.push('PERSON_MODEL: ' + e.message); }
+          } catch (e) { warnings.push('VISION_RUNTIME: ' + e.message); }
+        }
+        self.postMessage({ id, payload: { warnings, face: !!face, person: !!person, labels } }); return;
+      }
+      if (kind === 'frame') {
+        const { width: w, height: h, buffer, t, visionFrame } = payload, pixels = new Uint8ClampedArray(buffer);
+        if (!canvas || canvas.width !== w || canvas.height !== h) { canvas = new OffscreenCanvas(w, h); context = canvas.getContext('2d'); }
+        context.putImageData(new ImageData(pixels, w, h), 0, 0);
+        const ratio = Math.min(1, metricWidth / Math.max(w, h)), mw = Math.max(8, Math.round(w * ratio)), mh = Math.max(8, Math.round(h * ratio));
+        if (!small || small.width !== mw || small.height !== mh) { small = new OffscreenCanvas(mw, mh); smallContext = small.getContext('2d', { willReadFrequently: true }); }
+        smallContext.drawImage(canvas, 0, 0, mw, mh);
+        const out = metrics(smallContext.getImageData(0, 0, mw, mh).data, mw, mh, previous, t - previousT, options.features.motion);
+        previous = out.state; previousT = t; delete out.state;
+        if (out.change) faceTrack = [];
+        out.faces = []; out.person = null; out.visionSample = !!visionFrame;
+        if (visionFrame && (face || person)) {
+          if (face) {
+            let detected = face.detect(canvas).detections;
+            if (options.quality !== 'fast') {
+              const tile = new OffscreenCanvas(Math.round(w * .5), Math.round(h * .7)), tileCtx = tile.getContext('2d');
+              for (const y of [0, h - tile.height]) for (const x of [0, Math.round(w * .25), w - tile.width]) {
+                tileCtx.drawImage(canvas, x, y, tile.width, tile.height, 0, 0, tile.width, tile.height);
+                for (const d of face.detect(tile).detections) detected.push({ ...d, boundingBox: { ...d.boundingBox, originX: d.boundingBox.originX + x, originY: d.boundingBox.originY + y } });
+              }
+              tile.width = tile.height = 1;
+              const unique = [];
+              for (const d of detected.sort((a, b) => (b.categories[0]?.score || 0) - (a.categories[0]?.score || 0))) {
+                const a = d.boundingBox;
+                if (unique.every(other => { const b = other.boundingBox, intersection = Math.max(0, Math.min(a.originX + a.width, b.originX + b.width) - Math.max(a.originX, b.originX)) * Math.max(0, Math.min(a.originY + a.height, b.originY + b.height) - Math.max(a.originY, b.originY)); return intersection / Math.max(1, Math.min(a.width * a.height, b.width * b.height)) < .4; })) unique.push(d);
+              }
+              detected = unique;
+            }
+            const used = new Set();
+            out.faces = detected.map(d => {
+              const b = d.boundingBox, box = { x: Math.max(0, b.originX / w), y: Math.max(0, b.originY / h), w: b.width / w, h: b.height / h, score: d.categories[0]?.score || 0, estimated: false };
+              const prev = faceTrack.filter(f => !used.has(f.trackId)).sort((a, b) => Math.hypot(a.x - box.x, a.y - box.y) - Math.hypot(b.x - box.x, b.y - box.y))[0];
+              box.trackId = prev && Math.hypot(prev.x - box.x, prev.y - box.y) < .25 ? prev.trackId : 'face-' + ++nextTrack; used.add(box.trackId); return box;
+            });
+            // Missed detections remain uncertain; briefly retain expanded protection.
+            for (const prev of faceTrack) if (!used.has(prev.trackId) && t - prev.lastSeen <= 1) out.faces.push({ ...prev, score: prev.score * .7, estimated: true });
+            faceTrack = out.faces.map(f => ({ ...f, lastSeen: f.estimated ? f.lastSeen : t }));
+          }
+          if (person) {
+            person.segment(canvas, result => {
+              const mask = result.confidenceMasks[personMaskIndex]; if (!mask) throw new Error('Person confidence channel is missing');
+              const data = mask.getAsFloat32Array(), mw = mask.width, mh = mask.height, grid = Array(144).fill(0), counts = Array(144).fill(0);
+              let hits = 0, confidence = 0, x0 = mw, y0 = mh, x1 = -1, y1 = -1;
+              for (let y = 0; y < mh; y++) for (let x = 0; x < mw; x++) {
+                const value = data[y * mw + x], cell = Math.min(8, Math.floor(y / mh * 9)) * 16 + Math.min(15, Math.floor(x / mw * 16)); counts[cell]++;
+                if (value >= .5) { hits++; confidence += value; grid[cell]++; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+              }
+              out.person = { grid: grid.map((v, i) => Math.round(v / Math.max(1, counts[i]) * 10000) / 10000), occupancy: hits / data.length, confidence: hits ? confidence / hits : 0, box: hits ? { x: x0 / mw, y: y0 / mh, w: (x1 + 1 - x0) / mw, h: (y1 + 1 - y0) / mh } : null, estimated: false };
+              // Callback masks are owned and released by MediaPipe on return.
+            });
+          }
+        }
+        if (!options.features.motion) out.motion = null;
+        if (!options.features.brightness) out.brightness = null;
+        self.postMessage({ id, payload: out });
+      }
+    } catch (e) { self.postMessage({ id, error: e.message }); }
+  };
+};
+V.WorkerClient = class {
+  constructor() {
+    const code = '(' + V.workerMain.toString() + ')(' + V.metrics.toString() + ');';
+    this.url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' })); this.worker = new Worker(this.url); this.id = 0; this.pending = new Map();
+    this.worker.onmessage = e => { const item = this.pending.get(e.data.id); if (!item) return; this.pending.delete(e.data.id); item.clean(); if (e.data.error) item.reject(new Error(e.data.error)); else item.resolve(e.data.payload); };
+    this.worker.onerror = e => { for (const item of this.pending.values()) { item.clean(); item.reject(new Error('ANALYSIS_WORKER: ' + e.message)); } this.pending.clear(); };
+  }
+  request(kind, payload, signal, transfer = []) {
+    V.abort(signal);
+    return new Promise((resolve, reject) => {
+      const id = ++this.id; let timer;
+      const stop = () => { this.pending.delete(id); clean(); reject(new DOMException('Cancelled', 'AbortError')); }, clean = () => { clearTimeout(timer); signal.removeEventListener('abort', stop); };
+      timer = setTimeout(() => { this.pending.delete(id); clean(); reject(new Error('ANALYSIS_WORKER_TIMEOUT')); }, kind === 'init' ? 45000 : 15000);
+      signal.addEventListener('abort', stop, { once: true }); this.pending.set(id, { resolve, reject, clean }); this.worker.postMessage({ id, kind, payload }, transfer);
+    });
+  }
+  close() { this.worker.terminate(); URL.revokeObjectURL(this.url); for (const item of this.pending.values()) { item.clean(); item.reject(new DOMException('Cancelled', 'AbortError')); } this.pending.clear(); }
+};
+V.run = async (media, rawOptions, signal, onProgress) => {
+  if (!media?.file) throw new Error(J.layerText('背景の動画または静止画を読み込んでください。', 'Load a video or image background.'));
+  if (location.protocol === 'file:' && (rawOptions.features.face || rawOptions.features.person)) throw new Error(J.layerText('人物解析はHTTPサーバーから起動してください。従来の編集は直接起動でも使えます。', 'For person analysis, use a local HTTP server. Existing editing still works from a file.'));
+  const started = performance.now(), options = V.options(rawOptions), q = V.quality[options.quality], provider = new V.FrameProvider(); let worker;
+  try {
+    const source = await V.sourceInfo(media, signal), duration = media.video ? source.duration : Math.max(1, options.end || J.ui.plan.duration || 5), start = options.start, end = options.end || duration;
+    if (!(end > start) || start < 0 || (media.video && end > duration + .001)) throw new Error(J.layerText('解析範囲を素材の長さ以内で指定してください。', 'Set the analysis range within the media duration.'));
+    const range = { start, end }, times = media.video ? V.times(start, end, q.fps, options.maxFrames) : [start];
+    await provider.open(media, options.features.face || options.features.person ? q.visionWidth : q.width, signal); worker = new V.WorkerClient();
+    const base = new URL((document.documentElement.lang === 'en' ? '../' : './') + 'vendor/vision/', location.href).href;
+    const vision = await worker.request('init', { options, base, metricWidth: q.width }, signal); let samples = [];
+    const sampleAll = async (timestamps, progressStart = 0, progressSpan = 1) => {
+    const output = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      V.abort(signal); const t = timestamps[i], frame = await provider.frame(t), visionFrame = i % q.visionEvery === 0 || i === timestamps.length - 1;
+      const sample = await worker.request('frame', { width: frame.width, height: frame.height, buffer: frame.data.buffer, t, visionFrame }, signal, [frame.data.buffer]);
+      output.push({ ...sample, t, videoTime: media.video ? Math.min(t, source.duration) : 0 }); onProgress(progressStart + progressSpan * (i + 1) / timestamps.length);
+    }
+    return output;
+    };
+    samples = await sampleAll(times, 0, options.quality === 'high' ? .8 : 1);
+    // High quality refines boundaries with a fresh, separate pass; all final samples sorted.
+    if (media.video && options.quality === 'high' && options.features.scene && samples.length < options.maxFrames) {
+      const refinements = [];
+      for (let i = 1; i < samples.length && times.length + refinements.length < options.maxFrames; i++) if (samples[i].change === 'cut') refinements.push(V.round((samples[i - 1].t + samples[i].t) / 2));
+      if (refinements.length) {
+        worker.close(); worker = new V.WorkerClient(); await worker.request('init', { options, base, metricWidth: q.width }, signal);
+        samples = await sampleAll([...new Set([...times, ...refinements])].sort((a, b) => a - b), .8, .2);
+      }
+    }
+    V.abort(signal); onProgress(1);
+    const warnings = [...vision.warnings];
+    if (media.video && times.length >= options.maxFrames) warnings.push('FRAME_CAP: sampling interval increased to respect the frame limit.');
+    if (!vision.face && options.features.face) warnings.push('Face protection is unavailable; add manual regions.');
+    if (!vision.person && options.features.person) warnings.push('Person segmentation is unavailable; Safe Zone cannot confirm person avoidance.');
+    if (vision.face && !samples.some(s => s.faces?.some(f => !f.estimated))) warnings.push('NO_FACE_DETECTED: this does not prove faces are absent; inspect the preview or add manual protection.');
+    if (samples.some(s => (s.faces || []).length > 1)) warnings.push('MULTIPLE_FACES: person masks may miss smaller or distant people; inspect every subtitle interval.');
+    const result = { format: 'synthia-video-analysis', schemaVersion: 1, source, range, options, samples, scenes: V.finalizeScenes(samples, range, options.features.scene), createdAt: new Date().toISOString(), elapsedMs: performance.now() - started, models: { runtime: 'MediaPipe Tasks Vision 0.10.21', face: vision.face ? 'BlazeFace short-range float16 v1' : '', person: vision.person ? 'SelfieSegmenter float16 v1 (sigmoid foreground)' : '' }, warnings };
+    return V.validateResult(result);
+  } finally { provider.close(); worker?.close(); }
+};
+})();
+
+/* Execution permission and result visibility never imply each other. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis;
+V.Controller = class {
+  constructor(run, onChange = () => {}, onResult = () => {}) { this.run = run; this.onChange = onChange; this.onResult = onResult; this.enabled = false; this.display = false; this.state = 'idle'; this.progress = 0; this.id = 0; this.result = null; }
+  emit() { this.onChange(this); }
+  setEnabled(on) { this.enabled = !!on; if (!on) this.cancel(); this.emit(); }
+  setDisplay(on) { this.display = !!on; this.emit(); }
+  cancel() { ++this.id; this.abortController?.abort(); this.abortController = null; if (this.state === 'running') this.state = 'cancelled'; this.emit(); }
+  load(result) { this.cancel(); this.enabled = false; this.display = false; this.result = result; this.progress = 0; this.state = result ? 'saved' : 'idle'; this.error = ''; this.emit(); }
+  async start(media, options) {
+    if (!this.enabled || this.state === 'running') return false;
+    const id = ++this.id, ac = this.abortController = new AbortController();
+    this.state = 'running'; this.progress = 0; this.error = ''; this.emit();
+    try {
+      const result = await this.run(media, options, ac.signal, progress => { if (id === this.id) { this.progress = progress; this.emit(); } });
+      if (id !== this.id || ac.signal.aborted || !this.enabled) return false;
+      this.result = result; this.state = 'complete'; this.progress = 1; this.onResult(result); this.emit(); return true;
+    } catch (e) {
+      if (id !== this.id) return false;
+      this.state = e.name === 'AbortError' ? 'cancelled' : 'failed'; this.error = e.message; this.emit(); return false;
+    } finally { if (id === this.id) this.abortController = null; }
+  }
+};
+})();
+
 /* Opt-in integrated tools. Projects retain their existing version-1 fields. */
 (() => {
     'use strict';
@@ -39197,6 +39668,7 @@ J.parseMotionLibrary = data => {
         const indices = match.map.map(i => env.cut.studioCharacterMap?.[i] ?? i), key = J.studioLineKey(line), row = studio.characters[key], base = J.studioTransform(row?.line), old = it.charFn;
         const changed = { ...it, _studioApplied: true, x: it.x + base.x, y: it.y + base.y, rot: (it.rot || 0) + base.rotation, sx: (it.sx || 1) * base.scale, sy: (it.sy || 1) * base.scale, alpha: (it.alpha ?? 1) * base.opacity, charFn: (i, g, n) => { const a = old?.(i, g, n) || {}, b = J.studioTransform(row?.glyphs[indices[i]]); return { ...a, dx: (a.dx || 0) + b.x + base.kerning * i + b.kerning, dy: (a.dy || 0) + b.y, s: (a.s ?? 1) * b.scale, rot: (a.rot || 0) + b.rotation, a: (a.a ?? 1) * b.opacity }; } };
         return draw({ ...env, studioGlyph: (g, m, bases) => {
+                env.studioGlyph?.(g, m, bases);
                 if (J.studioCapturing && env.pass === 'main')
                     J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.hypot(m.a, m.b) * g.w), h: Math.max(12, Math.hypot(m.c, m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
             } }, changed);
@@ -39646,6 +40118,64 @@ J.parseMotionLibrary = data => {
             return false;
         }
     };
+})();
+
+/* Translate lyric glyphs through the existing renderer, including matte/front passes. */
+(() => {
+'use strict';
+const V = J.VideoAnalysis, draw = J.drawItem;
+V.lineKey = line => line?.cueId ? 'cue-' + line.cueId : 'line-' + line.index;
+V.layerDelta = (plan, dx, dy, inverse = true) => {
+  if (!plan.studio?.flags.timeline) return { dx, dy };
+  const layer = plan.studio.layers.find(l => l.type === 'Lyrics'); if (!layer) return { dx, dy };
+  const p = layer.transform, angle = (inverse ? -1 : 1) * p.rotation * Math.PI / 180, scale = inverse ? 1 / p.scale : p.scale;
+  const x = dx * plan.W, y = dy * plan.H;
+  return { dx: scale * (Math.cos(angle) * x - Math.sin(angle) * y) / plan.W, dy: scale * (Math.sin(angle) * x + Math.cos(angle) * y) / plan.H };
+};
+J.drawItem = (env, it) => {
+  const line = env.plan?.lines?.find(l => l.index === env.cut?.line), key = V.lineKey(line), p = (V.previewing && V.previewPlacements?.[key]) || env.plan?.videoPlacements?.[key];
+  const lyric = line && !env.bgOnly && !env.inLayer && it.text && J.studioGlyphMap(line.text, it.text).found;
+  if (!lyric) return draw(env, it);
+  const ctx = env.ctx, capture = V.capture, originalGlyph = env.studioGlyph;
+  const withCapture = capture && env.pass === 'main' ? { ...env, studioGlyph: (g, m, bases) => {
+    originalGlyph?.(g, m, bases);
+    const w = Math.abs(m.a) * g.w + Math.abs(m.c) * g.h, h = Math.abs(m.b) * g.w + Math.abs(m.d) * g.h, pad = Math.max(3, ((it.stroke || 0) + (it.blur || 0) * 3 + (it.shadow?.blur || 0) * 2) * (env.scale || 1));
+    capture.push({ key, x: (m.e - w / 2 - pad) / ctx.canvas.width, y: (m.f - h / 2 - pad) / ctx.canvas.height, w: (w + pad * 2) / ctx.canvas.width, h: (h + pad * 2) / ctx.canvas.height, color: it.color || '#ffffff' });
+  } } : env;
+  if (!p || p.text !== line.text) return draw(withCapture, it);
+  const delta = V.layerDelta(env.plan, p.dx, p.dy), dx = delta.dx * ctx.canvas.width, dy = delta.dy * ctx.canvas.height, m = ctx.getTransform(), det = m.a * m.d - m.b * m.c;
+  if (Math.abs(det) < 1e-9) return draw(withCapture, it);
+  ctx.save(); ctx.translate((m.d * dx - m.c * dy) / det, (-m.b * dx + m.a * dy) / det);
+  try { return draw(withCapture, it); } finally { ctx.restore(); }
+};
+V.union = rects => { if (!rects.length) return null; const x = Math.min(...rects.map(r => r.x)), y = Math.min(...rects.map(r => r.y)); return { x, y, w: Math.max(...rects.map(r => r.x + r.w)) - x, h: Math.max(...rects.map(r => r.y + r.h)) - y }; };
+V.layerRect = (plan, rect) => {
+  if (!plan.studio?.flags.timeline) return rect;
+  const layer = plan.studio.layers.find(l => l.type === 'Lyrics'); if (!layer) return rect;
+  const p = layer.transform, angle = p.rotation * Math.PI / 180, points = [];
+  for (const x of [rect.x, rect.x + rect.w]) for (const y of [rect.y, rect.y + rect.h]) { const px = (x - .5) * plan.W, py = (y - .5) * plan.H; points.push({ x: .5 + p.x / plan.W + p.scale * (Math.cos(angle) * px - Math.sin(angle) * py) / plan.W, y: .5 + p.y / plan.H + p.scale * (Math.sin(angle) * px + Math.cos(angle) * py) / plan.H, w: 0, h: 0 }); }
+  return V.union(points);
+};
+V.measureLine = async (plan, line, signal, onProgress = () => {}) => {
+  const width = 480, height = Math.max(8, Math.round(width * plan.H / plan.W)), renderer = new J.LayerRenderer(width, height, J.normalizeLayerMode(J.ui.project.layerMode));
+  const times = new Set(V.times(line.start, line.end, 8, 160).map(t => Math.min(line.end - .001, t)));
+  for (const c of plan.cuts.filter(c => c.line === line.index)) for (const t of [c.start + .001, c.start + c.inDur, c.end - c.outDur, c.end - .001]) if (t >= line.start && t < line.end) times.add(t);
+  const bounds = [], others = [], colors = []; let i = 0;
+  try {
+    for (const t of [...times].sort((a, b) => a - b)) {
+      V.abort(signal); V.capture = []; renderer.draw(plan, t, false);
+      const hits = V.capture; V.capture = null;
+      const lyric = hits.filter(h => h.key === V.lineKey(line)), rect = V.union(lyric);
+      if (rect) { bounds.push(V.layerRect(plan, rect)); colors.push(...lyric.map(h => h.color)); }
+      for (const other of hits.filter(h => h.key !== V.lineKey(line))) others.push(V.layerRect(plan, other));
+      onProgress(++i / times.size);
+      if (i % 4 === 0) await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    const rect = V.union(bounds); if (!rect) throw new Error(J.layerText('字幕の描画領域を測定できません。時刻と表示設定を確認してください。', 'No lyric bounds were captured. Check timing and display settings.'));
+    const color = colors.find(c => /^#[0-9a-f]{6}$/i.test(c)) || '#ffffff', components = [1, 3, 5].map(i => parseInt(color.slice(i, i + 2), 16) / 255), linear = components.map(c => c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4);
+    return { rect, others, color, luminance: .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2], frames: times.size };
+  } finally { V.capture = null; renderer.layer.width = renderer.layer.height = 1; }
+};
 })();
 
 /* English labels are applied after all expression packs register, before the editor starts.
@@ -40372,6 +40902,7 @@ function drawTimeline() {
   }
   const px = X(S.t);
   x.fillStyle = '#f5a50c'; x.fillRect(Math.round(px) - dpr, 0, 2 * dpr, h);
+  J.drawVideoAnalysisMarkers?.(x, X, h, dpr);
 }
 // Keep endpoint handles inside the canvas; use the same plot for drawing and pointer mapping.
 function tlPlot(width, scale = 1) {
@@ -40775,7 +41306,7 @@ function editLine(li, ln) {
 // old per-cue snapshots can undo a later global palette/font change piecemeal.
 const HKEYS = ['style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
 const ED = { undo: [], redo: [] };
-const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
+const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, videoAnalysisEdits: { regions: S.project.videoAnalysis?.regions || [], placements: S.project.videoAnalysis?.placements || {} }, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
 function pushEdit() { const s = edSnap(); if (ED.undo[ED.undo.length - 1] !== s) ED.undo.push(s); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = []; updateEditBtns(); }
 function edGo(d) {
   const from = d < 0 ? ED.undo : ED.redo, to = d < 0 ? ED.redo : ED.undo;
@@ -40785,6 +41316,7 @@ function edGo(d) {
   to.push(JSON.stringify(cur));
   if (o.look) Object.assign(S.project, o.look);
   if ('studio' in o) S.project.studio = J.normalizeStudio(o.studio);
+  if (o.videoAnalysisEdits && S.project.videoAnalysis) { S.project.videoAnalysis.regions = J.VideoAnalysis.regions(o.videoAnalysisEdits.regions); S.project.videoAnalysis.placements = J.VideoAnalysis.placements(o.videoAnalysisEdits.placements); }
   S.project.subtitleCues = o.subtitleCues || null;
   S.project.localLooks = o.localLooks || null;
   S.project.fillerSettings = J.normalizeFillerSettings(o.fillerSettings);
@@ -40815,6 +41347,7 @@ async function resetAll() {
   if (S.tap) stopTap();
   pause();
   S.project = mergeProject(null); S.project.lyrics = '';
+  J.videoAnalysisProjectLoaded?.();
   S.audio = null; AP.clear(); audioSeq++; setPreviewRate(1); if ($('audioFile')) $('audioFile').value = '';
   J.resetLayerProjectSession?.();
   J.resetNativeSpectrumSession?.();
@@ -41772,7 +42305,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.6.0' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.7.0' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -41792,6 +42325,7 @@ function bind() {
       if (S.tap) stopTap();
       pause();
       S.project = next;
+      J.videoAnalysisProjectLoaded?.();
       // Both edit history and look proposals belong to the project that was closed.
       ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
       fontKey = '';
@@ -41963,6 +42497,7 @@ J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSa
     if (S.exporting) return;
     if (S.tap) stopTap(); pause(); J.projectSessionEpoch++;
     S.project = mergeProject(project); ED.undo = []; ED.redo = []; H.list = []; H.i = -1;
+    J.videoAnalysisProjectLoaded?.();
     fontKey = ''; syncUI(); replan(); commit(); updateEditBtns(); flushSave();
     seek(J.firstCuePreviewTime(S.plan));
   },
@@ -42077,6 +42612,7 @@ function syncCueErrors() {
 function changed() { const a = J.uiApi; a.pause(); a.syncUI(); a.replan(); a.flushSave(); }
 async function loadMedia(key, file, videoOnly) {
   const n = session.generation[key] = (session.generation[key] || 0) + 1;
+  if (key === 'background') J.videoAnalysisMediaChanged?.(true);
   status(tr('読み込み中…', 'Loading…'));
   const m = await J.loadLayerMedia(file, videoOnly);
   if (key === 'background' && m.video) {
@@ -42090,6 +42626,7 @@ async function loadMedia(key, file, videoOnly) {
   }
   if (key === 'front' && session.front) clearMedia('matte');
   session[key]?.dispose(); session[key] = m;
+  if (key === 'background') J.videoAnalysisMediaChanged?.();
   if (key === 'front') J.ui.project.spectrumMode = 'external';
   if (m.video) { m.el.addEventListener('seeked', dirty); m.el.addEventListener('loadeddata', dirty); }
   $('layerName-' + key).textContent = file.name;
@@ -42161,6 +42698,7 @@ function spectrumControls(panel) {
 function clearMedia(key) {
   session.generation[key] = (session.generation[key] || 0) + 1;
   session[key]?.dispose(); session[key] = null; $('layerName-' + key).textContent = tr('未選択', 'None');
+  if (key === 'background') J.videoAnalysisMediaChanged?.();
   if (key !== 'background') {
     J.uiApi.replan();
     if (key === 'matte' && session.front) status(tr('マットを解除しました。RGB 000000だけを透明にします。', 'Matte removed. Only RGB 000000 is transparent.'));
@@ -42214,6 +42752,7 @@ async function exportVideo(simple, frontOnly = false) {
   let spectrum = null;
   try {
     spectrum = J.getSpectrumForExport();
+    J.videoAnalysisBeforeExport?.();
     J.uiApi.pause();
     const ac = new AbortController(); J.ui.exporting = ac; session.busy = true;
     for (const m of [session.background, session.front, session.matte]) if (m?.video) m.el.pause();
@@ -44231,6 +44770,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         cancel.addEventListener('click', () => J.ui.exporting?.abort());
         root.append(label, J.studioButton('studioCompletedMP4', '完成MP4を書き出す', 'Export completed MP4', () => document.getElementById('simpleExport').click()), J.studioButton('studioExportPNG', '歌詞のみ透過PNG連番（ZIP）', 'Transparent lyric PNG sequence (ZIP)', async () => {
             J.uiApi.pause();
+            J.videoAnalysisBeforeExport?.();
             ( /** @type {HTMLElement|null} */(document.activeElement))?.blur();
             if (J.layerCueEditsInvalid)
                 throw new Error(tr('字幕の入力エラーを修正してください。', 'Fix invalid cue edits first.'));
@@ -44357,6 +44897,277 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         document.addEventListener('DOMContentLoaded', boot);
     else
         boot();
+})();
+
+/* Independent video-analysis controls, using the existing editor save/undo APIs. */
+(() => {
+'use strict';
+function boot() {
+  const V = J.VideoAnalysis, el = J.studioElement, tr = J.layerText, $ = id => document.getElementById(id);
+  const root = J.studioSection('videoAnalysis', '映像自動解析', 'Video analysis');
+  const state = J.videoAnalysisUI = { source: null, valid: false, candidates: [], selectedCandidate: -1, measured: null, candidatePlan: null, checking: false, mediaId: 0, notice: '', batch: [], batchPlan: null }; let batchResults;
+  const data = () => J.ui.project.videoAnalysis || (J.ui.project.videoAnalysis = J.normalizeVideoAnalysis());
+  const locked = line => !!(J.ui.project.subtitleCues?.[line.index]?.locked || J.ui.project.locks?.params?.[V.lineKey(line)] || J.ui.project.overrides?.[line.index]?.lock);
+  const dirty = () => { J.ui.need = true; J.drawVideoAnalysisOverlay?.(); };
+  const status = el('p', null, 'vaStatus'); status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
+  const overview = el('p', null, 'vaOverview'), progress = el('progress', null, 'vaProgress'); progress.max = 1;
+  const switchRow = el('div'); switchRow.className = 'va-switches';
+  function checkbox(id, ja, en, checked, change) { const label = el('label', tr(ja, en)), input = el('input', null, id); input.type = 'checkbox'; input.checked = checked; input.setAttribute('aria-label', tr(ja, en)); input.addEventListener('change', () => change(input.checked)); label.prepend(input); return { label, input }; }
+  const enabled = checkbox('vaEnabled', '映像自動解析 ON / OFF', 'Enable video analysis', false, on => controller.setEnabled(on));
+  const display = checkbox('vaDisplay', '解析結果の表示 ON / OFF', 'Show analysis results', false, on => controller.setDisplay(on));
+  switchRow.append(enabled.label, display.label);
+  const states = { idle: ['待機中', 'Idle'], running: ['解析中', 'Analyzing'], complete: ['解析完了', 'Complete'], cancelled: ['中止', 'Cancelled'], failed: ['失敗', 'Failed'], saved: ['保存済み結果', 'Saved results'] };
+  const controller = state.controller = new V.Controller(V.run, () => sync(), result => { data().result = result; state.valid = V.sameSource(result.source, state.source); state.notice = ''; clearCandidates(); J.uiApi.flushSave(); });
+  function clearCandidates() { state.candidates = []; state.selectedCandidate = -1; state.measured = null; state.candidatePlan = null; state.batch = []; state.batchPlan = null; batchResults?.replaceChildren(); state.measureAbort?.abort(); candidates.replaceChildren(); dirty(); }
+  function act(id, ja, en, fn) {
+    const b = el('button', tr(ja, en), id); b.type = 'button';
+    b.addEventListener('click', async () => { try { await fn(); } catch (e) { if (e.name !== 'AbortError') state.notice = e.message; } finally { sync(); } }); return b;
+  }
+  const quality = el('select', null, 'vaQuality');
+  for (const [value, ja, en] of [['fast', '高速', 'Fast'], ['standard', '標準', 'Standard'], ['high', '高精度', 'Detailed']]) { const o = el('option', tr(ja, en)); o.value = value; quality.append(o); }
+  const settings = el('div'); settings.className = 'va-settings';
+  const qualityLabel = el('label', tr('解析品質 ', 'Quality ')); qualityLabel.append(quality); settings.append(qualityLabel);
+  function number(id, ja, en, min, max, step, initial, parent = settings) { const label = el('label', tr(ja, en)), input = el('input', null, id); input.type = 'number'; input.min = min; input.max = max; input.step = step; input.value = String(initial); input.setAttribute('aria-label', tr(ja, en)); label.append(input); parent.append(label); return input; }
+  const start = number('vaStart', '開始秒', 'Start seconds', 0, 86400, .01, 0), end = number('vaEnd', '終了秒（0は素材末尾）', 'End seconds (0 = media end)', 0, 86400, .01, 0), cap = number('vaFrameCap', '最大解析フレーム数', 'Frame limit', 2, 1200, 1, 600), margin = number('vaFaceMargin', '顔の保護余白（%）', 'Face margin (%)', 0, 80, 1, 15);
+  const features = el('div'); features.className = 'va-feature-grid'; const featureInputs = {};
+  for (const [key, ja, en] of [['motion', '動き・移動方向', 'Motion / direction'], ['scene', 'シーンチェンジ', 'Scene changes'], ['brightness', '明暗・コントラスト', 'Brightness / contrast'], ['face', '顔検出', 'Faces'], ['person', '人物領域', 'People'], ['safe', 'Safe Zone', 'Safe Zone']]) { const c = checkbox('vaFeature-' + key, ja, en, true, saveOptions); featureInputs[key] = c.input; features.append(c.label); }
+  function saveOptions() {
+    if (controller.state === 'running') return;
+    data().options = V.options({ quality: quality.value, start: start.valueAsNumber, end: end.valueAsNumber, maxFrames: cap.valueAsNumber, faceMargin: margin.valueAsNumber / 100, features: Object.fromEntries(Object.entries(featureInputs).map(([k, v]) => [k, v.checked])) });
+    J.uiApi.flushSave(); clearCandidates(); sync();
+  }
+  for (const input of [quality, start, end, cap, margin]) input.addEventListener('change', saveOptions);
+  const qualityInfo = el('p', tr('高速: 基礎160px／人物320px・約1枚/秒、人物は3枚ごと。標準: 240px／512px・約2枚/秒、人物は2枚ごと。高精度: 320px／640px・約4枚/秒、人物は毎回・カット周辺を追加解析。標準以上は小さい顔を領域分割でも検出。上限を超えると間隔を広げます。高品質ほど処理・保存量が増えます。速度・検出精度の保証はありません。', 'Fast: metrics 160px / vision 320px, about 1 fps, vision every third sample. Standard: 240px / 512px, about 2 fps, vision every second sample. Detailed: 320px / 640px, about 4 fps, vision every sample and refined cut boundaries. Standard/Detailed also scan overlapping tiles for small faces. The frame cap increases spacing. Higher detail needs more time and storage; no speed or accuracy guarantee.'));
+  const startButton = act('vaAnalyze', '解析開始', 'Start analysis', async () => { if (!controller.enabled || J.layerSession.busy || J.ui.exporting || state.checking) return; saveOptions(); clearCandidates(); state.notice = ''; await controller.start(J.layerSession.background, data().options); });
+  const cancelButton = act('vaCancel', '解析キャンセル', 'Cancel analysis', () => controller.cancel());
+  const actions = el('div'); actions.className = 'va-actions'; actions.append(startButton, cancelButton);
+  const saveButton = act('vaSave', '解析結果を保存', 'Save analysis JSON', () => {
+    if (!controller.result) throw new Error(tr('保存する解析結果がありません。', 'No analysis results to save.'));
+    const result = { ...controller.result, manualRegions: data().regions.filter(r => r.sourceHash === controller.result.source.hash) };
+    const blob = new Blob([JSON.stringify(result)], { type: 'application/json' }); if (blob.size > V.maxBytes) throw new Error('Analysis data exceeds 16 MiB');
+    const url = URL.createObjectURL(blob), a = el('a'); a.href = url; a.download = controller.result.source.name.replace(/\.[^.]+$/, '').replace(/[\\/:*?"<>|]/g, '_') + '.analysis.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 10000); state.notice = tr('解析JSONを保存しました。', 'Analysis JSON saved.');
+  });
+  const fileLabel = el('label', tr('解析結果を読み込む ', 'Load analysis JSON ')), file = el('input', null, 'vaLoad'); file.type = 'file'; file.accept = '.json,application/json'; fileLabel.append(file);
+  file.addEventListener('change', async () => {
+    const f = file.files[0], project = J.ui.project; if (!f) return;
+    try { if (f.size > V.maxBytes) throw new Error('Analysis JSON exceeds 16 MiB'); const parsed = JSON.parse(await f.text()), result = V.validateResult(parsed); if (project !== J.ui.project) return;
+      controller.cancel(); data().result = result;
+      // Import never overwrites existing manual edits or applied lyric positions.
+      const ids = new Set(data().regions.map(r => r.id)); data().regions.push(...V.regions(parsed.manualRegions).filter(r => r.sourceHash === result.source.hash && !ids.has(r.id))); data().regions = V.regions(data().regions);
+      controller.load(result); state.valid = V.sameSource(result.source, state.source); clearCandidates(); J.uiApi.flushSave(); state.notice = tr('保存済み結果を読み込みました。両スイッチはOFFです。', 'Results loaded. Both switches are OFF.');
+    } catch (e) { state.notice = tr('解析JSONを読み込めません: ', 'Cannot load analysis JSON: ') + e.message; } finally { file.value = ''; sync(); }
+  });
+  const deleteButton = act('vaDelete', '解析結果の削除', 'Delete analysis results', () => { if (!controller.result) return; if (!confirm(tr('解析結果だけを削除します。手動保護領域と適用済み字幕位置は保持します。', 'Delete analysis results? Manual regions and applied lyric positions are retained.'))) return; controller.cancel(); data().result = null; controller.result = null; controller.state = 'idle'; state.valid = false; clearCandidates(); J.uiApi.flushSave(); });
+  const storage = el('div'); storage.className = 'va-actions'; storage.append(saveButton, fileLabel, deleteButton);
+  const privacy = el('p', tr('素材はブラウザ内で処理します。解析モデルは同梱済み・初期状態では読み込みません。解析枠は完成動画へ入りません。', 'Media stays in your browser. Bundled models load only on explicit analysis. Guides are excluded from exports.'));
+  const guide = el('a', tr('起動方法・操作ガイド・既知の制限', 'Startup, guide and known limitations')); guide.href = document.documentElement.lang === 'en' ? '../docs/VIDEO_ANALYSIS.en.md' : 'docs/VIDEO_ANALYSIS.md'; guide.target = '_blank'; guide.rel = 'noopener';
+  root.append(switchRow, status, progress, overview, settings, features, qualityInfo, actions, storage, privacy, guide);
+
+  const safe = el('details', null, 'vaSafePanel'); safe.append(el('summary', tr('Safe Zone候補と字幕位置', 'Safe Zone / lyric placement')));
+  const lineSelect = el('select', null, 'vaLine'); lineSelect.setAttribute('aria-label', tr('対象字幕', 'Target subtitle'));
+  const candidateInfo = el('p', tr('字幕区間の描画範囲を測定して、最大3候補を表示します。', 'Measure animated lyric bounds across the interval and show up to three candidates.'), 'vaCandidateStatus');
+  const candidates = el('div', null, 'vaCandidates');
+  const compute = act('vaComputeSafe', '配置候補を計算', 'Evaluate placement candidates', async () => {
+    if (!state.valid || !controller.result) throw new Error(tr('素材と一致する解析結果が必要です。', 'Matching analysis results are required.'));
+    const line = J.ui.plan.lines.find(l => String(l.index) === lineSelect.value); if (!line || !(line.end > line.start)) throw new Error(tr('字幕を選択してください。', 'Select a subtitle.'));
+    clearCandidates(); const plan = J.ui.plan, project = J.ui.project, ac = state.measureAbort = new AbortController();
+    const measurement = await V.measureLine(plan, line, ac.signal, p => { candidateInfo.textContent = tr('字幕の描画範囲を測定中 ', 'Measuring lyric bounds ') + Math.round(p * 100) + '%'; });
+    if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
+    const fit = V.fit(controller.result.source, plan.W, plan.H), envelope = V.toVideo(measurement.rect, fit);
+    const evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, envelope, measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+    if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
+    state.candidates = evaluated; state.measured = measurement; state.line = { ...line }; state.candidatePlan = plan; state.selectedCandidate = -1;
+    controller.result.safeZones ||= {}; controller.result.safeZones[V.lineKey(line)] = { text: line.text, start: line.start, end: line.end, candidates: state.candidates };
+    J.uiApi.flushSave(); renderCandidates(); dirty();
+  });
+  function renderCandidates() {
+    candidates.replaceChildren(); const safeFound = state.candidates.some(c => c.safe);
+    candidateInfo.textContent = safeFound ? tr('候補は推定です。文字の動きと人物をプレビューで確認してください。', 'Candidates are estimates. Check animation and people in the preview.') : tr('安全な配置候補が見つかりません。暫定候補には検出不足・衝突・範囲不足の可能性があります。', 'No verified safe candidate. Provisional candidates may have missing detection, collisions or incomplete coverage.');
+    state.candidates.forEach((c, i) => {
+      const entry = el('div'); entry.className = 'va-candidate';
+      entry.append(el('strong', `${i + 1}. ${tr(...positionLabel(c.position))} · ${c.score}/100`), el('p', tr('顔との重複 ', 'Face overlap ') + Math.round(c.faceRisk * 100) + '% · ' + tr('人物との重複 ', 'Person overlap ') + Math.round(c.personRisk * 100) + '% · ' + tr('視認性 ', 'Readability ') + Math.round(c.readable * 100) + '% · ' + tr('解析信頼度 ', 'Analysis confidence ') + Math.round(c.confidence * 100) + '%'), el('p', (c.safe ? tr('低い人物衝突リスク、表示区間のカバーあり。', 'Low detected collision risk; interval covered.') : tr('暫定評価。人物検出・解析間隔・衝突を確認してください。', 'Provisional. Check missing detections, sample spacing and collisions.')) + tr(' 推奨色: ', ' Suggested color: ') + c.recommendedColor), act('vaCandidate-' + i, '候補をプレビュー', 'Preview candidate', () => { state.selectedCandidate = i; controller.setDisplay(true); J.uiApi.seek((state.line.start + state.line.end) / 2); dirty(); })); candidates.append(entry);
+    });
+  }
+  function positionLabel(value) { const [x, y] = value.split('-'); return [{ left: '左', center: '中央', right: '右' }[x] + { top: '上', middle: '中央', bottom: '下' }[y], value]; }
+  const apply = act('vaApplyPosition', '選択字幕にこの位置を適用', 'Apply position to selected subtitle', () => {
+    if (J.layerSession.busy || J.ui.exporting) return;
+    const c = state.candidates[state.selectedCandidate], line = state.line;
+    if (!c || state.candidatePlan !== J.ui.plan || !state.valid) throw new Error(tr('候補を再計算してプレビューしてください。', 'Recompute and preview a candidate.'));
+    if (!c.safe && !confirm(tr('この候補は暫定評価です。プレビューを確認した位置を適用しますか？', 'This candidate is provisional. Apply the position you checked in the preview?'))) return;
+    const key = V.lineKey(line);
+    if (locked(line)) throw new Error(tr('ロック中の字幕です。', 'This subtitle is locked.'));
+    const r = V.toProject(c.rect, V.fit(controller.result.source, J.ui.plan.W, J.ui.plan.H)), old = data().placements[key] || { dx: 0, dy: 0 };
+    J.uiApi.pushEdit(); data().placements[key] = { dx: old.dx + r.x + r.w / 2 - state.measured.rect.x - state.measured.rect.w / 2, dy: old.dy + r.y + r.h / 2 - state.measured.rect.y - state.measured.rect.h / 2, text: line.text };
+    J.uiApi.replan(); J.uiApi.flushSave(); clearCandidates(); state.notice = tr('字幕位置を適用しました。Ctrl+Zで取り消せます。', 'Position applied. Use Ctrl+Z to undo.');
+  });
+  const resetPosition = act('vaResetPosition', '選択字幕の位置上書きを解除', 'Remove selected position override', () => { const line = J.ui.plan.lines.find(l => String(l.index) === lineSelect.value); if (!line || J.layerSession.busy || J.ui.exporting) return; if (locked(line)) throw new Error(tr('ロック中の字幕です。', 'This subtitle is locked.')); J.uiApi.pushEdit(); delete data().placements[V.lineKey(line)]; J.uiApi.replan(); J.uiApi.flushSave(); clearCandidates(); });
+  const manualXY = el('div'); manualXY.className = 'va-settings';
+  const mx = number('vaManualX', '手動位置X（%）', 'Manual X (%)', 0, 100, .1, 50, manualXY), my = number('vaManualY', '手動位置Y（%）', 'Manual Y (%)', 0, 100, .1, 50, manualXY);
+  const manualPosition = act('vaManualPosition', '手動位置を選択字幕に適用', 'Apply manual lyric position', async () => {
+    if (J.layerSession.busy || J.ui.exporting) return;
+    const line = J.ui.plan.lines.find(l => String(l.index) === lineSelect.value), plan = J.ui.plan; if (!line) throw new Error('Select a subtitle');
+    if (locked(line)) throw new Error(tr('ロック中の字幕です。', 'This subtitle is locked.'));
+    if (![mx.valueAsNumber, my.valueAsNumber].every(n => Number.isFinite(n) && n >= 0 && n <= 100)) throw new Error('Invalid position');
+    const m = await V.measureLine(plan, line, new AbortController().signal); if (plan !== J.ui.plan) return;
+    const key = V.lineKey(line), p = data().placements[key] || { dx: 0, dy: 0 }; J.uiApi.pushEdit(); data().placements[key] = { dx: p.dx + mx.valueAsNumber / 100 - m.rect.x - m.rect.w / 2, dy: p.dy + my.valueAsNumber / 100 - m.rect.y - m.rect.h / 2, text: line.text }; J.uiApi.replan(); J.uiApi.flushSave(); clearCandidates();
+  });
+  safe.append(lineSelect, compute, candidateInfo, candidates, apply, resetPosition, manualXY, manualPosition, el('p', tr('解析OFFでも適用済み位置は保持します。推奨色は自動適用しません。モーション全体の領域は有限サンプリングによる推定です。', 'Applied positions persist with analysis OFF. Suggested colors are never applied automatically. Animation bounds use finite sampling.'))); root.append(safe);
+  const batchPanel = el('details', null, 'vaBatchPanel'); batchPanel.append(el('summary', tr('複数字幕への配置候補', 'Placement for multiple subtitles')));
+  const batchLines = el('select', null, 'vaBatchLines'); batchLines.multiple = true; batchLines.size = 5; batchLines.setAttribute('aria-label', tr('適用対象の複数字幕', 'Select multiple target subtitles')); batchResults = el('div', null, 'vaBatchResults');
+  const batchCompute = act('vaBatchCompute', '選択した字幕の候補を計算', 'Evaluate selected subtitles', async () => {
+    if (!state.valid || !controller.result) throw new Error(tr('素材と一致する解析結果が必要です。', 'Matching results are required.'));
+    const selected = [...batchLines.selectedOptions].map(o => +o.value), plan = J.ui.plan, project = J.ui.project;
+    if (!selected.length) throw new Error(tr('字幕を選択してください。', 'Select subtitles.'));
+    clearCandidates(); const ac = state.measureAbort = new AbortController(), fit = V.fit(controller.result.source, plan.W, plan.H), pending = [];
+    for (const index of selected) {
+      const line = plan.lines.find(l => l.index === index); if (!line) continue;
+      if (locked(line)) throw new Error(tr('ロック中の字幕があります。', 'A selected subtitle is locked.'));
+      const measurement = await V.measureLine(plan, line, ac.signal), evaluated = await V.evaluateSafeAsync(controller.result, data().regions, line, V.toVideo(measurement.rect, fit), measurement.luminance, measurement.others.map(r => V.toVideo(r, fit)), ac.signal);
+      if (!evaluated.length) throw new Error(tr('候補のない字幕があります: ', 'No candidate for subtitle: ') + (index + 1));
+      pending.push({ line: { ...line }, measurement, candidates: evaluated, previewed: false });
+      if (plan !== J.ui.plan || project !== J.ui.project || ac.signal.aborted || !state.valid) return;
+    }
+    state.batch = pending; state.batchPlan = plan;
+    controller.result.safeZones ||= {}; for (const entry of pending) controller.result.safeZones[V.lineKey(entry.line)] = { text: entry.line.text, start: entry.line.start, end: entry.line.end, candidates: entry.candidates }; J.uiApi.flushSave();
+    pending.forEach((entry, i) => batchResults.append(act('vaBatchPreview-' + i, `${entry.line.index + 1}行目をプレビュー（${entry.candidates[0].score}点）`, `Preview subtitle ${entry.line.index + 1} (${entry.candidates[0].score})`, () => { entry.previewed = true; state.candidates = entry.candidates; state.selectedCandidate = 0; state.measured = entry.measurement; state.line = entry.line; state.candidatePlan = plan; controller.setDisplay(true); J.uiApi.seek((entry.line.start + entry.line.end) / 2); renderCandidates(); dirty(); })));
+    state.notice = tr('各行をプレビューしてから適用してください。', 'Preview every selected subtitle before applying.');
+  });
+  const batchApply = act('vaBatchApply', '確認した複数字幕に適用', 'Apply to previewed subtitles', () => {
+    if (J.ui.exporting || J.layerSession.busy) return;
+    if (!state.batch.length || state.batchPlan !== J.ui.plan || !state.valid || state.batch.some(e => !e.previewed)) throw new Error(tr('全対象をプレビューし、変更時は候補を再計算してください。', 'Preview every target and recompute after edits.'));
+    if (state.batch.some(e => locked(e.line))) throw new Error(tr('ロック中の字幕があります。', 'A selected subtitle is locked.'));
+    if (!confirm(tr('確認した ', 'Apply the previewed positions to ') + state.batch.length + tr(' 件の字幕位置を適用します。Ctrl+Zで取り消せます。', ' subtitles? Ctrl+Z can undo this.'))) return;
+    J.uiApi.pushEdit(); const fit = V.fit(controller.result.source, J.ui.plan.W, J.ui.plan.H);
+    for (const entry of state.batch) { const key = V.lineKey(entry.line), r = V.toProject(entry.candidates[0].rect, fit), old = data().placements[key] || { dx: 0, dy: 0 }, m = entry.measurement.rect; data().placements[key] = { dx: old.dx + r.x + r.w / 2 - m.x - m.w / 2, dy: old.dy + r.y + r.h / 2 - m.y - m.h / 2, text: entry.line.text }; }
+    J.uiApi.replan(); J.uiApi.flushSave(); clearCandidates();
+  });
+  batchPanel.append(batchLines, act('vaSelectAll', '全字幕を選択', 'Select all subtitles', () => { for (const option of batchLines.options) option.selected = true; }), batchCompute, batchResults, batchApply); root.append(batchPanel);
+
+  const protection = el('details', null, 'vaProtection'); protection.append(el('summary', tr('手動保護領域', 'Manual protected regions')));
+  const regionList = el('select', null, 'vaRegion'); regionList.setAttribute('aria-label', tr('保護領域を選択', 'Select protected region')); protection.append(regionList);
+  const regionFields = {}, regionGrid = el('div'); regionGrid.className = 'va-settings';
+  for (const [key, label, initial] of [['x', 'X (%)', 10], ['y', 'Y (%)', 10], ['w', 'Width (%)', 30], ['h', 'Height (%)', 40], ['start', 'Start (s)', 0], ['end', 'End (s)', 86400]]) regionFields[key] = number('vaRegion-' + key, label, label, 0, ['start', 'end'].includes(key) ? 86400 : 100, .1, initial, regionGrid);
+  protection.append(regionGrid);
+  state.commitRegions = regions => { J.uiApi.pushEdit(); data().regions = V.regions(regions); clearCandidates(); J.uiApi.flushSave(); syncRegions(); dirty(); };
+  const regionFromFields = id => { const values = Object.fromEntries(Object.entries(regionFields).map(([k, input]) => [k, input.valueAsNumber])); if (!Object.values(values).every(Number.isFinite) || values.end <= values.start || values.w <= 0 || values.h <= 0 || values.x + values.w > 100 || values.y + values.h > 100) throw new Error(tr('保護領域の座標と時間を確認してください。', 'Check region coordinates and times.')); return { ...values, x: values.x / 100, y: values.y / 100, w: values.w / 100, h: values.h / 100, id, sourceHash: state.source.hash }; };
+  protection.append(act('vaAddRegion', '保護領域を追加', 'Add protected region', () => { if (!state.source) throw new Error(tr('背景素材を選択してください。', 'Select background media.')); state.commitRegions([...data().regions, regionFromFields('manual-' + crypto.randomUUID())]); }), act('vaUpdateRegion', '選択領域を更新', 'Update selected region', () => { const region = data().regions.find(r => r.id === regionList.value); if (!region || !state.source || region.sourceHash !== state.source.hash) throw new Error('Select a region for this media'); state.commitRegions(data().regions.map(r => r.id === region.id ? regionFromFields(region.id) : r)); }), act('vaRemoveRegion', '選択領域を削除', 'Delete selected region', () => state.commitRegions(data().regions.filter(r => r.id !== regionList.value))));
+  const edit = el('select', null, 'vaRegionEdit'); for (const [value, ja, en] of [['off', 'プレビュー操作: 通常', 'Preview: normal'], ['draw', 'ドラッグで新規領域', 'Drag to add region'], ['move', '選択領域を移動', 'Move selected region'], ['resize', '選択領域の右下を変更', 'Resize selected region']]) { const o = el('option', tr(ja, en)); o.value = value; edit.append(o); }
+  edit.addEventListener('change', () => { if (edit.value !== 'off') controller.setDisplay(true); dirty(); }); protection.append(edit, el('p', tr('座標は素材内の割合です。人物が移動する場合は複数の時間区間を追加してください。再解析で手動領域を消しません。', 'Coordinates are percentages of the source media. For moving people, add multiple timed regions. Reanalysis retains manual regions.'))); root.append(protection);
+  regionList.addEventListener('change', () => { const r = data().regions.find(r => r.id === regionList.value); if (!r) return; for (const [k, input] of Object.entries(regionFields)) input.value = String(r[k] * (['start', 'end'].includes(k) ? 1 : 100)); dirty(); });
+  function syncRegions() { const old = regionList.value; regionList.replaceChildren(); for (const [i, r] of data().regions.entries()) if (r.sourceHash === state.source?.hash) { const o = el('option', `${i + 1}: ${r.start.toFixed(2)}–${r.end.toFixed(2)}s`); o.value = r.id; regionList.append(o); } if ([...regionList.options].some(o => o.value === old)) regionList.value = old; }
+  function syncOptions() { const o = data().options; quality.value = o.quality; start.value = o.start; end.value = o.end; cap.value = o.maxFrames; margin.value = o.faceMargin * 100; for (const k in featureInputs) featureInputs[k].checked = o.features[k]; }
+  function sync() {
+    enabled.input.checked = controller.enabled; display.input.checked = controller.display; progress.value = controller.progress;
+    const pair = states[controller.state] || states.idle;
+    status.textContent = tr(...pair) + (controller.state === 'running' ? ` · ${Math.round(controller.progress * 100)}%` : '') + (state.checking ? tr(' · 素材照合中', ' · checking source') : '') + (controller.result && !state.valid ? tr(' · 結果不一致／素材未確認', ' · result mismatch / unverified source') : '') + (controller.error ? ' · ' + controller.error : '') + (state.notice ? ' · ' + state.notice : '');
+    startButton.disabled = !controller.enabled || controller.state === 'running' || !J.layerSession.background || state.checking || J.layerSession.busy || J.ui.exporting;
+    cancelButton.disabled = controller.state !== 'running'; saveButton.disabled = !controller.result; compute.disabled = !state.valid || !J.ui.plan.lines.length || !controller.result?.options.features.safe;
+    apply.disabled = state.selectedCandidate < 0 || state.candidatePlan !== J.ui.plan;
+    batchCompute.disabled = !state.valid || !controller.result?.options.features.safe; batchApply.disabled = !state.batch.length || state.batchPlan !== J.ui.plan || state.batch.some(e => !e.previewed);
+    for (const input of [quality, start, end, cap, margin, ...Object.values(featureInputs)]) input.disabled = controller.state === 'running';
+    const r = controller.result;
+    overview.textContent = r ? `${r.source.name} · ${r.samples.length} ${tr('解析フレーム', 'samples')} · ${r.scenes.length} ${tr('シーン候補', 'scene candidates')} · ${Math.round(r.elapsedMs)}ms · ${tr('顔の最大検出数', 'Maximum detected faces')}: ${Math.max(0, ...r.samples.map(s => (s.faces || []).filter(f => !f.estimated).length))} · ${tr('人物モデル', 'Person model')}: ${r.models.person ? tr('利用済み', 'used') : tr('未使用', 'unavailable')}\n${tr('未検出は人物がいない証明ではありません。候補は必ず目視で確認してください。', 'No detection does not prove nobody is present. Always inspect candidates visually.')}\n${r.warnings.join('\n')}` : (data().loadWarning || tr('解析データはありません。', 'No analysis data.'));
+    if (state.candidatePlan && state.candidatePlan !== J.ui.plan) { state.candidates = []; state.selectedCandidate = -1; state.candidatePlan = null; candidates.replaceChildren(); }
+    const old = lineSelect.value, signature = J.ui.plan.lines.map(l => `${l.index}:${l.text}`).join('|');
+    if (signature !== lineSelect.dataset.signature) { lineSelect.dataset.signature = signature; lineSelect.replaceChildren(); batchLines.replaceChildren(); for (const l of J.ui.plan.lines.filter(l => l.text && !l.interlude)) { const o = el('option', `${l.index + 1}: ${l.text.slice(0, 40)}`); o.value = l.index; lineSelect.append(o); batchLines.append(o.cloneNode(true)); } if ([...lineSelect.options].some(o => o.value === old)) lineSelect.value = old; }
+    syncRegions(); dirty();
+  }
+  lineSelect.addEventListener('change', () => { clearCandidates(); const l = J.ui.plan.lines.find(l => String(l.index) === lineSelect.value); if (l) J.uiApi.seek((l.start + l.end) / 2); });
+  J.videoAnalysisMediaChanged = async loading => {
+    const id = ++state.mediaId; state.sourceAbort?.abort(); state.sourceAbort = new AbortController(); controller.cancel(); state.valid = false; state.source = null; clearCandidates(); state.checking = !!J.layerSession.background && !loading; sync();
+    if (loading || !J.layerSession.background) return;
+    const media = J.layerSession.background, project = J.ui.project;
+    try { const source = await V.sourceInfo(media, state.sourceAbort.signal); if (id !== state.mediaId || project !== J.ui.project || media !== J.layerSession.background) return; state.source = source; state.valid = V.sameSource(source, controller.result?.source); }
+    catch (e) { if (e.name !== 'AbortError' && id === state.mediaId) state.notice = e.message; }
+    finally { if (id === state.mediaId) { state.checking = false; sync(); } }
+  };
+  J.videoAnalysisProjectLoaded = () => { controller.load(data().result); state.notice = data().loadWarning; syncOptions(); J.videoAnalysisMediaChanged(); };
+  J.videoAnalysisBeforeExport = () => { if (controller.state === 'running') { controller.cancel(); state.notice = tr('書き出しを優先して解析を中止しました。保存済み結果は保持しています。', 'Analysis cancelled to prioritize export. Saved results are retained.'); } state.measureAbort?.abort(); };
+  const syncLayer = J.syncLayerUI; J.syncLayerUI = () => { syncLayer(); sync(); };
+  controller.load(data().result); syncOptions(); J.videoAnalysisMediaChanged();
+  state.sync = sync; state.clearCandidates = clearCandidates;
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+
+/* A separate preview-only canvas: never used by renderer/export buffers. */
+(() => {
+'use strict';
+function boot() {
+  const V = J.VideoAnalysis, state = J.videoAnalysisUI, el = J.studioElement, tr = J.layerText, $ = id => document.getElementById(id), view = $('view'); if (!state) return;
+  const overlay = el('canvas', null, 'vaOverlay'); overlay.hidden = true; overlay.setAttribute('aria-label', tr('映像解析ガイド', 'Video analysis guides')); $('viewport').append(overlay);
+  const controls = el('div'); controls.className = 'va-feature-grid'; const toggles = {};
+  for (const [key, ja, en] of [['face', '顔の枠', 'Face boxes'], ['person', '人物マスク', 'Person mask'], ['motion', '動き・方向', 'Motion / direction'], ['heat', '動きヒートマップ', 'Motion heatmap'], ['light', '明暗グリッド', 'Luminance grid'], ['safe', 'Safe Zone候補', 'Safe Zone candidates'], ['manual', '手動保護領域', 'Manual regions']]) { const label = el('label', tr(ja, en)), input = el('input', null, 'vaOverlay-' + key); input.type = 'checkbox'; input.checked = key !== 'heat' && key !== 'light'; label.prepend(input); input.addEventListener('change', () => J.drawVideoAnalysisOverlay()); controls.append(label); toggles[key] = input; }
+  $('studio-videoAnalysis').append(controls);
+  let drag = null, drawingError = '';
+  J.drawVideoAnalysisOverlay = () => {
+    const source = state.source, controller = state.controller;
+    const visible = controller.display && !!source && (!controller.result || state.valid) && J.layerSession.preview === 'composite';
+    overlay.hidden = !visible; overlay.style.pointerEvents = visible && $('vaRegionEdit').value !== 'off' ? 'auto' : 'none';
+    if (!visible) return;
+    overlay.width = view.width; overlay.height = view.height; overlay.style.left = view.offsetLeft + 'px'; overlay.style.top = view.offsetTop + 'px'; overlay.style.width = view.clientWidth + 'px'; overlay.style.height = view.clientHeight + 'px';
+    const ctx = overlay.getContext('2d'), fit = V.fit(source, overlay.width, overlay.height), w = overlay.width, h = overlay.height, time = J.ui.t, result = controller.result;
+    const drawRect = (r, color, label, fill = false) => { const p = V.toProject(r, fit); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = Math.max(1, w / 640); if (fill) { ctx.globalAlpha = .12; ctx.fillRect(p.x * w, p.y * h, p.w * w, p.h * h); ctx.globalAlpha = 1; } ctx.strokeRect(p.x * w, p.y * h, p.w * w, p.h * h); if (label) { ctx.font = `${Math.max(11, w / 64)}px sans-serif`; ctx.fillText(label, p.x * w + 3, Math.max(13, p.y * h - 3)); } };
+    try {
+      const inRange = result && (source.kind === 'image' || time >= result.range.start && (time <= result.range.end || result.range.end >= source.duration - .01)), nearest = inRange ? result.samples.reduce((a, b) => Math.abs(a.t - time) <= Math.abs(b.t - time) ? a : b) : null;
+      const scene = nearest && result.scenes.find(s => nearest.t >= s.start && nearest.t < s.end);
+      const vision = nearest && result.samples.filter(s => s.visionSample && (!scene || s.t >= scene.start && s.t < scene.end)).reduce((a, b) => !a || Math.abs(b.t - time) < Math.abs(a.t - time) ? b : a, null);
+      if (vision) {
+        if (toggles.person.checked && vision.person) for (let i = 0; i < 144; i++) if (vision.person.grid[i] > .05) { const p = V.toProject({ x: i % 16 / 16, y: Math.floor(i / 16) / 9, w: 1 / 16, h: 1 / 9 }, fit); ctx.fillStyle = `rgba(168,95,214,${vision.person.grid[i] * .25})`; ctx.fillRect(p.x * w, p.y * h, p.w * w, p.h * h); }
+        if (toggles.face.checked) for (const face of vision.faces) drawRect(V.expand(face, result.options.faceMargin), '#f07178', `${face.trackId} ${Math.round(face.score * 100)}%${face.estimated ? ' ?' : ''}`);
+      }
+      if (nearest) {
+        if (toggles.heat.checked || toggles.light.checked) for (let i = 0; i < 48; i++) { const p = V.toProject({ x: i % 8 / 8, y: Math.floor(i / 8) / 6, w: 1 / 8, h: 1 / 6 }, fit), v = toggles.heat.checked ? nearest.motion?.regions[i] || 0 : nearest.brightness?.light[i] || 0; ctx.fillStyle = toggles.heat.checked ? `hsla(${220 * (1 - v)},85%,55%,.2)` : `rgba(255,255,255,${v * .3})`; ctx.fillRect(p.x * w, p.y * h, p.w * w, p.h * h); }
+        if (toggles.motion.checked && nearest.motion) {
+          const m = nearest.motion, x = w / 2, y = h / 2, norm = Math.max(.001, Math.hypot(m.dx, m.dy)), dx = m.dx / norm * w * .07, dy = m.dy / norm * h * .07;
+          ctx.strokeStyle = '#61b4e5'; ctx.lineWidth = Math.max(2, w / 500); ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx, y + dy); ctx.stroke();
+          if (m.strength > .001) { const a = Math.atan2(dy, dx); ctx.beginPath(); ctx.moveTo(x + dx - 10 * Math.cos(a - .5), y + dy - 10 * Math.sin(a - .5)); ctx.lineTo(x + dx, y + dy); ctx.lineTo(x + dx - 10 * Math.cos(a + .5), y + dy - 10 * Math.sin(a + .5)); ctx.stroke(); }
+        }
+      }
+      if (toggles.safe.checked && state.candidatePlan === J.ui.plan && time >= state.line.start && time <= state.line.end) state.candidates.forEach((candidate, i) => drawRect(candidate.rect, candidate.safe ? '#79d9ae' : '#e4bb72', `${i + 1}: ${candidate.score}${i === state.selectedCandidate ? ' ★' : ''}`, i === state.selectedCandidate));
+      if (toggles.manual.checked) for (const r of J.ui.project.videoAnalysis.regions) if (r.sourceHash === source.hash && time >= r.start && time <= r.end) { drawRect(r, r.id === $('vaRegion').value ? '#e4bb72' : '#dd96ed', tr('手動保護', 'Protected'), true); }
+      if (drag?.rect) drawRect(drag.rect, '#e4bb72', '', true);
+      if (drawingError) drawingError = '';
+    } catch (e) { overlay.hidden = true; if (drawingError !== e.message) { drawingError = e.message; state.notice = tr('解析ガイドを描画できません: ', 'Analysis guides failed: ') + e.message; } }
+  };
+  const preview = J.drawLayerPreview;
+  J.drawLayerPreview = (ctx, plan, t, options) => {
+    V.previewing = ctx.canvas.id === 'view' && state.controller.display && state.valid && state.candidatePlan === plan && state.selectedCandidate >= 0;
+    if (V.previewing) {
+      const line = state.line, key = V.lineKey(line), candidate = state.candidates[state.selectedCandidate], r = V.toProject(candidate.rect, V.fit(state.source, plan.W, plan.H)), old = J.ui.project.videoAnalysis.placements[key] || { dx: 0, dy: 0 };
+      V.previewPlacements = { [key]: { dx: old.dx + r.x + r.w / 2 - state.measured.rect.x - state.measured.rect.w / 2, dy: old.dy + r.y + r.h / 2 - state.measured.rect.y - state.measured.rect.h / 2, text: line.text } };
+    }
+    try { return preview(ctx, plan, t, options); } finally { V.previewing = false; V.previewPlacements = null; if (ctx.canvas.id === 'view') J.drawVideoAnalysisOverlay(); }
+  };
+  J.drawVideoAnalysisMarkers = (ctx, X, h, dpr) => {
+    if (!state.controller.display || !state.valid || !state.controller.result) return;
+    ctx.save(); ctx.strokeStyle = '#79d9ae'; ctx.lineWidth = dpr; for (const scene of state.controller.result.scenes.slice(1)) { const x = X(scene.start); if (x < 0 || x > ctx.canvas.width) continue; ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); } ctx.restore();
+  };
+  const point = e => { const bounds = overlay.getBoundingClientRect(), fit = V.fit(state.source, overlay.width, overlay.height); return { x: V.finite(((e.clientX - bounds.left) / bounds.width - fit.x) / fit.w, 0, 0, 1), y: V.finite(((e.clientY - bounds.top) / bounds.height - fit.y) / fit.h, 0, 0, 1) }; };
+  overlay.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || !state.source || J.ui.playing || J.ui.exporting || J.layerSession.busy || $('vaRegionEdit').value === 'off') return;
+    const mode = $('vaRegionEdit').value, p = point(e), region = J.ui.project.videoAnalysis.regions.find(r => r.id === $('vaRegion').value && r.sourceHash === state.source.hash);
+    if (mode !== 'draw' && !region) return;
+    e.preventDefault(); overlay.setPointerCapture(e.pointerId); drag = { mode, start: p, original: region && { ...region }, rect: region && { ...region }, media: state.source.hash, project: J.ui.project };
+  });
+  overlay.addEventListener('pointermove', e => {
+    if (!drag) return; const p = point(e), r = drag.original;
+    if (drag.mode === 'draw') drag.rect = { x: Math.min(p.x, drag.start.x), y: Math.min(p.y, drag.start.y), w: Math.abs(p.x - drag.start.x), h: Math.abs(p.y - drag.start.y) };
+    else if (drag.mode === 'move') drag.rect = { ...r, x: Math.max(0, Math.min(1 - r.w, r.x + p.x - drag.start.x)), y: Math.max(0, Math.min(1 - r.h, r.y + p.y - drag.start.y)) };
+    else drag.rect = { ...r, w: Math.max(.01, p.x - r.x), h: Math.max(.01, p.y - r.y) };
+    J.drawVideoAnalysisOverlay();
+  });
+  overlay.addEventListener('pointerup', () => {
+    if (!drag) return; const d = drag; drag = null;
+    if (!d.rect || d.project !== J.ui.project || state.source?.hash !== d.media || d.rect.w < .01 || d.rect.h < .01) return;
+    if (d.mode === 'draw') { const start = +$('vaRegion-start').value, end = +$('vaRegion-end').value; if (!(end > start)) return; state.commitRegions([...J.ui.project.videoAnalysis.regions, { ...d.rect, id: 'manual-' + crypto.randomUUID(), start, end, sourceHash: d.media }]); }
+    else state.commitRegions(J.ui.project.videoAnalysis.regions.map(r => r.id === d.original.id ? { ...r, ...d.rect } : r));
+  });
+  for (const event of ['pointercancel', 'lostpointercapture']) overlay.addEventListener(event, () => { drag = null; J.drawVideoAnalysisOverlay(); });
+  new ResizeObserver(() => J.drawVideoAnalysisOverlay()).observe(view);
+  J.drawVideoAnalysisOverlay();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
 
 /* Finish pointer-operated controls without stealing keyboard/text editing focus. */

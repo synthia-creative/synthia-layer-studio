@@ -1,5 +1,33 @@
 # Third-party notices
 
+## MediaPipe Tasks Vision 0.10.21 and fixed vision models (bundled, Apache-2.0)
+
+Copyright Google LLC and MediaPipe contributors. Unmodified runtime assets are
+included in `vendor/vision/`: `vision_bundle.mjs`, SIMD/no-SIMD WASM loaders and
+binaries. The full upstream Apache License 2.0, including its existing notices,
+is retained in `vendor/vision/LICENSE.txt`.
+
+Bundled, unmodified model weights:
+
+- BlazeFace short-range float16 version 1 (`blaze_face_short_range-v1.tflite`).
+- MediaPipe Selfie Segmenter float16 version 1 (`selfie_segmenter-v1.tflite`).
+
+The model cards identify Apache License 2.0. Original download URLs, exact sizes
+and SHA-256 are recorded in `vendor/vision/manifest.json`. Our frame processing,
+tiling, tracking and coarse-grid conversion are separate application code; the
+models/runtime have not been modified. Preserve these assets and notices when
+redistributing a package. Models are loaded lazily from this package, not a CDN.
+
+Upstream: https://github.com/google-ai-edge/mediapipe/tree/v0.10.21
+
+Model cards:
+https://storage.googleapis.com/mediapipe-assets/MediaPipe%20BlazeFace%20Model%20Card%20%28Short%20Range%29.pdf
+
+https://storage.googleapis.com/mediapipe-assets/Model%20Card%20MediaPipe%20Selfie%20Segmentation.pdf
+
+No QA portrait, generated illustration or sample video is included in the app
+or release package. Existing application and Mediabunny licensing is unchanged.
+
 ## Mediabunny 1.60.0 (bundled, MPL-2.0)
 
 Copyright (c) 2026-present, Vanilagy and contributors.

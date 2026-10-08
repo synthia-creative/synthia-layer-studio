@@ -83,5 +83,8 @@ for code, _, _, _ in i18n.EDITIONS:
 if '--dev' in sys.argv:
     os.makedirs('dev/www', exist_ok=True)
     open('dev/www/jizura.js', 'w', encoding='utf-8').write(js)
-    open('dev/www/test.html', 'w', encoding='utf-8').write(read('dev/test.html'))
-    print('dev/www ready: cd dev/www && python3 -m http.server 8765')
+    if os.path.isfile('dev/test.html'):
+        open('dev/www/test.html', 'w', encoding='utf-8').write(read('dev/test.html'))
+        print('dev/www ready: cd dev/www && python3 -m http.server 8765')
+    else:
+        print('dev/www/jizura.js ready; optional dev/test.html is not included in this edition')
