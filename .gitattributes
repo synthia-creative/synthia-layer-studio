@@ -1,0 +1,2 @@
+# Preserve exact upstream vision bytes and the manifest checksums on Windows.
+vendor/vision/** -text
