@@ -176,6 +176,7 @@ BODY = {
 }
 
 UI = {
+    "'歌詞'": "'Lyrics'",
     "'文字PV系の部品：使う'": "'Typographic parts: on'",
     "'文字PV系の部品：使わない（おまかせ・シャッフルで選ばれません）'": "'Typographic parts: off (not picked by Randomize or Shuffle)'",
     "'キネティックの部品：使う'": "'Kinetic parts: on'",
