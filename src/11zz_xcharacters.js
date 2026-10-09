@@ -57,7 +57,7 @@
         const studio = env.plan?.studio, line = env.plan?.lines?.find(l => l.index === env.cut?.line);
         if (!studio?.flags?.characterEditing || !line || env.bgOnly || env.inLayer || it._studioApplied || !it.text)
             return draw(env, it);
-        const match = J.studioGlyphMap(env.cut.text, it.text);
+        const match = J.studioGlyphMap(env.cut.text, it.text, env._studioGlyphStart || 0);
         if (!match.found)
             return draw(env, it);
         const indices = match.map.map(i => env.cut.studioCharacterMap?.[i] ?? i), key = J.studioLineKey(line), row = studio.characters[key], base = J.studioTransform(row?.line), old = it.charFn;

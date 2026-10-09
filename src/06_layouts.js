@@ -424,10 +424,9 @@ J.LAYOUTS = {
     render(env) {
       const { W, H, sc } = env, P = env.cut.params, s = env.cut.seed, lb = env.ltb;
       const text = env.cut.text.replace(/\s+/g, '');
-      let units = P.unit === 'char' ? [...text].filter(c => !J.isPunct(c)) : (env.cut.words && env.cut.words.length ? env.cut.words : [text]);
-      if (!units.length) units = [text];
+      const units = J.labelPartTexts(env.cut);
       const out = 1 - E.inCubic(env.pOut);
-      const drawLabel = (u, x, y, rot, fs, q, i) => {
+      const drawLabel = (u, x, y, rot, fs, q, i) => J.renderEffectPart(env,'label-'+i,u,()=>{
         if (q <= 0) return;
         const m = J.measure({ text: u, font: P.font, size: fs, track: 0.04 });
         const w = m.w + fs * 0.7, h = fs * 1.36;
@@ -435,17 +434,17 @@ J.LAYOUTS = {
         env.rect(-w / 2, -h / 2, w, h, sc.ink, 1);
         env.draw({ text: u, font: P.font, size: fs, track: 0.04, x: 0, y: 0, color: sc.bg, ghost: false });
         ctx.restore();
-      };
+      });
       let bb = null;
       if (P.variant === 'radial') {
         const m = Math.max(units.length, 10), R = Math.min(H * 0.3, W * 0.36), fs = Math.min(H * 0.062, W * 0.052);
-        if (P.center === 'orb') { const e = E.outBack(J.clamp(env.lt / 0.35), 1.4) * out; env.circle(W / 2, H / 2, R * 0.52 * e, sc.accent, null, 0, 1, true); }
+        if (P.center === 'orb') J.renderEffectPart(env,'label-center','●',()=>{ const e = E.outBack(J.clamp(env.lt / 0.35), 1.4) * out; env.circle(W / 2, H / 2, R * 0.52 * e, sc.accent, null, 0, 1, true); });
         for (let i = 0; i < m; i++) {
           const ang = i / m * 360 + lb * 7 - 90;
           const q = E.outBack(J.clamp((env.lt - i * 0.025) / 0.22), 2) * out;
           drawLabel(units[i % units.length], W / 2 + Math.cos(ang * J.DEG) * R, H / 2 + Math.sin(ang * J.DEG) * R, ang, fs, q, i);
         }
-        if (P.center === 'word') bb = J.mainDraw(env, { text, font: P.fontC, size: Math.min(J.fitSize(text, P.fontC, R * 1.1, R * 0.7), H * 0.18), x: W / 2, y: H / 2, color: sc.fg });
+        if (P.center === 'word') bb = J.renderEffectPart(env,'label-center',text,()=>J.mainDraw(env, { text, font: P.fontC, size: Math.min(J.fitSize(text, P.fontC, R * 1.1, R * 0.7), H * 0.18), x: W / 2, y: H / 2, color: sc.fg }));
         return bb || { x0: W / 2 - R, x1: W / 2 + R, y0: H / 2 - R, y1: H / 2 + R, cx: W / 2, cy: H / 2, boxes: [] };
       }
       if (P.variant === 'rows') {

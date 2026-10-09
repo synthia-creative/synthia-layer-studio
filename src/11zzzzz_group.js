@@ -112,8 +112,8 @@ J.subtitleGroupBounds = (renderer, env) => {
 };
 J.Renderer.prototype.drawCut = function(env) {
   const line=env.plan.lines.find(l=>l.index===env.cut.line), key=J.subtitleGroupKey(line), p=J.groupTransform(env.plan.studio?.groups?.[key]);
-  const needsBounds=J.groupCapturing||!!J.VideoAnalysis.capture;
-  if(!line||env.bgOnly||env.inLayer||env._groupScope||(!needsBounds&&J.groupIsIdentity(p)))return drawCut.call(this,env);
+  const needsBounds=J.groupCapturing||J.partCapturing||!!J.VideoAnalysis.capture;
+  if(!line||env.bgOnly||env.inLayer||env._groupScope||(!needsBounds&&J.groupIsIdentity(p)&&!J.hasEffectTransforms?.(env)))return drawCut.call(this,env);
   const ctx=env.ctx, bounds=J.subtitleGroupBounds(this,env), zone=env.zone, origin={x:zone?.x||0,y:zone?.y||0};
   const world={x0:bounds.x0+origin.x,y0:bounds.y0+origin.y,x1:bounds.x1+origin.x,y1:bounds.y1+origin.y};
   const partner=typeof env.cut.companion==='object'?env.cut.companion:env.plan.cuts.find(c=>c.companion===env.cut);
@@ -123,12 +123,13 @@ J.Renderer.prototype.drawCut = function(env) {
   const device={...matrix,e:matrix.e*k,f:matrix.f*k}, before=ctx.getTransform();
   // グループはカメラ・文字の外側の親。カメラの既存行列は保持する。
   const combined=J.groupMultiply(device,before);
-  const screen=fn=>{ctx.save();ctx.setTransform(before);try{return recorder?recorder.pause(fn):fn();}finally{ctx.restore();}};
+  const screen=fn=>{ctx.save();ctx.setTransform(before);try{const draw=()=>J.withoutEffectCapture?J.withoutEffectCapture(fn):fn();return recorder?recorder.pause(draw):draw();}finally{ctx.restore();}};
   // makeEnvでdraw等のクロージャも作り直し、測定用スコープを実描画へ漏らさない。
   const scoped=this.makeEnv(ctx,env.plan,env.cut,env.sc,{...env,_groupScope:true});let bb=null;
   ctx.save();ctx.setTransform(combined.a,combined.b,combined.c,combined.d,combined.e,combined.f);
   const recorder=needsBounds&&env.pass==='main'?J.recordGroupGeometry(ctx):null;
   try {
+    const drawSubtitle=()=>{
     if(env.layer!=='front')for(const d of env.cut.decor||[]){const D=J.DECOR[d.id];if(D?.layer==='back'){
       if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,null,d));
       else D.draw(scoped,null,d);
@@ -139,6 +140,9 @@ J.Renderer.prototype.drawCut = function(env) {
           if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,bb,d));else D.draw(scoped,bb,d);
         }}
       }
+    return bb;
+    };
+    if(J.withCutTransform)J.withCutTransform(this,scoped,drawSubtitle);else drawSubtitle();
       const actual=recorder?.bounds();
       if(actual){
         if(J.groupCapturing){

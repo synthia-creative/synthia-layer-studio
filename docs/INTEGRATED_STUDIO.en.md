@@ -25,3 +25,5 @@ Use Windows Chrome or Edge. Open **Integrated studio tools → Enable / disable 
 10. Enable Autosave / recovery for edit-triggered, 15-second and pre-export IndexedDB snapshots. Choose restore/discard on next launch. Use Save snapshot now and wait for the Saved status before closing. Turning it OFF deletes recovery data. Audio/images/videos require reloading; font binaries restore from the snapshot. Save JSON as well, especially for large fonts exceeding localStorage capacity.
 
 Browser data deletion, private mode, quotas and another browser/origin can remove or isolate recovery data. Physical pen devices, real phones, Mac Safari and long 4K exports require separate testing. Lyrics Studio is unchanged.
+
+[Independent Cut / Part controls, ownership, persistence and developer contract](CUT_PART_TRANSFORMS.en.md)

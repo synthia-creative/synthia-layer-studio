@@ -3,8 +3,8 @@ type StudioControl = HTMLButtonElement|HTMLInputElement|HTMLTextAreaElement|HTML
 declare const Mediabunny:{VideoSampleSink:new(track:unknown)=>{samplesAtTimestamps:(times:Iterable<number>)=>AsyncIterableIterator<unknown>}};
 interface StudioTransform {x:number;y:number;scale:number;rotation:number;opacity:number;kerning:number;}
 interface SubtitleGroupTransform {x:number;y:number;scale:number;rotation:number;}
-interface StudioState {groups:Record<string,SubtitleGroupTransform>;groupLines:{id:string;text:string;index:number}[];}
-interface StudioInput {groups?:StudioState['groups'];groupLines?:StudioState['groupLines'];}
+interface StudioState {groups:Record<string,SubtitleGroupTransform>;groupLines:{id:string;text:string;index:number}[];partTransforms:Record<string,{owner:string;signature:string;kind:string;transform:SubtitleGroupTransform}>;}
+interface StudioInput {groups?:StudioState['groups'];groupLines?:StudioState['groupLines'];partTransforms?:StudioState['partTransforms'];}
 interface StudioState { flags: Record<string, boolean>; tapGap: number; blankLines: 'keep' | 'skip'; characters:Record<string,{line:StudioTransform;glyphs:Record<string,StudioTransform>}>; fontFiles:{key:string;label:string;data:string}[]; }
 interface StudioInput { flags?: Record<string, boolean>; tapGap?: number; blankLines?: string; characters?:StudioState['characters']; fontFiles?:StudioState['fontFiles']; motion?:StudioMotion; }
 interface StudioMotion {preset:string;controls:Record<string,number>;rows:Record<string,{enter:string;hold:string;exit:string;intensity:number}>;}

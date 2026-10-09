@@ -1867,9 +1867,7 @@ J.register('layout', 'tape', {
     let bb = null;
     const txt = String(cut.text).trim();
     if (Pm.variant === 'stack') {
-      let parts = (cut.words && cut.words.length > 1 ? cut.words : [txt]).map(p => p.trim()).filter(Boolean);
-      if (parts.length > 4) { const k = Math.ceil(parts.length / 4); const q = []; for (let i = 0; i < parts.length; i += k) q.push(parts.slice(i, i + k).join('')); parts = q; }
-      if (parts.length === 1 && J.glyphCount(txt) > (port ? 5 : 9)) parts = J.splitLines(txt, Math.ceil(J.glyphCount(txt) / 2)).split('\n');
+      const parts = J.tapePartTexts(cut,W,H);
       const np = parts.length;
       const longest = parts.reduce((a, p) => Math.max(a, J.measure({ text: p, font: Pm.font, size: 100, track: 0.05 }).w / 100), 1);
       const size = Math.min(W * 0.72 / longest, H * 0.62 / (np * 1.75), M * 0.17);
@@ -1880,7 +1878,7 @@ J.register('layout', 'tape', {
         const y = H / 2 + (i - (np - 1) / 2) * h * 1.12;
         const x = W / 2 + J.rs(s, i, 3) * W * 0.05;
         const ang = (i % 2 ? -1 : 1) * Math.abs(Pm.ang) * 0.45 + J.rs(s, i, 4) * 1.5;
-        const r = strip(x, y, ang, L, h, i % 3 === 1 ? tapeC2 : tapeC, i, 0.03 + i * 0.12, 0.3, (cx2, cy2) => J.mainDraw(env, { text: p, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, color: onCol(sc, i % 3 === 1 ? tapeC2 : tapeC), noHold: plateHold(env), mi: miAt(env, 0.05 + i * 0.12) }));
+        const r = J.renderEffectPart(env,'tape-row-'+i,p,()=>strip(x, y, ang, L, h, i % 3 === 1 ? tapeC2 : tapeC, i, 0.03 + i * 0.12, 0.3, (cx2, cy2) => J.mainDraw(env, { text: p, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, color: onCol(sc, i % 3 === 1 ? tapeC2 : tapeC), noHold: plateHold(env), mi: miAt(env, 0.05 + i * 0.12) })));
         if (r) bb = U(bb, bbRect(x - L / 2, y - h / 2, x + L / 2, y + h / 2));
       });
       return bb;
@@ -1893,8 +1891,9 @@ J.register('layout', 'tape', {
       const unit = String(cut.lineText || cut.text).replace(/\s+/g, ' ').trim();
       const fs = h * 0.26;
       const L2 = Math.min(Math.hypot(W, H) * 0.9, J.measure({ text: unit, font: Pm.fs, size: fs, track: 0.1 }).w * 1.3 + fs * 6);
-      strip(W / 2 + L * 0.15, H / 2 + h * 0.1, -Pm.ang * 2.4, L2, h * 0.5, tapeC2, 9, 0.0, 0.4, (cx2, cy2) => env.draw({ text: unit, font: Pm.fs, size: fs, track: 0.1, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false }));
+      J.renderEffectPart(env,'tape-cross',unit,()=>strip(W / 2 + L * 0.15, H / 2 + h * 0.1, -Pm.ang * 2.4, L2, h * 0.5, tapeC2, 9, 0.0, 0.4, (cx2, cy2) => env.draw({ text: unit, font: Pm.fs, size: fs, track: 0.1, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false })));
     }
+    return J.renderEffectPart(env,'tape-main',txt,()=>{
     const r = strip(W / 2, H / 2, Pm.ang, L, h, tapeC, 0, 0.06, 0.34, (cx2, cy2) => J.mainDraw(env, { text: mt, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, lead: 1.15, color: txtC, noHold: plateHold(env), mi: miAt(env, 0.1) }));
     if (Pm.piece) {
       const ph = h * 0.42, pl = ph * 2.6;
@@ -1904,6 +1903,7 @@ J.register('layout', 'tape', {
       strip(ex - ph * 0.3, ey - ph * 0.4, Pm.ang - 38 * Math.sign(Pm.ang || 1), pl, ph, tapeC2, 5, 0.32, 0.18, (cx2, cy2) => env.draw({ text: lab, font: monoF(env), size: Math.min(ph * 0.34, pl * 0.7 / Math.max(3, lab.length) * 1.6), track: 0.12, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false }));
     }
     return r ? bbRect(W / 2 - L / 2, H / 2 - h / 2, W / 2 + L / 2, H / 2 + h / 2) : null;
+    });
   },
 }, P);
 

@@ -1429,7 +1429,7 @@ reg('panels', {
     }
     const stag = Math.max(0.01, env.cut.stagger || 0.04);
     let bb = null;
-    polys.forEach((poly, i) => {
+    polys.forEach((poly, i) => J.renderEffectPart(env,'panel-'+i,ch[i],()=>{
       const d = 0.06 + i * 0.16, e = E.inOutCubic(J.clamp((env.lt - d) / 0.3));
       if (e <= 0) return;
       // wipe along the reading direction
@@ -1469,7 +1469,7 @@ reg('panels', {
         : { text: txt, font: p.font, size, x: cx, y: cy, lead: 1.15, color: accent ? onCol(sc, sc.ink) : sc.fg, mi: (d + 0.08) / stag };
       bb = J.unionBB(bb, J.mainDraw(env, it));
       ctx.restore();
-    });
+    }));
     return bb || box(m, m, W - m, H - m);
   },
 });

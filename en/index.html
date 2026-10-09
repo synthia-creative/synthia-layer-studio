@@ -664,8 +664,10 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .studio-tap-enhanced #tapBtn { width:100%; min-height:120px; touch-action:none; font-size:28px; }
 #studioTapMeta { white-space:pre-line; margin:10px 0; font-size:14px; }
 /* 演出全体の操作UIは既存パネル幅に収める。枠Canvasは出力対象外。 */
-#studioGroupOverlay { position:absolute; z-index:3; pointer-events:none; }
-#studioGroupOverlay[hidden], #studioGroupPanel[hidden] { display:none; }
+#studioGroupOverlay, #studioPartOverlay { position:absolute; z-index:3; pointer-events:none; }
+#studioGroupOverlay[hidden], #studioGroupPanel[hidden], #studioPartOverlay[hidden], #studioPartPanel[hidden] { display:none; }
+#studioPartSubtitle, #studioPartTarget { display:block; width:100%; max-width:100%; margin:6px 0; }
+#studioPartNotice { font-size:12px; color:var(--muted); }
 .group-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 10px; }
 .group-fields label { min-width:0; font-size:12px; }
 .group-fields input[type=number] { display:block; width:100%; box-sizing:border-box; margin:5px 0 0; }
@@ -3786,10 +3788,9 @@ J.LAYOUTS = {
     render(env) {
       const { W, H, sc } = env, P = env.cut.params, s = env.cut.seed, lb = env.ltb;
       const text = env.cut.text.replace(/\s+/g, '');
-      let units = P.unit === 'char' ? [...text].filter(c => !J.isPunct(c)) : (env.cut.words && env.cut.words.length ? env.cut.words : [text]);
-      if (!units.length) units = [text];
+      const units = J.labelPartTexts(env.cut);
       const out = 1 - E.inCubic(env.pOut);
-      const drawLabel = (u, x, y, rot, fs, q, i) => {
+      const drawLabel = (u, x, y, rot, fs, q, i) => J.renderEffectPart(env,'label-'+i,u,()=>{
         if (q <= 0) return;
         const m = J.measure({ text: u, font: P.font, size: fs, track: 0.04 });
         const w = m.w + fs * 0.7, h = fs * 1.36;
@@ -3797,17 +3798,17 @@ J.LAYOUTS = {
         env.rect(-w / 2, -h / 2, w, h, sc.ink, 1);
         env.draw({ text: u, font: P.font, size: fs, track: 0.04, x: 0, y: 0, color: sc.bg, ghost: false });
         ctx.restore();
-      };
+      });
       let bb = null;
       if (P.variant === 'radial') {
         const m = Math.max(units.length, 10), R = Math.min(H * 0.3, W * 0.36), fs = Math.min(H * 0.062, W * 0.052);
-        if (P.center === 'orb') { const e = E.outBack(J.clamp(env.lt / 0.35), 1.4) * out; env.circle(W / 2, H / 2, R * 0.52 * e, sc.accent, null, 0, 1, true); }
+        if (P.center === 'orb') J.renderEffectPart(env,'label-center','●',()=>{ const e = E.outBack(J.clamp(env.lt / 0.35), 1.4) * out; env.circle(W / 2, H / 2, R * 0.52 * e, sc.accent, null, 0, 1, true); });
         for (let i = 0; i < m; i++) {
           const ang = i / m * 360 + lb * 7 - 90;
           const q = E.outBack(J.clamp((env.lt - i * 0.025) / 0.22), 2) * out;
           drawLabel(units[i % units.length], W / 2 + Math.cos(ang * J.DEG) * R, H / 2 + Math.sin(ang * J.DEG) * R, ang, fs, q, i);
         }
-        if (P.center === 'word') bb = J.mainDraw(env, { text, font: P.fontC, size: Math.min(J.fitSize(text, P.fontC, R * 1.1, R * 0.7), H * 0.18), x: W / 2, y: H / 2, color: sc.fg });
+        if (P.center === 'word') bb = J.renderEffectPart(env,'label-center',text,()=>J.mainDraw(env, { text, font: P.fontC, size: Math.min(J.fitSize(text, P.fontC, R * 1.1, R * 0.7), H * 0.18), x: W / 2, y: H / 2, color: sc.fg }));
         return bb || { x0: W / 2 - R, x1: W / 2 + R, y0: H / 2 - R, y1: H / 2 + R, cx: W / 2, cy: H / 2, boxes: [] };
       }
       if (P.variant === 'rows') {
@@ -23465,7 +23466,7 @@ reg('panels', {
     }
     const stag = Math.max(0.01, env.cut.stagger || 0.04);
     let bb = null;
-    polys.forEach((poly, i) => {
+    polys.forEach((poly, i) => J.renderEffectPart(env,'panel-'+i,ch[i],()=>{
       const d = 0.06 + i * 0.16, e = E.inOutCubic(J.clamp((env.lt - d) / 0.3));
       if (e <= 0) return;
       // wipe along the reading direction
@@ -23505,7 +23506,7 @@ reg('panels', {
         : { text: txt, font: p.font, size, x: cx, y: cy, lead: 1.15, color: accent ? onCol(sc, sc.ink) : sc.fg, mi: (d + 0.08) / stag };
       bb = J.unionBB(bb, J.mainDraw(env, it));
       ctx.restore();
-    });
+    }));
     return bb || box(m, m, W - m, H - m);
   },
 });
@@ -25798,9 +25799,7 @@ J.register('layout', 'tape', {
     let bb = null;
     const txt = String(cut.text).trim();
     if (Pm.variant === 'stack') {
-      let parts = (cut.words && cut.words.length > 1 ? cut.words : [txt]).map(p => p.trim()).filter(Boolean);
-      if (parts.length > 4) { const k = Math.ceil(parts.length / 4); const q = []; for (let i = 0; i < parts.length; i += k) q.push(parts.slice(i, i + k).join('')); parts = q; }
-      if (parts.length === 1 && J.glyphCount(txt) > (port ? 5 : 9)) parts = J.splitLines(txt, Math.ceil(J.glyphCount(txt) / 2)).split('\n');
+      const parts = J.tapePartTexts(cut,W,H);
       const np = parts.length;
       const longest = parts.reduce((a, p) => Math.max(a, J.measure({ text: p, font: Pm.font, size: 100, track: 0.05 }).w / 100), 1);
       const size = Math.min(W * 0.72 / longest, H * 0.62 / (np * 1.75), M * 0.17);
@@ -25811,7 +25810,7 @@ J.register('layout', 'tape', {
         const y = H / 2 + (i - (np - 1) / 2) * h * 1.12;
         const x = W / 2 + J.rs(s, i, 3) * W * 0.05;
         const ang = (i % 2 ? -1 : 1) * Math.abs(Pm.ang) * 0.45 + J.rs(s, i, 4) * 1.5;
-        const r = strip(x, y, ang, L, h, i % 3 === 1 ? tapeC2 : tapeC, i, 0.03 + i * 0.12, 0.3, (cx2, cy2) => J.mainDraw(env, { text: p, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, color: onCol(sc, i % 3 === 1 ? tapeC2 : tapeC), noHold: plateHold(env), mi: miAt(env, 0.05 + i * 0.12) }));
+        const r = J.renderEffectPart(env,'tape-row-'+i,p,()=>strip(x, y, ang, L, h, i % 3 === 1 ? tapeC2 : tapeC, i, 0.03 + i * 0.12, 0.3, (cx2, cy2) => J.mainDraw(env, { text: p, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, color: onCol(sc, i % 3 === 1 ? tapeC2 : tapeC), noHold: plateHold(env), mi: miAt(env, 0.05 + i * 0.12) })));
         if (r) bb = U(bb, bbRect(x - L / 2, y - h / 2, x + L / 2, y + h / 2));
       });
       return bb;
@@ -25824,8 +25823,9 @@ J.register('layout', 'tape', {
       const unit = String(cut.lineText || cut.text).replace(/\s+/g, ' ').trim();
       const fs = h * 0.26;
       const L2 = Math.min(Math.hypot(W, H) * 0.9, J.measure({ text: unit, font: Pm.fs, size: fs, track: 0.1 }).w * 1.3 + fs * 6);
-      strip(W / 2 + L * 0.15, H / 2 + h * 0.1, -Pm.ang * 2.4, L2, h * 0.5, tapeC2, 9, 0.0, 0.4, (cx2, cy2) => env.draw({ text: unit, font: Pm.fs, size: fs, track: 0.1, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false }));
+      J.renderEffectPart(env,'tape-cross',unit,()=>strip(W / 2 + L * 0.15, H / 2 + h * 0.1, -Pm.ang * 2.4, L2, h * 0.5, tapeC2, 9, 0.0, 0.4, (cx2, cy2) => env.draw({ text: unit, font: Pm.fs, size: fs, track: 0.1, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false })));
     }
+    return J.renderEffectPart(env,'tape-main',txt,()=>{
     const r = strip(W / 2, H / 2, Pm.ang, L, h, tapeC, 0, 0.06, 0.34, (cx2, cy2) => J.mainDraw(env, { text: mt, font: Pm.font, size, x: cx2, y: cy2, track: 0.05, lead: 1.15, color: txtC, noHold: plateHold(env), mi: miAt(env, 0.1) }));
     if (Pm.piece) {
       const ph = h * 0.42, pl = ph * 2.6;
@@ -25835,6 +25835,7 @@ J.register('layout', 'tape', {
       strip(ex - ph * 0.3, ey - ph * 0.4, Pm.ang - 38 * Math.sign(Pm.ang || 1), pl, ph, tapeC2, 5, 0.32, 0.18, (cx2, cy2) => env.draw({ text: lab, font: monoF(env), size: Math.min(ph * 0.34, pl * 0.7 / Math.max(3, lab.length) * 1.6), track: 0.12, x: cx2, y: cy2, color: onCol(sc, tapeC2), alpha: out, ghost: false }));
     }
     return r ? bbRect(W / 2 - L / 2, H / 2 - h / 2, W / 2 + L / 2, H / 2 + h / 2) : null;
+    });
   },
 }, P);
 
@@ -39555,6 +39556,7 @@ V.Controller = class {
         characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
         groups: J.normalizeSubtitleGroups ? J.normalizeSubtitleGroups(value?.groups) : {},
         groupLines: J.normalizeSubtitleGroupLines ? J.normalizeSubtitleGroupLines(value?.groupLines) : [],
+        partTransforms: J.normalizeEffectTransforms ? J.normalizeEffectTransforms(value?.partTransforms) : {},
         fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
         motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
         analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },
@@ -39694,7 +39696,7 @@ V.Controller = class {
         const studio = env.plan?.studio, line = env.plan?.lines?.find(l => l.index === env.cut?.line);
         if (!studio?.flags?.characterEditing || !line || env.bgOnly || env.inLayer || it._studioApplied || !it.text)
             return draw(env, it);
-        const match = J.studioGlyphMap(env.cut.text, it.text);
+        const match = J.studioGlyphMap(env.cut.text, it.text, env._studioGlyphStart || 0);
         if (!match.found)
             return draw(env, it);
         const indices = match.map.map(i => env.cut.studioCharacterMap?.[i] ?? i), key = J.studioLineKey(line), row = studio.characters[key], base = J.studioTransform(row?.line), old = it.charFn;
@@ -40328,8 +40330,8 @@ J.subtitleGroupBounds = (renderer, env) => {
 };
 J.Renderer.prototype.drawCut = function(env) {
   const line=env.plan.lines.find(l=>l.index===env.cut.line), key=J.subtitleGroupKey(line), p=J.groupTransform(env.plan.studio?.groups?.[key]);
-  const needsBounds=J.groupCapturing||!!J.VideoAnalysis.capture;
-  if(!line||env.bgOnly||env.inLayer||env._groupScope||(!needsBounds&&J.groupIsIdentity(p)))return drawCut.call(this,env);
+  const needsBounds=J.groupCapturing||J.partCapturing||!!J.VideoAnalysis.capture;
+  if(!line||env.bgOnly||env.inLayer||env._groupScope||(!needsBounds&&J.groupIsIdentity(p)&&!J.hasEffectTransforms?.(env)))return drawCut.call(this,env);
   const ctx=env.ctx, bounds=J.subtitleGroupBounds(this,env), zone=env.zone, origin={x:zone?.x||0,y:zone?.y||0};
   const world={x0:bounds.x0+origin.x,y0:bounds.y0+origin.y,x1:bounds.x1+origin.x,y1:bounds.y1+origin.y};
   const partner=typeof env.cut.companion==='object'?env.cut.companion:env.plan.cuts.find(c=>c.companion===env.cut);
@@ -40339,12 +40341,13 @@ J.Renderer.prototype.drawCut = function(env) {
   const device={...matrix,e:matrix.e*k,f:matrix.f*k}, before=ctx.getTransform();
   // グループはカメラ・文字の外側の親。カメラの既存行列は保持する。
   const combined=J.groupMultiply(device,before);
-  const screen=fn=>{ctx.save();ctx.setTransform(before);try{return recorder?recorder.pause(fn):fn();}finally{ctx.restore();}};
+  const screen=fn=>{ctx.save();ctx.setTransform(before);try{const draw=()=>J.withoutEffectCapture?J.withoutEffectCapture(fn):fn();return recorder?recorder.pause(draw):draw();}finally{ctx.restore();}};
   // makeEnvでdraw等のクロージャも作り直し、測定用スコープを実描画へ漏らさない。
   const scoped=this.makeEnv(ctx,env.plan,env.cut,env.sc,{...env,_groupScope:true});let bb=null;
   ctx.save();ctx.setTransform(combined.a,combined.b,combined.c,combined.d,combined.e,combined.f);
   const recorder=needsBounds&&env.pass==='main'?J.recordGroupGeometry(ctx):null;
   try {
+    const drawSubtitle=()=>{
     if(env.layer!=='front')for(const d of env.cut.decor||[]){const D=J.DECOR[d.id];if(D?.layer==='back'){
       if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,null,d));
       else D.draw(scoped,null,d);
@@ -40355,6 +40358,9 @@ J.Renderer.prototype.drawCut = function(env) {
           if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,bb,d));else D.draw(scoped,bb,d);
         }}
       }
+    return bb;
+    };
+    if(J.withCutTransform)J.withCutTransform(this,scoped,drawSubtitle);else drawSubtitle();
       const actual=recorder?.bounds();
       if(actual){
         if(J.groupCapturing){
@@ -40376,6 +40382,153 @@ J.studioEnsureCues=project=>{
 };
 J.studioDuplicateCue=(project,index)=>{const key='cue-'+project.subtitleCues[index]?.id,id=duplicate(project,index);if(project.studio.groups[key])project.studio.groups['cue-'+id]=structuredClone(project.studio.groups[key]);return id;};
 J.deleteLayerCue=(project,index)=>{const key='cue-'+project.subtitleCues[index]?.id;remove(project,index);if(project.studio?.groups)delete project.studio.groups[key];};
+})();
+
+/* カットと描画ブロックを明示的に束ねる。文字列検索や描画済み画像の切り抜きは使わない。 */
+(() => {
+'use strict';
+J.normalizeEffectTransforms = value => {
+  const out = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return out;
+  for (const [id,r] of Object.entries(value).slice(0,20000)) {
+    if (!/^part-[-a-zA-Z0-9_]{1,100}$/.test(id) || !r || !/^cue-.{1,100}$/.test(r.owner) || typeof r.signature !== 'string' || r.signature.length > 30000) continue;
+    if (!['cut','part'].includes(r.kind)) continue;
+    out[id] = {owner:r.owner, signature:r.signature, kind:r.kind, transform:J.groupTransform(r.transform)};
+  }
+  return out;
+};
+// 同じ分割規則を生成時と描画時で共有し、書体や配色の変更を構成変更と誤認しない。
+J.tapePartTexts = (cut,W,H) => {
+  const txt=String(cut.text).trim();
+  let parts=(cut.words?.length>1?cut.words:[txt]).map(p=>p.trim()).filter(Boolean);
+  if(parts.length>4){const k=Math.ceil(parts.length/4),q=[];for(let i=0;i<parts.length;i+=k)q.push(parts.slice(i,i+k).join(''));parts=q;}
+  if(parts.length===1&&J.glyphCount(txt)>(W<H?5:9))parts=J.splitLines(txt,Math.ceil(J.glyphCount(txt)/2)).split('\n');
+  return parts;
+};
+J.labelPartTexts = cut => {
+  const txt=cut.text.replace(/\s+/g,''),p=cut.params;
+  const units=p.unit==='char'?[...txt].filter(c=>!J.isPunct(c)):(cut.words?.length?cut.words:[txt]);
+  return units.length?units:[txt];
+};
+J.effectPartSpecs = (cut,W,H) => {
+  const p=cut.params||{},out=/** @type {{slot:string,text:string,glyphStart?:number}[]} */([]);
+  if(cut.layout==='tape'){
+    if(p.variant==='stack')J.tapePartTexts(cut,W,H).forEach((text,i)=>out.push({slot:'tape-row-'+i,text}));
+    else {if(p.variant==='cross')out.push({slot:'tape-cross',text:cut.lineText||cut.text});out.push({slot:'tape-main',text:cut.text});}
+  } else if(cut.layout==='labels'){
+    const units=J.labelPartTexts(cut),n=p.variant==='radial'?Math.max(units.length,10):units.length;
+    for(let i=0;i<n;i++)out.push({slot:'label-'+i,text:units[i%units.length]});
+    if(p.variant==='radial'&&p.center!=='none')out.push({slot:'label-center',text:p.center==='word'?cut.text:'●'});
+  } else if(cut.layout==='panels'){
+    (p.chunks?.length?p.chunks:[cut.text]).forEach((text,i)=>out.push({slot:'panel-'+i,text}));
+  }
+  // 描画スロットから文字位置の開始点も渡す。同じ語や文字の別スロットを区別する。
+  let cursor=0;
+  for(const s of out){
+    if(s.slot==='label-center'||s.slot==='tape-main'||s.slot==='tape-cross')s.glyphStart=0;
+    else if(cut.layout==='labels'&&p.unit==='char'){
+      const chars=[...cut.text.replace(/\s+/g,'')],indices=chars.map((ch,i)=>({ch,i})).filter(r=>!J.isPunct(r.ch));
+      s.glyphStart=indices[Number(s.slot.slice(6))%indices.length]?.i||0;
+    }else if(cut.layout==='labels'){
+      const units=J.labelPartTexts(cut),n=Number(s.slot.slice(6))%units.length;
+      s.glyphStart=units.slice(0,n).reduce((sum,text)=>sum+[...text.replace(/\s+/g,'')].length,0);
+    }else {s.glyphStart=cursor;cursor+=[...s.text.replace(/\s+/g,'')].length;}
+  }
+  return out;
+};
+const planner=J.plan;
+J.plan=(project,audio)=>{
+  const plan=planner(project,audio),records=plan.studio.partTransforms,targets=[],recordMap=new Map();
+  for(const [id,r]of Object.entries(records)){const key=JSON.stringify([r.owner,r.kind,r.signature]);if(!recordMap.has(key))recordMap.set(key,[id,r]);}
+  function bind(p){
+    p.studio=plan.studio;
+    for(const line of p.lines){
+      const owner=J.subtitleGroupKey(line),cuts=p.cuts.filter(c=>c.line===line.index&&c.layout!=='interlude');
+      const sequence=cuts.map(c=>[c.utext||c.text,typeof c.companion==='object'?c.companion.text:null]);
+      cuts.forEach((root,i)=>{
+        for(const [cut,role] of [[root,'main'],...(typeof root.companion==='object'?[[root.companion,'companion']]:[])]){
+          const W=cut.zone?.w||p.W,H=cut.zone?.h||p.H,specs=J.effectPartSpecs(cut,W,H);
+          // 時刻・書体・色は署名から外す。全文と分割構成が変われば旧値を退避する。
+          const base=JSON.stringify([line.text,sequence,i,role]);
+          const add=(kind,slot,text,signature)=>{
+            const saved=recordMap.get(JSON.stringify([owner,kind,signature]));
+            const t={id:saved?.[0]||'pending:'+owner+':'+signature,owner,signature,kind,slot,text,line:line.index,cutNumber:i+1,role,start:cut.start,end:cut.end,transform:J.groupTransform(saved?.[1].transform),supported:specs.length>0,glyphStart:specs.find(s=>s.slot===slot)?.glyphStart||0};
+            targets.push(t);return t;
+          };
+          cut._effectCut=add('cut','cut',cut.text,base);cut._effectParts={};
+          const topology=JSON.stringify([cut.layout,cut.params?.variant,specs]);
+          for(const s of specs)cut._effectParts[s.slot]=add('part',s.slot,s.text,base+'|'+topology+'|'+s.slot);
+          cut._effectGlyphMapping=cut._effectCut.id.startsWith('part-')||Object.values(cut._effectParts).some(t=>t.id.startsWith('part-'));
+        }
+      });
+    }
+  }
+  if(plan.layerGroups?.length){
+    for(const g of plan.layerGroups){
+      const first=targets.length;
+      for(const line of g.plan.lines){const top=plan.lines.find(l=>l.index===g.indices[line.index]);if(top){line.cueId=top.cueId;line.groupId=top.groupId;}}
+      for(const cut of g.plan.cuts){const top=plan.cuts.find(c=>c.line===g.indices[cut.line]&&c.start===cut.start&&c.text===cut.text);if(top)cut.studioCharacterMap=top.studioCharacterMap;}
+      bind(g.plan);
+      // 一覧は全体の字幕番号、描画用の所属は各サブプランの行番号を保つ。
+      for(const t of targets.slice(first))t.line=g.indices[t.line];
+    }
+  }else bind(plan);
+  plan.effectTargets=targets;
+  const activeIds=new Set(targets.map(t=>t.id));plan.suspendedEffectTransforms=Object.keys(records).filter(id=>!activeIds.has(id));
+  return plan;
+};
+J.setEffectTransform=(project,target,value,currentPlan)=>{
+  const plan=currentPlan||J.plan(project,J.ui?.audio),line=plan.lines.find(l=>l.index===target?.line);
+  if(!target||!plan.effectTargets.some(t=>t.owner===target.owner&&t.signature===target.signature&&t.kind===target.kind)||J.groupLocked(project,line))return null;
+  const owner=J.setSubtitleGroup(project,line,project.studio.groups?.[J.subtitleGroupKey(line)]);
+  const id=target.id.startsWith('part-')?target.id:'part-'+crypto.randomUUID();
+  project.studio.partTransforms[id]={owner,signature:target.signature,kind:target.kind,transform:J.groupTransform(value)};
+  return id;
+};
+J.effectPartHits=[];
+const active=[];
+J.withoutEffectCapture=fn=>{
+  const run=i=>i<active.length?active[i].pause(()=>run(i+1)):fn();return run(0);
+};
+const cache=new WeakMap();let measureCanvas;
+function anchors(renderer,env){
+  let found=cache.get(env.cut);if(found)return found;
+  found={};measureCanvas ||= document.createElement('canvas');measureCanvas.width=measureCanvas.height=1;
+  const ctx=measureCanvas.getContext('2d'),cut=env.cut,lt=Math.min(cut.dur*.8,Math.max(cut.inDur+.1,cut.dur*.65));
+  const m=renderer.makeEnv(ctx,env.plan,cut,env.sc,{...env,ctx,lt,ltb:lt,t:cut.start+lt,pass:'main',passColor:null,scale:1,allowFilter:false,hideText:false,glyphLog:null,studioGlyph:()=>{},_groupMeasuring:true,_effectDiscover:found});
+  m.pIn=1;m.pOut=0;(J.LAYOUTS[cut.layout]||J.LAYOUTS.center).render(m);cache.set(cut,found);return found;
+}
+function scope(env,target,bounds,draw){
+  if(!target||env._groupMeasuring||env.bgOnly||env.inLayer)return draw();
+  const p=target.transform,capturing=J.partCapturing&&env.pass==='main';
+  if(!capturing&&J.groupIsIdentity(p))return draw();
+  const ctx=env.ctx,before=ctx.getTransform(),center={x:(bounds.x0+bounds.x1)/2,y:(bounds.y0+bounds.y1)/2},matrix=J.groupMatrix(p,center,env.plan.W,env.plan.H);
+  const transformed=!J.groupIsIdentity(p);if(transformed){ctx.save();ctx.transform(matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f);}
+  const recorder=capturing?J.recordGroupGeometry(ctx):null;if(recorder)active.push(recorder);
+  try{
+    const result=draw(),b=recorder?.bounds();
+    if(b){const total=ctx.getTransform();J.effectPartHits.push({id:target.id,target,bounds:b,center:J.groupPoint(total,center),basis:{a:before.a,b:before.b,c:before.c,d:before.d},transform:p});}
+    return result;
+  }finally{if(recorder){active.pop();recorder.close();}if(transformed)ctx.restore();}
+}
+J.hasEffectTransforms=env=>!!env.cut._effectCut&&!J.groupIsIdentity(env.cut._effectCut.transform)||Object.values(env.cut._effectParts||{}).some(t=>!J.groupIsIdentity(t.transform));
+J.withCutTransform=(renderer,env,draw)=>{
+  if(env._groupMeasuring)return draw();
+  env._effectAnchors=(J.partCapturing||J.hasEffectTransforms(env))?anchors(renderer,env):null;
+  return scope(env,env.cut._effectCut,J.subtitleGroupBounds(renderer,env),draw);
+};
+J.renderEffectPart=(env,slot,text,draw)=>{
+  const t=env.cut._effectParts?.[slot],previous=env._studioGlyphStart;env._studioGlyphStart=env.cut._effectGlyphMapping?t?.glyphStart||0:previous;
+  try{
+  if(env._effectDiscover){const r=J.recordGroupGeometry(env.ctx);try{const result=draw();env._effectDiscover[slot]=r.bounds();return result;}finally{r.close();}}
+  const b=env._effectAnchors?.[slot]||{x0:env.W*.35,y0:env.H*.4,x1:env.W*.65,y1:env.H*.6};
+  return scope(env,t,b,draw);
+  }finally{env._studioGlyphStart=previous;}
+};
+const ensure=J.studioEnsureCues,duplicate=J.studioDuplicateCue,remove=J.deleteLayerCue;
+J.studioEnsureCues=project=>{const old=Array.isArray(project.subtitleCues)?null:J.plan(project,J.ui?.audio).lines.map(J.subtitleGroupKey),cues=ensure(project);if(old)for(const r of Object.values(project.studio.partTransforms)){const i=old.indexOf(r.owner);if(i>=0)r.owner='cue-'+cues[i].id;}return cues;};
+J.studioDuplicateCue=(project,index)=>{J.studioEnsureCues(project);const owner='cue-'+project.subtitleCues[index]?.id,id=duplicate(project,index);for(const r of Object.values(project.studio.partTransforms))if(r.owner===owner)project.studio.partTransforms['part-'+crypto.randomUUID()]={...structuredClone(r),owner:'cue-'+id};return id;};
+J.deleteLayerCue=(project,index)=>{const owner='cue-'+project.subtitleCues?.[index]?.id;remove(project,index);for(const [id,r]of Object.entries(project.studio.partTransforms))if(r.owner===owner)delete project.studio.partTransforms[id];};
 })();
 
 /* English labels are applied after all expression packs register, before the editor starts.
@@ -44590,6 +44743,104 @@ function boot(){
   mode.addEventListener('change',()=>{drag=null;sync();J.ui.need=true;});
   const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
   J.subtitleGroupUI={sync,drawOverlay};sync();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+})();
+
+/* 一覧は時間外・画面外・重なった対象の復帰経路。操作枠はプレビュー専用。 */
+(() => {
+'use strict';
+function boot(){
+  const el=J.studioElement,tr=J.layerText,root=document.getElementById('studio-characterEditing'),mode=/** @type {HTMLSelectElement} */(document.getElementById('studioCharacterMode')),view=/** @type {HTMLCanvasElement} */(document.getElementById('view'));
+  root.querySelector('summary').textContent=tr('文字・行・演出全体・カット編集','Character / line / group / cut editing');
+  const option=el('option',tr('カット・パーツ / Cut・Part','Cut / Part'));option.value='part';mode.insertBefore(option,mode.options[2]);
+  const panel=el('div',null,'studioPartPanel'),status=el('p',null,'studioPartSelection'),notice=el('p',null,'studioPartNotice'),subtitle=el('select',null,'studioPartSubtitle'),list=el('select',null,'studioPartTarget');
+  subtitle.setAttribute('aria-label',tr('字幕を選択','Select subtitle'));list.setAttribute('aria-label',tr('カット・パーツを選択','Select cut or part'));list.size=5;
+  status.setAttribute('aria-live','polite');notice.setAttribute('aria-live','polite');panel.append(subtitle,list,status,notice,el('h3',tr('カット・パーツ変形','Cut / part transform')));
+  const fields={},resets=[],grid=el('div');grid.className='group-fields';let selected=null,selectionHint=null,drag=null,handles=[],listKey='';
+  const target=()=>J.ui.plan.effectTargets?.find(t=>t.id===selected),line=()=>J.ui.plan.lines.find(l=>l.index===target()?.line),current=()=>J.groupTransform(target()?.transform);
+  const editable=()=>!!target()&&!J.groupLocked(J.ui.project,line())&&!J.ui.playing&&!J.ui.tap&&!J.ui.exporting&&!J.layerSession.busy&&J.studioOn(J.ui.project,'characterEditing');
+  const hit=()=>J.effectPartHits.find(h=>h.id===selected);
+  const change=t=>{if(!editable())return;selectionHint={...target()};selected=J.setEffectTransform(J.ui.project,target(),t,J.ui.plan);selectionHint.owner=J.ui.project.studio.partTransforms[selected]?.owner;J.studioChanged();sync();};
+  for(const [key,ja,en,min,max,step] of /** @type {[string,string,string,number,number,number][]} */([['x','X（%）','X (%)',-400,400,.1],['y','Y（%）','Y (%)',-400,400,.1],['scale','拡大率（%）','Scale (%)',5,1000,1],['rotation','回転（°）','Rotation (°)',-360,360,1]])){
+    const label=el('label',tr(ja,en)),input=el('input',null,'studioPart-'+key);input.type='number';input.min=String(min);input.max=String(max);input.step=String(step);input.setAttribute('aria-label',tr(ja,en));label.append(input);grid.append(label);fields[key]=input;
+    input.addEventListener('change',()=>{const v=input.valueAsNumber;if(!editable()||!Number.isFinite(v)||v<min||v>max){sync();return;}const t=current();t[key]=key==='rotation'?v:v/100;if(JSON.stringify(t)!==JSON.stringify(current())){J.uiApi.pushEdit();change(t);}else sync();});
+  }
+  panel.append(grid);const buttons=el('div');buttons.className='group-resets';
+  for(const [id,ja,en,patch] of [['position','位置リセット','Reset position',{x:0,y:0}],['scale','拡大率リセット','Reset scale',{scale:1}],['rotation','回転リセット','Reset rotation',{rotation:0}],['all','選択対象の変形をすべてリセット','Reset all transforms of this target',J.groupTransform()]]){
+    const button=J.studioButton('studioPartReset-'+id,ja,en,()=>{if(editable()){J.uiApi.pushEdit();change({...current(),...patch});}});resets.push(button);buttons.append(button);
+  }
+  panel.append(buttons,el('p',tr('一覧選択で該当カットへ移動。カット全体、または内部パーツを選び、ドラッグ・四隅・上の丸で位置・倍率・回転を編集します。X/Yは親座標で画面幅・高さの%です。共通装飾はカット全体に属します。','Select a target to seek to its cut. Drag, use corners, or the top circle to move, scale, or rotate the cut or an internal part. X/Y are % of frame width/height in parent coordinates. Shared decorations belong to the whole cut.')));root.append(panel);
+  const overlay=el('canvas',null,'studioPartOverlay');overlay.hidden=true;overlay.setAttribute('aria-label',tr('カット・パーツの選択枠','Cut / part selection'));document.getElementById('viewport').append(overlay);
+  function sync(){
+    const on=mode.value==='part';panel.hidden=!on;
+    if(on)for(const node of root.children)if(node!==mode&&node!==panel&&node.tagName!=='SUMMARY')/** @type {HTMLElement} */(node).hidden=true;
+    if(!target()&&selectionHint)selected=J.ui.plan.effectTargets?.find(t=>t.signature===selectionHint.signature&&t.kind===selectionHint.kind&&(t.owner===selectionHint.owner||t.line===selectionHint.line))?.id||null;
+    const targets=J.ui.plan.effectTargets||[],key=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value]);
+    if(key!==listKey){
+      const old=subtitle.value;subtitle.replaceChildren();
+      for(const l of J.ui.plan.lines){const o=el('option','#'+(l.index+1)+' '+l.text);o.value=String(l.index);subtitle.append(o);}
+      subtitle.value=target()?String(target().line):old;if(!subtitle.value&&subtitle.options.length)subtitle.selectedIndex=0;
+      list.replaceChildren();for(const t of targets.filter(t=>String(t.line)===subtitle.value)){
+        const label=(t.kind==='part'?'  ↳ ':'')+tr('カット ','Cut ')+t.cutNumber+(t.role==='companion'?' B':'')+(t.kind==='part'?' / '+t.slot:tr(' 全体',' whole'))+'：'+t.text+' ['+(t.id.startsWith('part-')?t.id.slice(-8):J.sid(t.signature).toString(16))+']';
+        const o=el('option',label);o.value=t.id;list.append(o);
+      }
+      listKey=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value]);
+    }
+    list.value=selected||'';
+    const p=current();for(const key in fields){fields[key].value=String(Math.round((key==='rotation'?p[key]:p[key]*100)*1000)/1000);fields[key].disabled=!editable();}for(const b of resets)b.disabled=!editable();
+    const t=target();status.textContent=t?tr('選択：','Selected: ')+t.text+(J.groupLocked(J.ui.project,line())?tr('（ロック中）',' (locked)'):''):tr('一覧またはプレビューで編集対象を選択してください。','Select a target in the list or preview.');
+    const suspended=J.ui.plan.suspendedEffectTransforms?.length||0;
+    notice.textContent=(suspended?tr('構成変更で対応不明の設定を退避中：','Suspended unmatched settings after topology change: ')+suspended+'. ':'')+(t?.kind==='cut'&&!t.supported?tr('このスタイルは内部パーツ分割未対応です。カット全体は編集できます。','Internal part subdivision is unavailable for this style. The whole cut is editable.'):'');
+    if(on)view.style.touchAction=J.studioOn(J.ui.project,'characterEditing')?'none':'';drawOverlay();
+  }
+  function select(id,seek){
+    selected=id;const t=target();selectionHint=t?{...t}:null;if(t){subtitle.value=String(t.line);listKey='';if(seek){J.effectPartHits=[];J.uiApi.seek(t.start+(t.end-t.start)*.65);J.ui.need=true;}}sync();
+  }
+  subtitle.addEventListener('change',()=>{selected=null;selectionHint=null;listKey='';sync();});list.addEventListener('change',()=>select(list.value,true));
+  function drawOverlay(){
+    const h=hit();overlay.hidden=mode.value!=='part'||!h||J.ui.playing||J.ui.tap||J.ui.exporting||!J.studioOn(J.ui.project,'characterEditing');
+    if(h&&(h.bounds.x1<0||h.bounds.y1<0||h.bounds.x0>view.width||h.bounds.y0>view.height))overlay.hidden=true;
+    if(overlay.hidden){handles=[];return;}
+    const r=view.getBoundingClientRect(),parent=document.getElementById('viewport').getBoundingClientRect();overlay.width=view.width;overlay.height=view.height;overlay.style.left=(r.left-parent.left)+'px';overlay.style.top=(r.top-parent.top)+'px';overlay.style.width=r.width+'px';overlay.style.height=r.height+'px';
+    const ctx=overlay.getContext('2d'),k=view.width/r.width,pad=5*k,b=h.bounds,x=b.x0-pad,y=b.y0-pad,w=b.x1-b.x0+2*pad,height=b.y1-b.y0+2*pad;
+    ctx.strokeStyle=J.groupLocked(J.ui.project,line())?'#aab0bd':'#eac67b';ctx.fillStyle='#151b24';ctx.lineWidth=1.5*k;ctx.setLineDash([5*k,3*k]);ctx.strokeRect(x,y,w,height);ctx.setLineDash([]);
+    handles=[[x,y],[x+w,y],[x+w,y+height],[x,y+height]].map(([x,y])=>({x,y,type:'scale'}));handles.push({x:x+w/2,y:y-26*k,type:'rotate'});ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w/2,y-26*k);ctx.stroke();
+    for(const p of handles){ctx.beginPath();if(p.type==='rotate')ctx.arc(p.x,p.y,5*k,0,J.TAU);else ctx.rect(p.x-4*k,p.y-4*k,8*k,8*k);ctx.fill();ctx.stroke();}
+  }
+  const preview=J.drawLayerPreview;
+  J.drawLayerPreview=(ctx,plan,t,opt)=>{
+    J.partCapturing=ctx.canvas.id==='view'&&mode.value==='part'&&!J.ui.playing&&J.studioOn(J.ui.project,'characterEditing');if(J.partCapturing)J.effectPartHits=[];
+    try{
+      const result=preview(ctx,plan,t,opt);
+      if(J.partCapturing&&J.studioOn(J.ui.project,'timeline')&&(opt?.simpleSettingsPreview||J.layerSession.preview==='composite')){
+        const layer=J.ui.project.studio.layers.find(l=>l.type==='Lyrics'),p=layer?.transform;
+        if(!p||p.opacity<=0||t<layer.start||t>=layer.end)J.effectPartHits=[];
+        else {const m=J.groupMatrix({x:p.x/plan.W,y:p.y/plan.H,scale:p.scale,rotation:p.rotation},{x:ctx.canvas.width/2,y:ctx.canvas.height/2},ctx.canvas.width,ctx.canvas.height);
+          for(const h of J.effectPartHits){const b=h.bounds,points=[[b.x0,b.y0],[b.x1,b.y0],[b.x1,b.y1],[b.x0,b.y1]].map(([x,y])=>J.groupPoint(m,{x,y}));h.bounds={x0:Math.min(...points.map(p=>p.x)),y0:Math.min(...points.map(p=>p.y)),x1:Math.max(...points.map(p=>p.x)),y1:Math.max(...points.map(p=>p.y))};h.center=J.groupPoint(m,h.center);const basis=J.groupMultiply(m,{...h.basis,e:0,f:0});h.basis={a:basis.a,b:basis.b,c:basis.c,d:basis.d};}
+        }
+      }
+      if(ctx.canvas.id==='view')drawOverlay();return result;
+    }finally{J.partCapturing=false;}
+  };
+  const point=e=>{const r=view.getBoundingClientRect();return{x:(e.clientX-r.left)*view.width/r.width,y:(e.clientY-r.top)*view.height/r.height};};
+  view.addEventListener('pointerdown',e=>{
+    if(mode.value!=='part'||e.button!==0||J.ui.playing||J.ui.tap||J.ui.exporting||J.layerSession.busy||!J.studioOn(J.ui.project,'characterEditing'))return;
+    e.preventDefault();e.stopImmediatePropagation();const p=point(e),r=view.getBoundingClientRect(),radius=12*view.width/r.width,handle=handles.find(h=>Math.hypot(h.x-p.x,h.y-p.y)<=radius);
+    const inside=h=>p.x>=Math.max(0,h.bounds.x0)&&p.x<=Math.min(view.width,h.bounds.x1)&&p.y>=Math.max(0,h.bounds.y0)&&p.y<=Math.min(view.height,h.bounds.y1);
+    if(!handle&&(!hit()||!inside(hit()))){const h=J.effectPartHits.filter(inside).sort((a,b)=>(a.bounds.x1-a.bounds.x0)*(a.bounds.y1-a.bounds.y0)-(b.bounds.x1-b.bounds.x0)*(b.bounds.y1-b.bounds.y0))[0];select(h?.id||null,false);}
+    const h=hit();if(!editable()||!h)return;view.setPointerCapture(e.pointerId);drag={point:p,transform:current(),type:handle?.type||'move',center:h.center,basis:h.basis,started:false};
+  },true);
+  view.addEventListener('pointermove',e=>{
+    if(!drag)return;e.preventDefault();e.stopImmediatePropagation();if(!editable()){drag=null;return;}const p=point(e),dx=p.x-drag.point.x,dy=p.y-drag.point.y;if(!drag.started&&Math.hypot(dx,dy)<1)return;if(!drag.started){J.uiApi.pushEdit();drag.started=true;}
+    const t={...drag.transform},b=drag.basis,det=b.a*b.d-b.b*b.c;if(Math.abs(det)<1e-9)return;
+    if(drag.type==='move'){t.x+=(b.d*dx-b.c*dy)/det/J.ui.plan.W;t.y+=(-b.b*dx+b.a*dy)/det/J.ui.plan.H;}
+    else if(drag.type==='scale'){const a=Math.hypot(drag.point.x-drag.center.x,drag.point.y-drag.center.y);if(a>1)t.scale*=Math.hypot(p.x-drag.center.x,p.y-drag.center.y)/a;}
+    else {let a=Math.atan2(p.y-drag.center.y,p.x-drag.center.x)-Math.atan2(drag.point.y-drag.center.y,drag.point.x-drag.center.x);a=Math.atan2(Math.sin(a),Math.cos(a));t.rotation+=a/J.DEG;}change(t);
+  },true);
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])view.addEventListener(event,()=>{drag=null;});mode.addEventListener('change',()=>{drag=null;sync();J.ui.need=true;});
+  const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
+  J.effectPartUI={sync,drawOverlay,select,target};sync();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

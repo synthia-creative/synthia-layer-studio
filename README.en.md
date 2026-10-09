@@ -150,3 +150,5 @@ The original and derivative are [MIT licensed](LICENSE). Preserve original copyr
 Exported videos do not require an application MIT credit. Check the rights and terms of your lyrics, music, images, videos, fonts and other material separately. The software is provided without warranty.
 
 Bundled Mediabunny 1.60.0 is separately licensed under MPL-2.0. Its unmodified source distribution and license are included in `vendor/`.
+
+[Cut / Part editing guide](docs/CUT_PART_TRANSFORMS.en.md)

@@ -10,6 +10,7 @@
         characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
         groups: J.normalizeSubtitleGroups ? J.normalizeSubtitleGroups(value?.groups) : {},
         groupLines: J.normalizeSubtitleGroupLines ? J.normalizeSubtitleGroupLines(value?.groupLines) : [],
+        partTransforms: J.normalizeEffectTransforms ? J.normalizeEffectTransforms(value?.partTransforms) : {},
         fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
         motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
         analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },
