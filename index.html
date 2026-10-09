@@ -690,7 +690,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.7.1</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.8.0</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="曲名（タイトルカード・HUDに表示）" aria-label="曲名">
       <input id="songArtist" type="text" placeholder="アーティスト" aria-label="アーティスト">
@@ -971,7 +971,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">利用について</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.7.1</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.8.0</p></div>
     <p>SYNTHIA Layer Studioは、hakoniwa氏の「JIZURA」、およびcityedge氏による「JIZURA Layer Studio」を基にカスタマイズした独立した派生アプリです。元作者は本アプリの開発・保守を担当していません。元プロジェクトと第三者ライブラリの著作権・ライセンスは各権利者に帰属します。</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">原版 JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -1482,7 +1482,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio 利用ガイド</h2>
     <p>字幕の演出を作り、背景・音源付きの動画、または編集ソフトで重ねるフロント／マット動画として保存できます。</p>
-    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.7.1 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
+    <p><a class="full-manual" href="user_guide.md" target="_blank" rel="noopener">v1.8.0 詳細ユーザーマニュアル（Markdown）</a>には、各設定・合成手順・保存データを詳しく掲載しています。</p>
     <h3>まず1本作る</h3>
     <ol class="guide-steps">
       <li><strong>字幕と素材を読み込む</strong><p>「SRTを読み込む」でUTF-8のSRTを選び、音源と作業用背景（画像・動画）を読み込みます。SRTなしで字幕を直接入力することもできます。保存済みプロジェクトを再開する場合はJSONを開き、素材だけを読み直してください。SRTを読み直すと、復元した字幕・フィラー・個別演出を置き換えます。</p></li>
@@ -1549,7 +1549,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>「プロジェクト初期化」</strong>は現在の字幕・フィラー・区切り・演出・ロック・素材の読み込み・スペアナ・透明度・出力・タイトル設定・再生位置・履歴を初期状態へ戻します。出力の一時保存リンクも消え、自動保存は初期状態に置き換わります。確認後はUndoできません。</p>
     <p><strong>共通ライブラリは削除しません。</strong>ユーザーテーマなど曲をまたいで使うデータと、画面の言語・表示モード・プレビュー音量は保持します。PC上の素材、保存済みJSON、出力動画も削除しません。共通データの削除はそれぞれの管理画面で行います。</p>
     <p>「利用について」は右ペイン最下部にあります。権利・ライセンス・素材の取り扱いを確認できます。</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.7.1</span><button value="close" class="primary" autofocus>閉じる</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.8.0</span><button value="close" class="primary" autofocus>閉じる</button></div>
   </form>
 </dialog>
 
@@ -4575,7 +4575,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.7.1', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.8.0', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -42414,7 +42414,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.7.1' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.8.0' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {

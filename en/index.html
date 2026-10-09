@@ -690,7 +690,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.7.1</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.8.0</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -971,7 +971,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.7.1</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.8.0</p></div>
     <p>SYNTHIA Layer Studio is an independent customized derivative based on JIZURA by hakoniwa and JIZURA Layer Studio modifications by cityedge. The original authors do not maintain this edition. Original and third-party copyrights and licenses remain with their respective owners.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -1482,7 +1482,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.7.1 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.8.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
       <li><strong>Load lyrics and media</strong><p>Import a UTF-8 SRT, audio and a preview background (image/video). You can also type lyrics without SRT. To resume a project, open its JSON and reload only the media. Reimporting SRT replaces restored cues, fillers and local effects.</p></li>
@@ -1549,7 +1549,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.7.1</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.8.0</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4575,7 +4575,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.7.1', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.8.0', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -42658,7 +42658,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.7.1' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.8.0' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {

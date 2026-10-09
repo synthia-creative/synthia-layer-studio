@@ -1,10 +1,12 @@
-## Unreleased — Cut / Effect-Part Transform
+## 1.8.0 — 2026-10-09
+
+### Cut / Effect-Part Transform
 
 - Groupの内側にカット・パーツの独立変形を追加。時間差のあるカット、同時表示のテープ片・ラベル・パネルを文字と装飾ごと移動・拡大縮小・回転。一覧選択・シーク、数値、ハンドル、リセット、Undo、ロック、JSON／IndexedDB、構成変更時の安全な退避通知に対応。
 - Group・Line・Character、Safe Zone、各MP4・透過PNG出力に統合。共通装飾はカット全体、背景・画面装飾は元の所属を保持。汎用モーションレシピのPart値はプロジェクト内に保持。日英ガイドと専用テストを追加。
 - Added independent temporal cuts and simultaneous tape/label/panel transforms, target lists with seeking, preview-only handles, resets and undo. UUID/topology records safely suspend unmatched settings. Group/text editing, analysis and exports share the existing renderer; generic motion recipes retain project-local part settings.
 
-## Unreleased — Group Transform
+### Group Transform
 
 - 字幕演出をひとまとまりで移動・拡大縮小・回転できる「演出全体 / Group」を追加。文字・テープ・番号ラベル等を共通の親変形にまとめ、背景・画面装飾・別字幕・追加レイヤーは独立して保持。ハンドル・数値編集、個別／全リセット、Undo / Redo、字幕ロックに対応。
 - `studio.groups` と通常歌詞の安定IDを保存。JSON・IndexedDB復元、おまかせ・字幕ガチャ、文字／行編集、手動位置適用、Safe Zone、MP4各経路・透過PNG連番と連携。日英UI・マニュアルと専用回帰テストを追加。
