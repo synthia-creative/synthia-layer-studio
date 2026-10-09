@@ -215,7 +215,8 @@ J.exportSimpleVideo = async ({ plan, project, background = null, spectrum = null
         const title = J.simpleTitleFrame(ctx, settings.title, t, span);
         J.drawSimpleTitle(ctx, title, 'backing');
         render.layer.getContext('2d').putImageData(new ImageData(pixels, w, h), 0, 0);
-        if (studioAssets) J.composeStudioLayers(ctx, project, t, render.layer, studioAssets.assets);
+        if (J.composeInstrumentalStudio) J.composeInstrumentalStudio(ctx, project, t, render.layer, studioAssets?.assets);
+        else if (studioAssets) J.composeStudioLayers(ctx, project, t, render.layer, studioAssets.assets);
         else ctx.drawImage(render.layer, 0, 0);
         J.drawSimpleTitle(ctx, title, 'text');
         const frame = new VideoFrame(canvas, { timestamp: Math.round(i * 1e6 / fps), duration: Math.round((i + 1) * 1e6 / fps) - Math.round(i * 1e6 / fps) });

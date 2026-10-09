@@ -14,6 +14,7 @@
         fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
         motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
         analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },
+        instrumentalFx: J.InstrumentalFX ? J.InstrumentalFX.normalize(value?.instrumentalFx) : undefined,
         layers: J.normalizeStudioLayers ? J.normalizeStudioLayers(value?.layers) : [],
         output: { filename: typeof value?.output?.filename === 'string' ? value.output.filename.replace(/[\\/:*?"<>|\x00-\x1f]/g, '_').slice(0, 100) : '' },
     });

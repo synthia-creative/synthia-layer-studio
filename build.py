@@ -81,11 +81,12 @@ def build(lang):
     print(target, len(html), 'bytes')
 for code, _, _, _ in i18n.EDITIONS:
     build(code)
-for suffix, lang in [('', 'ja'), ('.en', 'en')]:
-    source = 'docs/VIDEO_ANALYSIS' + suffix + '.md'
-    target = source[:-3] + '.html'
-    open(target, 'w', encoding='utf-8').write(render_guide(open(source, encoding='utf-8-sig').read(), lang))
-    print(target, 'UTF-8 guide')
+for guide_name in ['VIDEO_ANALYSIS', 'INSTRUMENTAL_FX']:
+    for suffix, lang in [('', 'ja'), ('.en', 'en')]:
+        source = 'docs/' + guide_name + suffix + '.md'
+        target = source[:-3] + '.html'
+        open(target, 'w', encoding='utf-8').write(render_guide(open(source, encoding='utf-8-sig').read(), lang))
+        print(target, 'UTF-8 guide')
 if '--dev' in sys.argv:
     os.makedirs('dev/www', exist_ok=True)
     open('dev/www/jizura.js', 'w', encoding='utf-8').write(js)
