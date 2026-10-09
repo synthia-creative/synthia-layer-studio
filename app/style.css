@@ -644,3 +644,13 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .studio-tap-enhanced #tapPanel .hint { display:block; }
 .studio-tap-enhanced #tapBtn { width:100%; min-height:120px; touch-action:none; font-size:28px; }
 #studioTapMeta { white-space:pre-line; margin:10px 0; font-size:14px; }
+/* 演出全体の操作UIは既存パネル幅に収める。枠Canvasは出力対象外。 */
+#studioGroupOverlay { position:absolute; z-index:3; pointer-events:none; }
+#studioGroupOverlay[hidden], #studioGroupPanel[hidden] { display:none; }
+.group-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 10px; }
+.group-fields label { min-width:0; font-size:12px; }
+.group-fields input[type=number] { display:block; width:100%; box-sizing:border-box; margin:5px 0 0; }
+.group-resets { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.group-resets button { font-size:11px; padding:6px 8px; }
+#studioGroupPanel h3 { font-size:13px; }
+#studioGroupSelection { overflow-wrap:anywhere; color:#79d9ae; }

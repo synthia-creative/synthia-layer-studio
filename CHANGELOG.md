@@ -1,3 +1,9 @@
+## Unreleased — Group Transform
+
+- 字幕演出をひとまとまりで移動・拡大縮小・回転できる「演出全体 / Group」を追加。文字・テープ・番号ラベル等を共通の親変形にまとめ、背景・画面装飾・別字幕・追加レイヤーは独立して保持。ハンドル・数値編集、個別／全リセット、Undo / Redo、字幕ロックに対応。
+- `studio.groups` と通常歌詞の安定IDを保存。JSON・IndexedDB復元、おまかせ・字幕ガチャ、文字／行編集、手動位置適用、Safe Zone、MP4各経路・透過PNG連番と連携。日英UI・マニュアルと専用回帰テストを追加。
+- Added subtitle Group editing with a shared parent transform for text and attached decorations, preview-only handles, numeric controls, independent resets, undo/redo and locks. Stable IDs preserve transforms through regeneration, JSON/recovery and cue edits. Character/line editing, manual placement, Safe Zone, MP4 and transparent PNG export use the same drawing path.
+
 ## 1.7.1 — 2026-10-08
 
 - Safe Zoneの過剰な暫定判定を修正。字幕の出入り全体の矩形結合から、各時刻の描画範囲・同時表示字幕・時間付き保護領域へ変更。解析間隔は対象字幕区間で判定し、候補ごとに衝突・検出項目・範囲・コントラストの理由と調整方法を表示。

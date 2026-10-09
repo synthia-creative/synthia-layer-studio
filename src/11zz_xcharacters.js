@@ -64,8 +64,8 @@
         const changed = { ...it, _studioApplied: true, x: it.x + base.x, y: it.y + base.y, rot: (it.rot || 0) + base.rotation, sx: (it.sx || 1) * base.scale, sy: (it.sy || 1) * base.scale, alpha: (it.alpha ?? 1) * base.opacity, charFn: (i, g, n) => { const a = old?.(i, g, n) || {}, b = J.studioTransform(row?.glyphs[indices[i]]); return { ...a, dx: (a.dx || 0) + b.x + base.kerning * i + b.kerning, dy: (a.dy || 0) + b.y, s: (a.s ?? 1) * b.scale, rot: (a.rot || 0) + b.rotation, a: (a.a ?? 1) * b.opacity }; } };
         return draw({ ...env, studioGlyph: (g, m, bases) => {
                 env.studioGlyph?.(g, m, bases);
-                if (J.studioCapturing && env.pass === 'main')
-                    J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.hypot(m.a, m.b) * g.w), h: Math.max(12, Math.hypot(m.c, m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
+                if (J.studioCapturing && !env._groupMeasuring && env.pass === 'main')
+                    J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.abs(m.a) * g.w + Math.abs(m.c) * g.h), h: Math.max(12, Math.abs(m.b) * g.w + Math.abs(m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
             } }, changed);
     };
 })();

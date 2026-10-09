@@ -13,6 +13,7 @@
         root.append(status);
         const fields = {};
         let selected = null, drag = null;
+        const editable = () => selected && !J.groupLocked(J.ui.project, J.ui.plan.lines.find(l => J.studioLineKey(l) === selected.key)) && !J.ui.exporting && !J.ui.playing && !J.layerSession.busy;
         for (const [key, label, min, max, step] of [['x', 'X', -10000, 10000, 1], ['y', 'Y', -10000, 10000, 1], ['scale', 'Scale', .05, 10, .05], ['rotation', 'Rotation', -360, 360, 1], ['opacity', 'Opacity', 0, 1, .05], ['kerning', 'Kerning', -500, 500, 1]]) {
             const labelEl = el('label', String(label)), input = el('input', null, 'studioChar-' + key);
             input.type = 'number';
@@ -23,7 +24,7 @@
             labelEl.append(input);
             root.append(labelEl);
             input.addEventListener('change', () => {
-                if (!selected)
+                if (!editable() || !Number.isFinite(input.valueAsNumber))
                     return;
                 J.uiApi.pushEdit();
                 const t = current();
@@ -38,7 +39,7 @@
             return J.studioTransform(mode.value === 'line' ? row?.line : row?.glyphs[selected.index]);
         };
         const set = t => {
-            if (!selected)
+            if (!editable())
                 return;
             const chars = J.ui.project.studio.characters, row = chars[selected.key] || (chars[selected.key] = { line: J.studioTransform(), glyphs: {} });
             if (mode.value === 'line')
@@ -49,15 +50,17 @@
             sync();
         };
         const sync = () => {
+            if (selected && !J.ui.plan.lines.some(l => J.studioLineKey(l) === selected.key))
+                selected = null;
             const t = current();
             for (const k in fields) {
                 fields[k].value = String(t[k]);
-                fields[k].disabled = !selected;
+                fields[k].disabled = !editable();
             }
             status.textContent = selected ? `${selected.key} / ${selected.index + 1} / ${selected.ch}` : tr('プレビューの文字を選択してください。', 'Select a preview glyph.');
         };
         root.append(J.studioButton('studioCharReset', '選択の変形をリセット', 'Reset selected transform', () => {
-            if (selected) {
+            if (editable()) {
                 J.uiApi.pushEdit();
                 set(J.studioTransform());
             }
@@ -69,7 +72,7 @@
                 J.studioGlyphHits = [];
             try {
                 const result = preview(ctx, plan, t, opt);
-                if (J.studioCapturing && J.studioOn(J.ui.project, 'timeline')) {
+                if (J.studioCapturing && J.studioOn(J.ui.project, 'timeline') && (opt?.simpleSettingsPreview || J.layerSession.preview === 'composite')) {
                     const layer = J.ui.project.studio.layers.find(l => l.type === 'Lyrics'), p = layer?.transform;
                     if (!p || p.opacity <= 0 || t < layer.start || t >= layer.end)
                         J.studioGlyphHits = [];
@@ -98,12 +101,12 @@
         const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('view'));
         const point = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height }; };
         canvas.addEventListener('pointerdown', e => {
-            if (e.button !== 0 || mode.value === 'off' || !J.studioOn(J.ui.project, 'characterEditing') || J.ui.playing || J.ui.tap || J.layerSession.busy)
+            if (e.button !== 0 || !['line', 'character'].includes(mode.value) || !J.studioOn(J.ui.project, 'characterEditing') || J.ui.playing || J.ui.tap || J.ui.exporting || J.layerSession.busy)
                 return;
             const p = point(e), hits = J.studioGlyphHits.filter(h => Math.abs(h.x - p.x) <= h.w / 2 + 6 && Math.abs(h.y - p.y) <= h.h / 2 + 6).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y));
             selected = hits[0] || null;
             sync();
-            if (!selected)
+            if (!editable())
                 return;
             e.preventDefault();
             canvas.setPointerCapture(e.pointerId);
@@ -111,7 +114,7 @@
             drag = { point: p, transform: current(), basis: mode.value === 'line' ? selected.lineBasis : selected.characterBasis };
         });
         canvas.addEventListener('pointermove', e => {
-            if (!drag || J.ui.exporting)
+            if (!drag || !editable())
                 return;
             const p = point(e), b = drag.basis, det = b.a * b.d - b.b * b.c, dx = p.x - drag.point.x, dy = p.y - drag.point.y;
             if (Math.abs(det) < 1e-9)
@@ -121,6 +124,8 @@
         for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
             canvas.addEventListener(event, () => { drag = null; });
         mode.addEventListener('change', () => { selected = null; sync(); });
+        const syncLayer = J.syncLayerUI;
+        J.syncLayerUI = () => { syncLayer(); sync(); };
         sync();
         J.syncLayerUI();
     }

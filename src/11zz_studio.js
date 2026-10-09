@@ -8,6 +8,8 @@
         tapGap: finite(value?.tapGap, 0, 0, 1000),
         blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
         characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
+        groups: J.normalizeSubtitleGroups ? J.normalizeSubtitleGroups(value?.groups) : {},
+        groupLines: J.normalizeSubtitleGroupLines ? J.normalizeSubtitleGroupLines(value?.groupLines) : [],
         fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
         motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
         analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },

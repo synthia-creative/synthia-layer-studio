@@ -6,6 +6,22 @@ JIZURA Layer Studio animates lyrics and subtitles with typography, motion, graph
 
 This manual describes the retained features of v1.5.0. Features removed from the original JIZURA are not presented as available operations.
 
+## Editing an entire subtitle (Group Transform)
+
+Enable **Integrated studio tools → Character editing**, open **Character / line / group editing**, then choose **Group**. Pause and click a subtitle in the preview. Text and attached tape, number labels and ornaments share one selection frame.
+
+| Mode | Target |
+| --- | --- |
+| Group | The subtitle text and its attached decorations together |
+| Line | The text line's position, scale and other properties |
+| Character | An individual glyph's position, scale and rotation |
+
+Drag inside the frame to move, a corner to scale, or the top circle to rotate. X/Y numeric controls are offsets as percentages of frame width/height; 100% scale is the original size, and rotation is in degrees. Reset position/scale/rotation separately or reset all Group transforms. Glyph/line edits and motion remain intact; Undo/Redo is supported.
+
+Stripes, preview backgrounds, other subtitles and added layers remain independent. Manual placement follows Group, then the completed composition's Lyrics layer transform. Editing is disabled during playback/export or when the cue is locked. Content outside the output frame and existing center-free bands is clipped.
+
+JSON and browser snapshots restore transforms. Old JSON defaults to identity; Auto, cue draws and style/font changes preserve edits. Turning editing OFF retains transforms. All MP4 paths and transparent lyric PNG include them; selection handles are excluded. See [detailed ranges, persistence and limitations](docs/INTEGRATED_STUDIO.en.md).
+
 ## Contents
 
 - [Capabilities](#capabilities)
@@ -55,7 +71,7 @@ This manual describes the retained features of v1.5.0. Features removed from the
 | Export | Synchronized front + binary/grayscale matte, front only, or simple video with background/audio; range export |
 | Preserve work | Browser autosave and downloadable project JSON |
 
-The primary front/matte pair excludes background and audio for external editing. Optional simple video export combines an image/video background, overlays and audio into one MP4. After Effects projects and PNG sequences are not supported.
+The primary front/matte pair excludes background and audio for external editing. Optional simple video export combines an image/video background, overlays and audio into one MP4. Integrated studio tools also offer transparent lyric PNG sequence ZIPs under Additional exports. After Effects projects are not supported.
 
 ## Requirements and startup
 
@@ -1042,7 +1058,7 @@ Increase pre/post gaps, choose longer fillers to reduce their count, and reduce 
 
 ## Limits and data handling
 
-- No single MP4 with embedded alpha, PNG sequences or After Effects export. Partial opacity is provided by a separate grayscale matte plus premultiplied front video. Simple video export supports images and videos, but does not import background soundtracks or edit multiple background clips.
+- No single MP4 with embedded alpha or After Effects export. Transparent lyric PNG sequence ZIPs are available in Integrated studio tools. Partial opacity is provided by a separate grayscale matte plus premultiplied front video. Simple video export supports images and videos, but does not import background soundtracks or edit multiple background clips.
 - No source-SRT overwrite/export or speech recognition.
 - No independent multiple-spectrum tracks or spectrum start-offset control.
 - Long/4K/60fps combinations can use substantial memory/time; all devices/codecs are not guaranteed.

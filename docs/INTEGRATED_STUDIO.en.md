@@ -1,5 +1,16 @@
 # Integrated studio tools (v1.6.0)
 
+## Subtitle group editing
+
+Enable **Character editing**, open **Character / line / group editing**, and choose **Group**. Pause and click a subtitle in the preview. Group controls the entire subtitle with attached tape, labels and ornaments; Line adjusts its text line and Character adjusts an individual glyph. Multiline text within one cue belongs to the same group.
+
+- Drag inside the selection to move. Drag a corner to scale around the shared visual center; drag the top circle to rotate. Numeric X/Y are offsets in percent of frame width/height, initially 0. Scale starts at 100%; rotation starts at 0°. Limits are −400–400%, 5–1000%, and −360–360° respectively. Empty/invalid values are rejected.
+- Reset position, scale or rotation separately, or reset all Group transforms for the selected cue. Glyph/line edits, motion, timing and other cues remain intact. One drag is one Undo transaction; Redo restores it.
+- Screen decorations, stripes, preview backgrounds and added image/video/text layers remain independent. Group wraps existing animation/camera, then manual placement is applied; the Lyrics layer transform follows during completed composition. Safe Zone measures the transformed subtitle with its ornaments.
+- Locked cues and playback, Tap Sync or export sessions cannot be edited. Content outside the frame is clipped; existing center-free band clipping remains. The selection uses a conservative bounding rectangle which can include decoration margins.
+- `studio.groups` saves transforms; `studio.groupLines` saves stable IDs for untimed lyrics. Missing fields in old JSON default to identity. JSON and IndexedDB restore them; Auto, cue draws and style/font changes preserve them. Identical untimed text is matched by occurrence order; use timed cues for strict identity.
+- Turning the editing extension OFF retains stored transforms in rendering. Reset them to remove them. Front/matte, simple/completed MP4 and transparent lyric PNG use the same transforms. Selection handles are preview-only. Group keyframes and combining separate cues are not provided.
+
 Use Windows Chrome or Edge. Open **Integrated studio tools → Enable / disable extensions**, select the tools you need, then expand their sections. All extensions default to OFF. Settings use an optional `studio` namespace in version 1 JSON; existing lyrics, cue times, motion libraries and MP4 tools remain available.
 
 1. Load audio and lyrics. Import SRT without changing exact start/end timestamps, import LRC, or paste lyrics and choose section breaks/interludes for blank lines.

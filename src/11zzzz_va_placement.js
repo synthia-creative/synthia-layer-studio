@@ -14,13 +14,13 @@ J.drawItem = (env, it) => {
   const line = env.plan?.lines?.find(l => l.index === env.cut?.line), key = V.lineKey(line), p = (V.previewing && V.previewPlacements?.[key]) || env.plan?.videoPlacements?.[key];
   const lyric = line && !env.bgOnly && !env.inLayer && it.text && J.studioGlyphMap(line.text, it.text).found;
   if (!lyric) return draw(env, it);
-  const ctx = env.ctx, capture = V.capture, originalGlyph = env.studioGlyph;
+  const ctx = env.ctx, capture = env._groupMeasuring ? null : V.capture, originalGlyph = env.studioGlyph;
   const withCapture = capture && env.pass === 'main' ? { ...env, studioGlyph: (g, m, bases) => {
     originalGlyph?.(g, m, bases);
     const w = Math.abs(m.a) * g.w + Math.abs(m.c) * g.h, h = Math.abs(m.b) * g.w + Math.abs(m.d) * g.h, pad = Math.max(3, ((it.stroke || 0) + (it.blur || 0) * 3 + (it.shadow?.blur || 0) * 2) * (env.scale || 1));
     capture.push({ key, x: (m.e - w / 2 - pad) / ctx.canvas.width, y: (m.f - h / 2 - pad) / ctx.canvas.height, w: (w + pad * 2) / ctx.canvas.width, h: (h + pad * 2) / ctx.canvas.height, color: it.color || '#ffffff' });
   } } : env;
-  if (!p || p.text !== line.text) return draw(withCapture, it);
+  if (env._groupMeasuring || !p || p.text !== line.text) return draw(withCapture, it);
   const delta = V.layerDelta(env.plan, p.dx, p.dy), dx = delta.dx * ctx.canvas.width, dy = delta.dy * ctx.canvas.height, m = ctx.getTransform(), det = m.a * m.d - m.b * m.c;
   if (Math.abs(det) < 1e-9) return draw(withCapture, it);
   ctx.save(); ctx.translate((m.d * dx - m.c * dy) / det, (-m.b * dx + m.a * dy) / det);

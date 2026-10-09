@@ -663,6 +663,16 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .studio-tap-enhanced #tapPanel .hint { display:block; }
 .studio-tap-enhanced #tapBtn { width:100%; min-height:120px; touch-action:none; font-size:28px; }
 #studioTapMeta { white-space:pre-line; margin:10px 0; font-size:14px; }
+/* 演出全体の操作UIは既存パネル幅に収める。枠Canvasは出力対象外。 */
+#studioGroupOverlay { position:absolute; z-index:3; pointer-events:none; }
+#studioGroupOverlay[hidden], #studioGroupPanel[hidden] { display:none; }
+.group-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:4px 10px; }
+.group-fields label { min-width:0; font-size:12px; }
+.group-fields input[type=number] { display:block; width:100%; box-sizing:border-box; margin:5px 0 0; }
+.group-resets { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
+.group-resets button { font-size:11px; padding:6px 8px; }
+#studioGroupPanel h3 { font-size:13px; }
+#studioGroupSelection { overflow-wrap:anywhere; color:#79d9ae; }
 
 </style>
 </head>
@@ -1481,6 +1491,9 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <h3>全体のテイストを調整する</h3>
     <p>「シャッフル」は現在の設定で構成を引き直します。かんたんモードの「ここだけ変える」は、スタイル・雰囲気・配色・配色微調整・書体・構成の6種類です。</p>
     <p>全体の「配色」は主カラーを含む色全体を、明暗・彩度の傾向を保って変更します。「配色微調整」は従来のアクセント・ズレ色A/Bだけの変更。「書体」はスタイル・雰囲気に沿った役割別の組み合わせを選びます。配色・書体の変更は個別ガチャ済みの字幕にも反映し、ロックされた字幕、動き、カット構成、時刻は保持します。</p>
+    <h3>演出全体を編集する（Group）</h3>
+    <p>「統合制作ツール」→「文字単位編集」をON→「文字・行・演出全体の直接編集」→「演出全体 / Group」。一時停止した字幕をクリックし、枠内をドラッグして移動、四隅で拡大縮小、上の丸で回転します。文字・テープ・番号ラベル等が一緒に動き、背景・別字幕・追加レイヤーは独立します。</p>
+    <p>Groupは字幕演出全体、Lineは文字の行、Characterは個々の文字を調整します。X/Yは画面幅／高さに対する移動量（%）、等倍は100%、回転は度です。個別／全リセット、Undo / Redoに対応。ロック中・再生中・書き出し中は編集できません。変形はJSONと自動保存で復元でき、各MP4と透過PNGへ反映されます。選択枠は出力されません。</p>
     <h3>字幕ガチャ</h3>
     <ul>
       <li><strong>0 ランダム：</strong>スタイル・雰囲気の枠を外し、成立条件と過密を避ける制限の中で抽選。</li>
@@ -39540,6 +39553,8 @@ V.Controller = class {
         tapGap: finite(value?.tapGap, 0, 0, 1000),
         blankLines: value?.blankLines === 'keep' ? 'keep' : 'skip',
         characters: J.normalizeStudioCharacters ? J.normalizeStudioCharacters(value?.characters) : {},
+        groups: J.normalizeSubtitleGroups ? J.normalizeSubtitleGroups(value?.groups) : {},
+        groupLines: J.normalizeSubtitleGroupLines ? J.normalizeSubtitleGroupLines(value?.groupLines) : [],
         fontFiles: J.normalizeStudioFonts ? J.normalizeStudioFonts(value?.fontFiles) : [],
         motion: J.normalizeStudioMotion ? J.normalizeStudioMotion(value?.motion) : { preset: 'Minimal', controls: {}, rows: {} },
         analysis: J.normalizeStudioAnalysis ? J.normalizeStudioAnalysis(value?.analysis) : { sections: [], beatSnap: 0 },
@@ -39686,8 +39701,8 @@ V.Controller = class {
         const changed = { ...it, _studioApplied: true, x: it.x + base.x, y: it.y + base.y, rot: (it.rot || 0) + base.rotation, sx: (it.sx || 1) * base.scale, sy: (it.sy || 1) * base.scale, alpha: (it.alpha ?? 1) * base.opacity, charFn: (i, g, n) => { const a = old?.(i, g, n) || {}, b = J.studioTransform(row?.glyphs[indices[i]]); return { ...a, dx: (a.dx || 0) + b.x + base.kerning * i + b.kerning, dy: (a.dy || 0) + b.y, s: (a.s ?? 1) * b.scale, rot: (a.rot || 0) + b.rotation, a: (a.a ?? 1) * b.opacity }; } };
         return draw({ ...env, studioGlyph: (g, m, bases) => {
                 env.studioGlyph?.(g, m, bases);
-                if (J.studioCapturing && env.pass === 'main')
-                    J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.hypot(m.a, m.b) * g.w), h: Math.max(12, Math.hypot(m.c, m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
+                if (J.studioCapturing && !env._groupMeasuring && env.pass === 'main')
+                    J.studioGlyphHits.push({ key, index: indices[g.i], ch: g.ch, x: m.e, y: m.f, w: Math.max(12, Math.abs(m.a) * g.w + Math.abs(m.c) * g.h), h: Math.max(12, Math.abs(m.b) * g.w + Math.abs(m.d) * g.h), lineBasis: bases.line, characterBasis: bases.character });
             } }, changed);
     };
 })();
@@ -40153,13 +40168,13 @@ J.drawItem = (env, it) => {
   const line = env.plan?.lines?.find(l => l.index === env.cut?.line), key = V.lineKey(line), p = (V.previewing && V.previewPlacements?.[key]) || env.plan?.videoPlacements?.[key];
   const lyric = line && !env.bgOnly && !env.inLayer && it.text && J.studioGlyphMap(line.text, it.text).found;
   if (!lyric) return draw(env, it);
-  const ctx = env.ctx, capture = V.capture, originalGlyph = env.studioGlyph;
+  const ctx = env.ctx, capture = env._groupMeasuring ? null : V.capture, originalGlyph = env.studioGlyph;
   const withCapture = capture && env.pass === 'main' ? { ...env, studioGlyph: (g, m, bases) => {
     originalGlyph?.(g, m, bases);
     const w = Math.abs(m.a) * g.w + Math.abs(m.c) * g.h, h = Math.abs(m.b) * g.w + Math.abs(m.d) * g.h, pad = Math.max(3, ((it.stroke || 0) + (it.blur || 0) * 3 + (it.shadow?.blur || 0) * 2) * (env.scale || 1));
     capture.push({ key, x: (m.e - w / 2 - pad) / ctx.canvas.width, y: (m.f - h / 2 - pad) / ctx.canvas.height, w: (w + pad * 2) / ctx.canvas.width, h: (h + pad * 2) / ctx.canvas.height, color: it.color || '#ffffff' });
   } } : env;
-  if (!p || p.text !== line.text) return draw(withCapture, it);
+  if (env._groupMeasuring || !p || p.text !== line.text) return draw(withCapture, it);
   const delta = V.layerDelta(env.plan, p.dx, p.dy), dx = delta.dx * ctx.canvas.width, dy = delta.dy * ctx.canvas.height, m = ctx.getTransform(), det = m.a * m.d - m.b * m.c;
   if (Math.abs(det) < 1e-9) return draw(withCapture, it);
   ctx.save(); ctx.translate((m.d * dx - m.c * dy) / det, (-m.b * dx + m.a * dy) / det);
@@ -40197,6 +40212,170 @@ V.measureLine = async (plan, line, signal, onProgress = () => {}) => {
     return { rect, others, geometry, color, luminance: .2126 * linear[0] + .7152 * linear[1] + .0722 * linear[2], frames: times.size };
   } finally { V.capture = null; renderer.layer.width = renderer.layer.height = 1; }
 };
+})();
+
+/* 字幕の描画スコープに親変形を追加する。背景・画面装飾はこのスコープに含めない。 */
+(() => {
+'use strict';
+const finite = (v, d, lo, hi) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
+J.groupTransform = v => ({ x: finite(v?.x, 0, -4, 4), y: finite(v?.y, 0, -4, 4), scale: Number.isFinite(v?.scale) && v.scale > 0 ? finite(v.scale, 1, .05, 10) : 1, rotation: finite(v?.rotation, 0, -360, 360) });
+J.normalizeSubtitleGroups = value => {
+  const out = {};
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return out;
+  for (const [key, row] of Object.entries(value).slice(0, 20000))
+    if (/^(line-\d+|cue-.{1,100})$/.test(key) && row && typeof row === 'object') out[key] = J.groupTransform(row);
+  return out;
+};
+J.normalizeSubtitleGroupLines = value => (Array.isArray(value)?value:[]).slice(0,20000).filter(r=>r&&typeof r.id==='string'&&/^[-a-zA-Z0-9_]{1,100}$/.test(r.id)&&typeof r.text==='string'&&Number.isInteger(r.index)&&r.index>=0).map(r=>({id:r.id,text:r.text.slice(0,10000),index:r.index}));
+J.subtitleGroupKey = line => line?.cueId || line?.groupId ? 'cue-' + (line.cueId || line.groupId) : J.studioLineKey(line);
+const planner = J.plan;
+J.plan = (project,audio) => {
+  const plan = planner(project,audio);
+  const used = new Set(), rows=project.studio?.groupLines||[];
+  // 同文は元の位置を先に確保し、並べ替え時は本文一致を優先して別字幕への移動を防ぐ。
+  for(const match of ['exactIndex','exactText','index'])for(const line of plan.lines){
+    if(line.cueId||line.groupId)continue;
+    const row=rows.find(r=>!used.has(r.id)&&(match==='exactIndex'?r.index===line.index&&r.text===line.text:match==='exactText'?r.text===line.text:r.index===line.index));
+    const id=row?.id||(match==='index'&&project.overrides?.[line.index]?.groupId);
+    if(typeof id==='string'&&/^[-a-zA-Z0-9_]{1,100}$/.test(id)){line.groupId=id;used.add(id);}
+  }
+  return plan;
+};
+J.setSubtitleGroup = (project,line,value) => {
+  if(J.groupLocked(project,line))return null;
+  const from=J.subtitleGroupKey(line);
+  if(!line.cueId&&!line.groupId){
+    line.groupId='group-'+crypto.randomUUID();
+  }
+  if(!line.cueId){const rows=project.studio.groupLines||(project.studio.groupLines=[]),row=rows.find(r=>r.id===line.groupId);if(row){row.text=line.text;row.index=line.index;}else rows.push({id:line.groupId,text:line.text,index:line.index});}
+  const key=J.subtitleGroupKey(line);project.studio.groups[key]=J.groupTransform(value);
+  if(key!==from)delete project.studio.groups[from];return key;
+};
+J.groupIsIdentity = p => !p.x && !p.y && p.scale === 1 && !p.rotation;
+J.groupLocked = (project, line) => !line || !!(project.subtitleCues?.[line.index]?.locked || project.overrides?.[line.index]?.lock || project.locks?.params?.[J.studioLineKey(line)]);
+J.groupMatrix = (value, center, W, H) => {
+  const p = J.groupTransform(value), a = p.scale * Math.cos(p.rotation * J.DEG), b = p.scale * Math.sin(p.rotation * J.DEG);
+  return { a, b, c: -b, d: a, e: center.x + p.x * W - a * center.x + b * center.y, f: center.y + p.y * H - b * center.x - a * center.y };
+};
+J.groupPoint = (m, p) => ({ x: m.a * p.x + m.c * p.y + m.e, y: m.b * p.x + m.d * p.y + m.f });
+J.groupInversePoint = (m, p) => { const d = m.a * m.d - m.b * m.c; return { x: (m.d * (p.x - m.e) - m.c * (p.y - m.f)) / d, y: (-m.b * (p.x - m.e) + m.a * (p.y - m.f)) / d }; };
+J.groupMultiply = (a, b) => ({ a: a.a*b.a+a.c*b.b, b: a.b*b.a+a.d*b.b, c: a.a*b.c+a.c*b.d, d: a.b*b.c+a.d*b.d, e: a.a*b.e+a.c*b.f+a.e, f: a.b*b.e+a.d*b.f+a.f });
+// 文字の手動位置は既存drawItemが親変形の後に1回だけ適用する。値と装飾の従来位置は保持する。
+J.subtitleGroupHits = [];
+// 座標に依存しない画面装飾。レイアウト内部のテープ・ラベルは常に字幕に属する。
+J.groupDecorationScope = id => {
+  const D = J.DECOR[id];
+  return D && ((D.layer === 'back' && id !== 'counter') || ['decoCorners', 'punchHoles'].includes(id)) ? 'screen' : 'subtitle';
+};
+const drawCut = J.Renderer.prototype.drawCut;
+const drawParts = (renderer, env) => {
+  const bb = (J.LAYOUTS[env.cut.layout] || J.LAYOUTS.center).render(env);
+  for (const d of env.cut.decor || []) {
+    const D = J.DECOR[d.id];
+    if (D && D.layer === 'front' && J.groupDecorationScope(d.id) === 'subtitle') D.draw(env, bb, d);
+  }
+  return bb;
+};
+// 実Canvasの幾何だけを記録する。1pxの測定Canvasなので画面外の影や回転を切り取らない。
+J.recordGroupGeometry = ctx => {
+  const points = [], saved = {}, own = {}, path = []; let activePath = path, paused = false;
+  const add = (x,y,pad=0,target=points) => {
+    if (paused || !Number.isFinite(x+y) || ctx.globalAlpha <= .002) return;
+    const m = ctx.getTransform(), p = J.groupPoint(m,{x,y}), k = Math.max(Math.hypot(m.a,m.b),Math.hypot(m.c,m.d));
+    target.push({x:p.x-pad*k,y:p.y-pad*k},{x:p.x+pad*k,y:p.y+pad*k});
+  };
+  const patch = (key, fn) => { own[key] = Object.prototype.hasOwnProperty.call(ctx,key); saved[key] = ctx[key]; ctx[key] = function(...a){fn(...a);return saved[key].apply(this,a);}; };
+  const rect = (x,y,w,h,pad=0,target=points) => {for(const X of [x,x+w])for(const Y of [y,y+h])add(X,Y,pad,target);};
+  patch('fillRect',(x,y,w,h)=>rect(x,y,w,h));
+  patch('strokeRect',(x,y,w,h)=>rect(x,y,w,h,ctx.lineWidth/2));
+  patch('drawImage',(image,...a)=>{const d=a.length===8?a.slice(4):a;rect(d[0],d[1],d[2]??image.width,d[3]??image.height);});
+  patch('beginPath',()=>{activePath=[];});
+  for (const key of ['moveTo','lineTo']) patch(key,(x,y)=>add(x,y,0,activePath));
+  patch('rect',(x,y,w,h)=>rect(x,y,w,h,0,activePath));
+  patch('roundRect',(x,y,w,h)=>rect(x,y,w,h,0,activePath));
+  patch('arc',(x,y,r)=>rect(x-r,y-r,r*2,r*2,0,activePath));
+  patch('ellipse',(x,y,rx,ry)=>rect(x-Math.max(rx,ry),y-Math.max(rx,ry),2*Math.max(rx,ry),2*Math.max(rx,ry),0,activePath));
+  patch('arcTo',(x,y,X,Y,r)=>{add(x,y,r,activePath);add(X,Y,r,activePath);});
+  patch('quadraticCurveTo',(x,y,X,Y)=>{add(x,y,0,activePath);add(X,Y,0,activePath);});
+  patch('bezierCurveTo',(x,y,X,Y,u,v)=>{add(x,y,0,activePath);add(X,Y,0,activePath);add(u,v,0,activePath);});
+  for(const key of ['fill','stroke']) patch(key,()=>{if(!paused&&ctx.globalAlpha>.002)points.push(...activePath);});
+  for(const key of ['fillText','strokeText']) patch(key,(text,x,y)=>{
+    const m=ctx.measureText(text), size=parseFloat(ctx.font.match(/[\d.]+px/)?.[0]||'20'), w=m.width, h=size*1.2, pad=(key==='strokeText'?ctx.lineWidth:0)+(ctx.shadowBlur||0)*2;
+    const left=ctx.textAlign==='left'||ctx.textAlign==='start'?x:ctx.textAlign==='right'||ctx.textAlign==='end'?x-w:x-w/2;
+    rect(left,y-h/2,w,h,pad);
+  });
+  return { pause:fn=>{paused=true;try{return fn();}finally{paused=false;}}, bounds:()=> {
+    if(!points.length)return null;
+    let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+    for(const p of points){x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);}
+    return {x0,y0,x1,y1};
+  }, close:()=>{for(const key in saved)if(own[key])ctx[key]=saved[key];else delete ctx[key];} };
+};
+const boundsCache = new WeakMap(); let measureCanvas;
+J.subtitleGroupBounds = (renderer, env) => {
+  let bounds = boundsCache.get(env.cut); if(bounds)return bounds;
+  measureCanvas ||= document.createElement('canvas'); measureCanvas.width=measureCanvas.height=1;
+  const ctx=measureCanvas.getContext('2d'), recorder=J.recordGroupGeometry(ctx);
+  const cut={...env.cut}, lt=Math.min(cut.dur*.6,Math.max(cut.inDur+.05,cut.dur/2));
+  const measure=renderer.makeEnv(ctx,env.plan,cut,env.sc,{...env,ctx,cut,pass:'main',passColor:null,lt,ltb:lt,t:cut.start+lt,pIn:1,pOut:0,scale:1,allowFilter:false,hideText:false,glyphLog:null,studioGlyph:()=>{},_groupScope:true,_groupMeasuring:true});
+  // makeEnvのpIn/pOut計算より後に静止時の基準を固定する。
+  measure.pIn=1;measure.pOut=0;
+  try {
+    for(const d of cut.decor||[])if(J.DECOR[d.id]?.layer==='back'&&J.groupDecorationScope(d.id)==='subtitle')J.DECOR[d.id].draw(measure,null,d);
+    drawParts(renderer,measure);bounds=recorder.bounds()||{x0:env.W*.35,y0:env.H*.4,x1:env.W*.65,y1:env.H*.6};
+  } finally {recorder.close();}
+  boundsCache.set(env.cut,bounds);return bounds;
+};
+J.Renderer.prototype.drawCut = function(env) {
+  const line=env.plan.lines.find(l=>l.index===env.cut.line), key=J.subtitleGroupKey(line), p=J.groupTransform(env.plan.studio?.groups?.[key]);
+  const needsBounds=J.groupCapturing||!!J.VideoAnalysis.capture;
+  if(!line||env.bgOnly||env.inLayer||env._groupScope||(!needsBounds&&J.groupIsIdentity(p)))return drawCut.call(this,env);
+  const ctx=env.ctx, bounds=J.subtitleGroupBounds(this,env), zone=env.zone, origin={x:zone?.x||0,y:zone?.y||0};
+  const world={x0:bounds.x0+origin.x,y0:bounds.y0+origin.y,x1:bounds.x1+origin.x,y1:bounds.y1+origin.y};
+  const partner=typeof env.cut.companion==='object'?env.cut.companion:env.plan.cuts.find(c=>c.companion===env.cut);
+  if(partner){const z=partner.zone||{},b=J.subtitleGroupBounds(this,{...env,cut:partner,zone:partner.zone,W:z.w||env.plan.W,H:z.h||env.plan.H});world.x0=Math.min(world.x0,b.x0+(z.x||0));world.y0=Math.min(world.y0,b.y0+(z.y||0));world.x1=Math.max(world.x1,b.x1+(z.x||0));world.y1=Math.max(world.y1,b.y1+(z.y||0));}
+  const center={x:(world.x0+world.x1)/2,y:(world.y0+world.y1)/2}, k=env.scale||1;
+  const matrix=J.groupMatrix(p,center,env.plan.W,env.plan.H);
+  const device={...matrix,e:matrix.e*k,f:matrix.f*k}, before=ctx.getTransform();
+  // グループはカメラ・文字の外側の親。カメラの既存行列は保持する。
+  const combined=J.groupMultiply(device,before);
+  const screen=fn=>{ctx.save();ctx.setTransform(before);try{return recorder?recorder.pause(fn):fn();}finally{ctx.restore();}};
+  // makeEnvでdraw等のクロージャも作り直し、測定用スコープを実描画へ漏らさない。
+  const scoped=this.makeEnv(ctx,env.plan,env.cut,env.sc,{...env,_groupScope:true});let bb=null;
+  ctx.save();ctx.setTransform(combined.a,combined.b,combined.c,combined.d,combined.e,combined.f);
+  const recorder=needsBounds&&env.pass==='main'?J.recordGroupGeometry(ctx):null;
+  try {
+    if(env.layer!=='front')for(const d of env.cut.decor||[]){const D=J.DECOR[d.id];if(D?.layer==='back'){
+      if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,null,d));
+      else D.draw(scoped,null,d);
+    }}
+      if(env.layer!=='back'){
+        bb=(J.LAYOUTS[env.cut.layout]||J.LAYOUTS.center).render(scoped);
+        for(const d of env.cut.decor||[]){const D=J.DECOR[d.id];if(D?.layer==='front'){
+          if(J.groupDecorationScope(d.id)==='screen')screen(()=>D.draw(env,bb,d));else D.draw(scoped,bb,d);
+        }}
+      }
+      const actual=recorder?.bounds();
+      if(actual){
+        if(J.groupCapturing){
+          const previous=J.subtitleGroupHits.find(h=>h.key===key);
+          if(previous){const b=previous.bounds;b.x0=Math.min(b.x0,actual.x0);b.y0=Math.min(b.y0,actual.y0);b.x1=Math.max(b.x1,actual.x1);b.y1=Math.max(b.y1,actual.y1);}
+          else J.subtitleGroupHits.push({key,line:line.index,bounds:actual,center:J.groupPoint(device,{x:center.x*k,y:center.y*k}),basis:{a:k,b:0,c:0,d:k},transform:p});
+        }
+        if(J.VideoAnalysis.capture)J.VideoAnalysis.capture.push({key:J.studioLineKey(line),x:actual.x0/ctx.canvas.width,y:actual.y0/ctx.canvas.height,w:(actual.x1-actual.x0)/ctx.canvas.width,h:(actual.y1-actual.y0)/ctx.canvas.height,color:env.sc.fg});
+      }
+    return bb;
+  }finally{recorder?.close();ctx.restore();}
+};
+// 複製・旧歌詞からSRT化・削除でもキーを字幕に追従させる。
+const ensure=J.studioEnsureCues, duplicate=J.studioDuplicateCue, remove=J.deleteLayerCue;
+J.studioEnsureCues=project=>{
+  const previous=Array.isArray(project.subtitleCues)?null:J.plan(project,J.ui.audio).lines.map(J.subtitleGroupKey), cues=ensure(project);
+  if(previous)for(let i=0;i<cues.length;i++){const from=previous[i],to='cue-'+cues[i].id;if(project.studio.groups[from]){project.studio.groups[to]=structuredClone(project.studio.groups[from]);if(from!==to)delete project.studio.groups[from];}}
+  return cues;
+};
+J.studioDuplicateCue=(project,index)=>{const key='cue-'+project.subtitleCues[index]?.id,id=duplicate(project,index);if(project.studio.groups[key])project.studio.groups['cue-'+id]=structuredClone(project.studio.groups[key]);return id;};
+J.deleteLayerCue=(project,index)=>{const key='cue-'+project.subtitleCues[index]?.id;remove(project,index);if(project.studio?.groups)delete project.studio.groups[key];};
 })();
 
 /* ============================================================
@@ -43959,6 +44138,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         root.append(status);
         const fields = {};
         let selected = null, drag = null;
+        const editable = () => selected && !J.groupLocked(J.ui.project, J.ui.plan.lines.find(l => J.studioLineKey(l) === selected.key)) && !J.ui.exporting && !J.ui.playing && !J.layerSession.busy;
         for (const [key, label, min, max, step] of [['x', 'X', -10000, 10000, 1], ['y', 'Y', -10000, 10000, 1], ['scale', 'Scale', .05, 10, .05], ['rotation', 'Rotation', -360, 360, 1], ['opacity', 'Opacity', 0, 1, .05], ['kerning', 'Kerning', -500, 500, 1]]) {
             const labelEl = el('label', String(label)), input = el('input', null, 'studioChar-' + key);
             input.type = 'number';
@@ -43969,7 +44149,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
             labelEl.append(input);
             root.append(labelEl);
             input.addEventListener('change', () => {
-                if (!selected)
+                if (!editable() || !Number.isFinite(input.valueAsNumber))
                     return;
                 J.uiApi.pushEdit();
                 const t = current();
@@ -43984,7 +44164,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
             return J.studioTransform(mode.value === 'line' ? row?.line : row?.glyphs[selected.index]);
         };
         const set = t => {
-            if (!selected)
+            if (!editable())
                 return;
             const chars = J.ui.project.studio.characters, row = chars[selected.key] || (chars[selected.key] = { line: J.studioTransform(), glyphs: {} });
             if (mode.value === 'line')
@@ -43995,15 +44175,17 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
             sync();
         };
         const sync = () => {
+            if (selected && !J.ui.plan.lines.some(l => J.studioLineKey(l) === selected.key))
+                selected = null;
             const t = current();
             for (const k in fields) {
                 fields[k].value = String(t[k]);
-                fields[k].disabled = !selected;
+                fields[k].disabled = !editable();
             }
             status.textContent = selected ? `${selected.key} / ${selected.index + 1} / ${selected.ch}` : tr('プレビューの文字を選択してください。', 'Select a preview glyph.');
         };
         root.append(J.studioButton('studioCharReset', '選択の変形をリセット', 'Reset selected transform', () => {
-            if (selected) {
+            if (editable()) {
                 J.uiApi.pushEdit();
                 set(J.studioTransform());
             }
@@ -44015,7 +44197,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
                 J.studioGlyphHits = [];
             try {
                 const result = preview(ctx, plan, t, opt);
-                if (J.studioCapturing && J.studioOn(J.ui.project, 'timeline')) {
+                if (J.studioCapturing && J.studioOn(J.ui.project, 'timeline') && (opt?.simpleSettingsPreview || J.layerSession.preview === 'composite')) {
                     const layer = J.ui.project.studio.layers.find(l => l.type === 'Lyrics'), p = layer?.transform;
                     if (!p || p.opacity <= 0 || t < layer.start || t >= layer.end)
                         J.studioGlyphHits = [];
@@ -44044,12 +44226,12 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         const canvas = /** @type {HTMLCanvasElement} */ (document.getElementById('view'));
         const point = e => { const r = canvas.getBoundingClientRect(); return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height }; };
         canvas.addEventListener('pointerdown', e => {
-            if (e.button !== 0 || mode.value === 'off' || !J.studioOn(J.ui.project, 'characterEditing') || J.ui.playing || J.ui.tap || J.layerSession.busy)
+            if (e.button !== 0 || !['line', 'character'].includes(mode.value) || !J.studioOn(J.ui.project, 'characterEditing') || J.ui.playing || J.ui.tap || J.ui.exporting || J.layerSession.busy)
                 return;
             const p = point(e), hits = J.studioGlyphHits.filter(h => Math.abs(h.x - p.x) <= h.w / 2 + 6 && Math.abs(h.y - p.y) <= h.h / 2 + 6).sort((a, b) => Math.hypot(a.x - p.x, a.y - p.y) - Math.hypot(b.x - p.x, b.y - p.y));
             selected = hits[0] || null;
             sync();
-            if (!selected)
+            if (!editable())
                 return;
             e.preventDefault();
             canvas.setPointerCapture(e.pointerId);
@@ -44057,7 +44239,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
             drag = { point: p, transform: current(), basis: mode.value === 'line' ? selected.lineBasis : selected.characterBasis };
         });
         canvas.addEventListener('pointermove', e => {
-            if (!drag || J.ui.exporting)
+            if (!drag || !editable())
                 return;
             const p = point(e), b = drag.basis, det = b.a * b.d - b.b * b.c, dx = p.x - drag.point.x, dy = p.y - drag.point.y;
             if (Math.abs(det) < 1e-9)
@@ -44067,6 +44249,8 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         for (const event of ['pointerup', 'pointercancel', 'lostpointercapture'])
             canvas.addEventListener(event, () => { drag = null; });
         mode.addEventListener('change', () => { selected = null; sync(); });
+        const syncLayer = J.syncLayerUI;
+        J.syncLayerUI = () => { syncLayer(); sync(); };
         sync();
         J.syncLayerUI();
     }
@@ -44074,6 +44258,96 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
         document.addEventListener('DOMContentLoaded', boot);
     else
         boot();
+})();
+
+/* 選択枠はプレビュー専用Canvas。書き出し描画器には渡さない。 */
+(() => {
+'use strict';
+function boot(){
+  const el=J.studioElement,tr=J.layerText,root=document.getElementById('studio-characterEditing'),mode=/** @type {HTMLSelectElement} */(document.getElementById('studioCharacterMode')),view=/** @type {HTMLCanvasElement} */(document.getElementById('view'));
+  root.querySelector('summary').textContent=tr('文字・行・演出全体の直接編集','Character / line / group editing');
+  const option=el('option',tr('演出全体 / Group','Group'));option.value='group';mode.insertBefore(option,mode.options[1]);
+  mode.setAttribute('aria-label',tr('編集対象','Editing target'));
+  const panel=el('div',null,'studioGroupPanel'),status=el('p',null,'studioGroupSelection'),hint=el('p',tr('一時停止した字幕演出をクリック。ドラッグで移動、四隅で拡大縮小、上の丸で回転。X/Yは画面幅・高さに対する移動量（%）です。','Pause and click a subtitle group. Drag to move, drag a corner to scale, or the top circle to rotate. X/Y are offsets in % of the frame width/height.'));
+  status.setAttribute('aria-live','polite');panel.append(status,el('h3',tr('グループ変形','Group transform')));
+  const fields={},resets=[],grid=el('div');grid.className='group-fields';let selected=null,drag=null,handles=[];
+  const line=()=>J.ui.plan.lines.find(l=>J.subtitleGroupKey(l)===selected),current=()=>J.groupTransform(J.ui.project.studio.groups?.[selected]);
+  const editable=()=>selected&&!J.groupLocked(J.ui.project,line())&&!J.ui.playing&&!J.ui.tap&&!J.ui.exporting&&!J.layerSession.busy&&J.studioOn(J.ui.project,'characterEditing');
+  const hit=()=>J.subtitleGroupHits.find(h=>h.key===selected);
+  const change=t=>{if(!editable())return;selected=J.setSubtitleGroup(J.ui.project,line(),t);J.studioChanged();sync();};
+  for(const [key,ja,en,min,max,step] of /** @type {[string,string,string,number,number,number][]} */([['x','X（%）','X (%)',-400,400,.1],['y','Y（%）','Y (%)',-400,400,.1],['scale','拡大率（%）','Scale (%)',5,1000,1],['rotation','回転（°）','Rotation (°)',-360,360,1]])){
+    const label=el('label',tr(ja,en)),input=el('input',null,'studioGroup-'+key);input.type='number';input.min=String(min);input.max=String(max);input.step=String(step);input.setAttribute('aria-label',tr(ja,en));label.append(input);grid.append(label);fields[key]=input;
+    input.addEventListener('change',()=>{const v=input.valueAsNumber;if(!editable()||!Number.isFinite(v)||v<min||v>max){sync();return;}const t=current();t[key]=key==='rotation'?v:v/100;if(JSON.stringify(t)!==JSON.stringify(current())){J.uiApi.pushEdit();change(t);}else sync();});
+  }
+  panel.append(grid);const buttons=el('div');buttons.className='group-resets';
+  for(const [id,ja,en,patch] of [['position','位置リセット','Reset position',{x:0,y:0}],['scale','拡大率リセット','Reset scale',{scale:1}],['rotation','回転リセット','Reset rotation',{rotation:0}],['all','グループ変形をすべてリセット','Reset all group transforms',J.groupTransform()]]){
+    const button=J.studioButton('studioGroupReset-'+id,ja,en,()=>{if(editable()){J.uiApi.pushEdit();change({...current(),...patch});}});resets.push(button);buttons.append(button);
+  }
+  panel.append(buttons,hint);root.append(panel);
+  const overlay=el('canvas',null,'studioGroupOverlay');overlay.hidden=true;overlay.setAttribute('aria-label',tr('演出全体の選択枠','Subtitle group selection'));document.getElementById('viewport').append(overlay);
+  function sync(){
+    const group=mode.value==='group';panel.hidden=!group;
+    for(const node of root.children)if(node!==mode&&node!==panel&&node.tagName!=='SUMMARY')/** @type {HTMLElement} */(node).hidden=group;
+    if(selected&&!line())selected=null;
+    const p=current();for(const key in fields){fields[key].value=String(Math.round((key==='rotation'?p[key]:p[key]*100)*1000)/1000);fields[key].disabled=!editable();}
+    for(const b of resets)b.disabled=!editable();
+    status.textContent=selected?tr('選択字幕：字幕 #','Selected subtitle: #')+String(line().index+1).padStart(2,'0')+(J.groupLocked(J.ui.project,line())?tr('（ロック中）',' (locked)'):''):tr('プレビューの字幕演出を選択してください。','Select a subtitle group in the preview.');
+    view.style.touchAction=group&&J.studioOn(J.ui.project,'characterEditing')?'none':'';
+    drawOverlay();
+  }
+  function drawOverlay(){
+    overlay.hidden=mode.value!=='group'||!selected||J.ui.playing||J.ui.tap||J.ui.exporting||!J.studioOn(J.ui.project,'characterEditing');
+    const h=hit();if(!h)overlay.hidden=true;if(overlay.hidden){handles=[];return;}
+    const r=view.getBoundingClientRect(),parent=document.getElementById('viewport').getBoundingClientRect();
+    overlay.width=view.width;overlay.height=view.height;overlay.style.left=(r.left-parent.left)+'px';overlay.style.top=(r.top-parent.top)+'px';overlay.style.width=r.width+'px';overlay.style.height=r.height+'px';
+    const ctx=overlay.getContext('2d'),k=view.width/r.width,pad=5*k,b=h.bounds,x=b.x0-pad,y=b.y0-pad,w=b.x1-b.x0+2*pad,height=b.y1-b.y0+2*pad;
+    ctx.strokeStyle=J.groupLocked(J.ui.project,line())?'#aab0bd':'#79d9ae';ctx.fillStyle='#151b24';ctx.lineWidth=1.5*k;ctx.setLineDash([5*k,3*k]);ctx.strokeRect(x,y,w,height);ctx.setLineDash([]);
+    handles=[[x,y],[x+w,y],[x+w,y+height],[x,y+height]].map(([x,y])=>({x,y,type:'scale'}));handles.push({x:x+w/2,y:y-26*k,type:'rotate'});
+    ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w/2,y-26*k);ctx.stroke();
+    for(const p of handles){ctx.beginPath();if(p.type==='rotate')ctx.arc(p.x,p.y,5*k,0,J.TAU);else ctx.rect(p.x-4*k,p.y-4*k,8*k,8*k);ctx.fill();ctx.stroke();}
+  }
+  const preview=J.drawLayerPreview;
+  J.drawLayerPreview=(ctx,plan,t,opt)=>{
+    J.groupCapturing=ctx.canvas.id==='view'&&!J.ui.playing&&J.studioOn(J.ui.project,'characterEditing');
+    if(J.groupCapturing)J.subtitleGroupHits=[];
+    try{
+      const result=preview(ctx,plan,t,opt);
+      if(J.groupCapturing&&J.studioOn(J.ui.project,'timeline')&&(opt?.simpleSettingsPreview||J.layerSession.preview==='composite')){
+        const layer=J.ui.project.studio.layers.find(l=>l.type==='Lyrics'),p=layer?.transform,k=ctx.canvas.width/plan.W;
+        if(!p||p.opacity<=0||t<layer.start||t>=layer.end)J.subtitleGroupHits=[];
+        else{
+          const matrix=J.groupMatrix({x:p.x/plan.W,y:p.y/plan.H,scale:p.scale,rotation:p.rotation},{x:ctx.canvas.width/2,y:ctx.canvas.height/2},ctx.canvas.width,ctx.canvas.height);
+          for(const h of J.subtitleGroupHits){const b=h.bounds,points=[[b.x0,b.y0],[b.x1,b.y0],[b.x1,b.y1],[b.x0,b.y1]].map(([x,y])=>J.groupPoint(matrix,{x,y}));h.bounds={x0:Math.min(...points.map(p=>p.x)),y0:Math.min(...points.map(p=>p.y)),x1:Math.max(...points.map(p=>p.x)),y1:Math.max(...points.map(p=>p.y))};h.center=J.groupPoint(matrix,h.center);h.basis={a:matrix.a*k,b:matrix.b*k,c:matrix.c*k,d:matrix.d*k};}
+        }
+      }
+      if(ctx.canvas.id==='view')drawOverlay();return result;
+    }finally{J.groupCapturing=false;}
+  };
+  const point=e=>{const r=view.getBoundingClientRect();return{x:(e.clientX-r.left)*view.width/r.width,y:(e.clientY-r.top)*view.height/r.height};};
+  view.addEventListener('pointerdown',e=>{
+    if(mode.value!=='group'||e.button!==0||J.ui.playing||J.ui.tap||J.ui.exporting||J.layerSession.busy||!J.studioOn(J.ui.project,'characterEditing'))return;
+    e.preventDefault();e.stopImmediatePropagation();const p=point(e),r=view.getBoundingClientRect(),radius=12*view.width/r.width;
+    const handle=handles.find(h=>Math.hypot(h.x-p.x,h.y-p.y)<=radius);
+    if(!handle){selected=J.subtitleGroupHits.filter(h=>p.x>=h.bounds.x0-radius&&p.x<=h.bounds.x1+radius&&p.y>=h.bounds.y0-radius&&p.y<=h.bounds.y1+radius).sort((a,b)=>(a.bounds.x1-a.bounds.x0)*(a.bounds.y1-a.bounds.y0)-(b.bounds.x1-b.bounds.x0)*(b.bounds.y1-b.bounds.y0))[0]?.key||null;sync();}
+    const h=hit();if(!editable()||!h)return;
+    view.setPointerCapture(e.pointerId);drag={point:p,transform:current(),type:handle?.type||'move',center:h.center,basis:h.basis,started:false,pointerId:e.pointerId};
+  },true);
+  view.addEventListener('pointermove',e=>{
+    if(!drag)return;e.preventDefault();e.stopImmediatePropagation();if(!editable()){drag=null;return;}
+    const p=point(e),dx=p.x-drag.point.x,dy=p.y-drag.point.y;if(!drag.started&&Math.hypot(dx,dy)<1)return;
+    if(!drag.started){J.uiApi.pushEdit();drag.started=true;}
+    let t={...drag.transform};const b=drag.basis,det=b.a*b.d-b.b*b.c;if(Math.abs(det)<1e-9)return;
+    if(drag.type==='move'){t.x+=(b.d*dx-b.c*dy)/det/J.ui.plan.W;t.y+=(-b.b*dx+b.a*dy)/det/J.ui.plan.H;}
+    else if(drag.type==='scale'){const a=Math.hypot(drag.point.x-drag.center.x,drag.point.y-drag.center.y);if(a>1)t.scale*=Math.hypot(p.x-drag.center.x,p.y-drag.center.y)/a;}
+    else {let angle=Math.atan2(p.y-drag.center.y,p.x-drag.center.x)-Math.atan2(drag.point.y-drag.center.y,drag.point.x-drag.center.x);angle=Math.atan2(Math.sin(angle),Math.cos(angle));t.rotation+=angle/J.DEG;}
+    change(t);
+  },true);
+  for(const event of ['pointerup','pointercancel','lostpointercapture'])view.addEventListener(event,()=>{drag=null;});
+  mode.addEventListener('change',()=>{drag=null;sync();J.ui.need=true;});
+  const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
+  J.subtitleGroupUI={sync,drawOverlay};sync();
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 
 (() => {
