@@ -1,4 +1,10 @@
-# SYNTHIA Layer Studio v1.5.0 User Manual
+# SYNTHIA Layer Studio v1.9.0 User Manual
+
+## v1.9.0 Instrumental FX
+
+Integrated studio tools → enable Instrumental FX → detect / review sections → accept → generate all → enable Auto. Enable Manual and add individual FX. Numeric, preview and timeline editing, locks, presets, Undo and JSON/autosave are available. OFF retains all FX data.
+
+[Detailed Instrumental FX guide](docs/INSTRUMENTAL_FX.en.html) covers section editing/splitting/merging, safe re-detection, six FX types, regeneration, people avoidance and fallback, exporting and troubleshooting. Completed/simple MP4 includes FX; lyric-only front/matte and transparent PNG excludes them.
 
 JIZURA Layer Studio animates lyrics and subtitles with typography, motion, graphics and ornaments. Create a **silent front/matte MP4 pair** for external compositing, or a **simple MP4 video** with an image/video background and optional audio already combined. Built on JIZURA's effects engine, it provides SRT editing, fillers, cue-level draws, themes, generated/external spectra and binary or translucent layer output.
 

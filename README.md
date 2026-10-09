@@ -2,6 +2,8 @@
 
 ブラウザ上で字幕演出・字幕レイヤー・リリックビデオ制作を行えるWebアプリです。PC版 Chrome / Edge 推奨。
 
+v1.9.0に「Instrumental FX Engine v1.0」を追加しました。歌詞のない前奏・間奏・アウトロを検出し、6種類の自動／手動FXを独立編集できます。初期OFF、既存の歌詞・保存・Undoと共存。完成MP4に反映します。[操作ガイド](docs/INSTRUMENTAL_FX.html) · [詳細仕様](docs/INSTRUMENTAL_FX.md)。字幕専用フロント／マット・透過PNGはFXを除外します。
+
 ## Credits
 
 SYNTHIA Layer Studio is based on [JIZURA by hakoniwa](https://github.com/852wa/JIZURA) and [JIZURA Layer Studio modifications by cityedge](https://github.com/cityedge/jizura_layer_studio).

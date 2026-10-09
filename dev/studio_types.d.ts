@@ -17,6 +17,10 @@ interface StudioState {layers:StudioLayer[];}
 interface StudioInput {layers?:StudioLayer[];}
 interface StudioState {output:{filename:string};}
 interface StudioInput {output?:{filename:string};}
+interface InstrumentalEffect {id:string;source:'auto'|'manual';type:string;name:string;regionId:string;start:number;end:number;x:number;y:number;scale:number;rotation:number;opacity:number;color:string;blend:string;speed:number;intensity:number;beat:boolean;plane:'back'|'front';visible:boolean;locked:boolean;seed:number;presetId:string;params:Record<string,number|string>;}
+interface InstrumentalState {version:1;enabled:boolean;auto:boolean;manual:boolean;preview:boolean;beat:boolean;avoidPeople:boolean;safeFlash:boolean;duration:number;strength:number;minGap:number;boundary:number;style:string;pattern:string;seed:number;snap:boolean;quality:string;regions:{id:string;name:string;start:number;end:number;type:string;auto:boolean;edited:boolean}[];autoEffects:InstrumentalEffect[];manualEffects:InstrumentalEffect[];analysis:null|{key:string;duration:number;rate:number;energy:number[];onset:number[];beats:number[];bpm:number};detectionKey:string;presets:{id:string;name:string;effect:InstrumentalEffect}[];beforeGeneration:InstrumentalEffect[]|null;}
+interface StudioState {instrumentalFx:InstrumentalState;}
+interface StudioInput {instrumentalFx?:Partial<InstrumentalState>;}
 interface StudioCue { start:number; end:number; text:string; id?:string; }
 interface StudioProject { studio?:StudioState; timing:{lineTimes:Record<string,number>}; subtitleCues?:StudioCue[]; }
 interface StudioLine { start:number; end:number; visEnd?:number; index?:number; text?:string; cueId?:string; }

@@ -2,6 +2,8 @@
 
 Browser-based subtitle animations, subtitle layers and lyric videos. Desktop Chrome / Edge recommended.
 
+v1.9.0 adds Instrumental FX Engine v1.0: detect lyric-free intro/interlude/outro sections, generate six deterministic FX types or edit individual Manual FX. It defaults OFF and uses existing saves and Undo. Completed MP4 includes FX; lyric-only front/matte and PNG excludes them. [Guide](docs/INSTRUMENTAL_FX.en.html) · [Detailed guide](docs/INSTRUMENTAL_FX.en.md).
+
 ## Credits
 
 SYNTHIA Layer Studio is based on [JIZURA by hakoniwa](https://github.com/852wa/JIZURA) and [JIZURA Layer Studio modifications by cityedge](https://github.com/cityedge/jizura_layer_studio).

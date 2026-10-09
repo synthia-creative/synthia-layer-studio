@@ -47,9 +47,10 @@
         project.exportRange = null;
         return id;
     };
-    J.composeStudioLayers = (ctx, project, t, lyrics, assets = J.studioMedia) => {
+    J.composeStudioLayers = (ctx, project, t, lyrics, assets = J.studioMedia, hooks = null) => {
         const w = ctx.canvas.width, h = ctx.canvas.height, design = J.designSize(project.aspect), k = w / design[0];
         for (const layer of project.studio.layers) {
+            if (layer.type === 'Lyrics') hooks?.beforeLyrics?.();
             const m = assets.get(layer.id);
             if (m?.video && assets === J.studioMedia) {
                 const local = Math.max(0, Math.min(t - layer.start, m.duration - .001));
@@ -60,8 +61,10 @@
                 else
                     m.el.pause();
             }
-            if (t < layer.start || t >= layer.end)
+            if (t < layer.start || t >= layer.end) {
+                if (layer.type === 'Lyrics') hooks?.afterLyrics?.();
                 continue;
+            }
             const p = layer.transform;
             ctx.save();
             ctx.globalAlpha = p.opacity;
@@ -90,6 +93,7 @@
                 ctx.drawImage(m.el, -m.width * ratio / 2, -m.height * ratio / 2, m.width * ratio, m.height * ratio);
             }
             ctx.restore();
+            if (layer.type === 'Lyrics') hooks?.afterLyrics?.();
         }
     };
     const reset = J.resetLayerProjectSession;

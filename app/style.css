@@ -656,3 +656,15 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .group-resets button { font-size:11px; padding:6px 8px; }
 #studioGroupPanel h3 { font-size:13px; }
 #studioGroupSelection { overflow-wrap:anywhere; color:#79d9ae; }
+.ifx-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin:10px 0; }
+.ifx-fields label { min-width:0; font-size:12px; }
+.ifx-fields input:not([type=checkbox]), .ifx-fields select { width:100%; box-sizing:border-box; }
+#ifxControls { border:0; padding:0; margin:0; min-width:0; }
+#studio-instrumentalFx details { border-top:1px solid var(--border); margin:12px 0; padding-top:8px; }
+#studio-instrumentalFx button { margin:4px 4px 4px 0; }
+#studio-instrumentalFx select { max-width:100%; }
+#ifxStatus { white-space:pre-line; font-size:12px; overflow-wrap:anywhere; }
+#ifxDetectionProposal { max-height:220px; overflow:auto; font-size:12px; }
+.ifx-overlay { position:absolute; z-index:4; pointer-events:none; }
+.ifx-overlay[hidden] { display:none; }
+@media(max-width:420px){ .ifx-fields { grid-template-columns:minmax(0,1fr); } }

@@ -1,3 +1,10 @@
+## 1.9.0 — 2026-10-09
+
+- Instrumental FX Engine v1.0を追加。初期OFFの親・Auto・Manualスイッチ、SRTの前奏／間奏／アウトロ検出、再検出の確認と手動区間保護、6種類の固定シードCanvas演出、6スタイル・3パターン、区間／個別再生成、ロック・専用プリセット・数値／直接編集・FXタイムラインに対応。
+- `studio.instrumentalFx` をversion 1 JSON・既存Undo・localStorage／IndexedDBへ保存。人物回避は既存の一致する映像解析結果だけを利用し、独立した解析開始・表示の仕様を維持。音源再読込・中止・プロジェクト切替で古い生成結果を破棄。
+- 完成／簡易MP4とプレビューは同じ時刻ベース合成を使用。字幕フロント／マット・透過歌詞PNGは従来どおりFXを除外。日英の操作ガイド・ヘルプ、専用テストを追加。粒子数、同時表示、フラッシュ明度／範囲／間隔を制限。
+- Added opt-in Instrumental Auto / Manual, lyric-gap detection with review, deterministic Canvas FX, per-object editing, tracks, presets, regeneration and bounded rendering. Version-1 projects, existing chronological undo and recovery are retained. Completed/simple MP4 includes FX; lyric-only front/matte and PNG exports retain their previous meaning.
+
 ## 1.8.0 — 2026-10-09
 
 ### Cut / Effect-Part Transform
