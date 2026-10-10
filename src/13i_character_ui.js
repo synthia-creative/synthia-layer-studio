@@ -126,6 +126,8 @@
         mode.addEventListener('change', () => { selected = null; sync(); });
         const syncLayer = J.syncLayerUI;
         J.syncLayerUI = () => { syncLayer(); sync(); };
+        J.characterUI = {target: () => selected, clear: () => { selected = null; drag = null; sync(); }};
+        J.characterUI = {target: () => selected, clear: () => { selected = null; drag = null; sync(); }};
         sync();
         J.syncLayerUI();
     }

@@ -1,3 +1,9 @@
+## Unreleased — selected-object display deletion
+
+- Added display-only deletion of glyph clusters, lines, subtitle groups, cuts, existing internal parts, decorations, text treatment, and explicitly selected Instrumental FX.
+- Added a selection-aware Delete button, guarded Delete / Backspace, multiple selection in an object list, character-effects-only deletion, chronological Undo / Redo, and backward-compatible JSON / autosave records.
+- Preserved lyrics, SRT timing, other cuts, transforms, existing output policy, and static source builds. Updated Japanese / English guides and added deletion regression / browser checks.
+
 ## 1.9.0 — 2026-10-09
 
 - Instrumental FX Engine v1.0を追加。初期OFFの親・Auto・Manualスイッチ、SRTの前奏／間奏／アウトロ検出、再検出の確認と手動区間保護、6種類の固定シードCanvas演出、6スタイル・3パターン、区間／個別再生成、ロック・専用プリセット・数値／直接編集・FXタイムラインに対応。

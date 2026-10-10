@@ -668,3 +668,8 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 .ifx-overlay { position:absolute; z-index:4; pointer-events:none; }
 .ifx-overlay[hidden] { display:none; }
 @media(max-width:420px){ .ifx-fields { grid-template-columns:minmax(0,1fr); } }
+
+#studioDeletionPanel select { width:100%; max-width:100%; margin:6px 0; }
+#studioDeleteTargets { min-height:140px; }
+#studioDeleteStatus { font-size:12px; overflow-wrap:anywhere; }
+#studioDeleteSelected { white-space:nowrap; }

@@ -1091,3 +1091,15 @@ You do not need to attach this app's MIT notice to exported videos. Check the ri
 ## Version history
 
 See [CHANGELOG.md](CHANGELOG.md) for version-by-version additions, changes and fixes. This manual describes current operation. Saved projects use the current renderer when opened, so an app update can change the appearance of an existing composition.
+
+## Delete selected objects from display
+
+Enable Character editing in Integrated studio tools. Select Character, Line, Group, or Cut / Part, pause, and click the preview. Use “🗑 Delete”, Delete, or Backspace. The Display deletion / object list also selects overlapping objects; Ctrl / Shift selects multiple entries. Delete is disabled without a selection.
+
+Source lyrics, SRT text, and timestamps are retained. Character deletion hides complete grapheme clusters, including combining marks and emoji, without shifting remaining glyphs. “Remove character effects only” retains the text and manual transform and removes its entrance / hold / exit animation and text treatment. Line / group deletion hides the selected line's display. Cuts, tapes, labels, panels, individual decorations, and text treatment are independent targets in the Cut / Part list.
+
+Explicitly select manual or Auto FX in the Instrumental FX preview or list to delete intro / interlude / outro effects. Particles and shapes inside one FX are one object. Locks, playback, export, Tap Sync, input fields, SRT editors, and dialogs prevent accidental deletion.
+
+Ctrl+Z undoes; Ctrl+Y or Ctrl+Shift+Z redoes. Project JSON and autosave retain deletion. Subtitle deletion applies to editing / playback preview, front / matte MP4, simple MP4 with background, and PNG output. Existing Instrumental FX output policy remains: FX appear in completed / simple MP4 and are excluded from subtitle-only front / matte and transparent PNG.
+
+Layouts without existing internal part subdivision support whole-cut or individual-decoration selection, rather than arbitrary individual drawing primitives. Color, font, and timing updates retain deletion. Explicit text / topology changes suspend unmatched records; returning to the original topology with Undo reactivates them. Resetting the project resets deletion records.

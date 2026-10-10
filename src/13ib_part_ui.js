@@ -10,7 +10,7 @@ function boot(){
   status.setAttribute('aria-live','polite');notice.setAttribute('aria-live','polite');panel.append(subtitle,list,status,notice,el('h3',tr('カット・パーツ変形','Cut / part transform')));
   const fields={},resets=[],grid=el('div');grid.className='group-fields';let selected=null,selectionHint=null,drag=null,handles=[],listKey='';
   const target=()=>J.ui.plan.effectTargets?.find(t=>t.id===selected),line=()=>J.ui.plan.lines.find(l=>l.index===target()?.line),current=()=>J.groupTransform(target()?.transform);
-  const editable=()=>!!target()&&!J.groupLocked(J.ui.project,line())&&!J.ui.playing&&!J.ui.tap&&!J.ui.exporting&&!J.layerSession.busy&&J.studioOn(J.ui.project,'characterEditing');
+  const editable=()=>!!target()&&!target().treatment&&!J.groupLocked(J.ui.project,line())&&!J.ui.playing&&!J.ui.tap&&!J.ui.exporting&&!J.layerSession.busy&&J.studioOn(J.ui.project,'characterEditing');
   const hit=()=>J.effectPartHits.find(h=>h.id===selected);
   const change=t=>{if(!editable())return;selectionHint={...target()};selected=J.setEffectTransform(J.ui.project,target(),t,J.ui.plan);selectionHint.owner=J.ui.project.studio.partTransforms[selected]?.owner;J.studioChanged();sync();};
   for(const [key,ja,en,min,max,step] of /** @type {[string,string,string,number,number,number][]} */([['x','X（%）','X (%)',-400,400,.1],['y','Y（%）','Y (%)',-400,400,.1],['scale','拡大率（%）','Scale (%)',5,1000,1],['rotation','回転（°）','Rotation (°)',-360,360,1]])){
@@ -26,17 +26,18 @@ function boot(){
   function sync(){
     const on=mode.value==='part';panel.hidden=!on;
     if(on)for(const node of root.children)if(node!==mode&&node!==panel&&node.tagName!=='SUMMARY')/** @type {HTMLElement} */(node).hidden=true;
+    if(target()&&J.effectTargetDeleted(J.ui.plan,target())){selected=null;selectionHint=null;drag=null;}
     if(!target()&&selectionHint)selected=J.ui.plan.effectTargets?.find(t=>t.signature===selectionHint.signature&&t.kind===selectionHint.kind&&(t.owner===selectionHint.owner||t.line===selectionHint.line))?.id||null;
-    const targets=J.ui.plan.effectTargets||[],key=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value]);
+    const targets=J.ui.plan.effectTargets||[],key=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value,J.ui.plan.studio.deletedObjects]);
     if(key!==listKey){
       const old=subtitle.value;subtitle.replaceChildren();
       for(const l of J.ui.plan.lines){const o=el('option','#'+(l.index+1)+' '+l.text);o.value=String(l.index);subtitle.append(o);}
       subtitle.value=target()?String(target().line):old;if(!subtitle.value&&subtitle.options.length)subtitle.selectedIndex=0;
-      list.replaceChildren();for(const t of targets.filter(t=>String(t.line)===subtitle.value)){
+      list.replaceChildren();for(const t of targets.filter(t=>String(t.line)===subtitle.value&&!J.effectTargetDeleted(J.ui.plan,t))){
         const label=(t.kind==='part'?'  ↳ ':'')+tr('カット ','Cut ')+t.cutNumber+(t.role==='companion'?' B':'')+(t.kind==='part'?' / '+t.slot:tr(' 全体',' whole'))+'：'+t.text+' ['+(t.id.startsWith('part-')?t.id.slice(-8):J.sid(t.signature).toString(16))+']';
         const o=el('option',label);o.value=t.id;list.append(o);
       }
-      listKey=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value]);
+      listKey=JSON.stringify([targets.map(t=>[t.id,t.line,t.text]),subtitle.value,J.ui.plan.studio.deletedObjects]);
     }
     list.value=selected||'';
     const p=current();for(const key in fields){fields[key].value=String(Math.round((key==='rotation'?p[key]:p[key]*100)*1000)/1000);fields[key].disabled=!editable();}for(const b of resets)b.disabled=!editable();

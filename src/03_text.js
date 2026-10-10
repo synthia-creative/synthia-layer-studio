@@ -212,6 +212,7 @@ J.drawItem = (env, it) => {
     if (g.ch === ' ' || g.ch === '　') continue;
     const c = it.charFn ? it.charFn(g.i, g, lay.N) : null;
     if (c && c.hide) continue;
+    const displayDeleted = !!c?._displayDeleted;
     const a = baseAlpha * (c && c.a != null ? c.a : 1);
     if (a <= 0.002) continue;
     const ch = (c && c.ch) || g.ch;
@@ -221,20 +222,20 @@ J.drawItem = (env, it) => {
     const crot = (c ? c.rot || 0 : 0) + (g.r90 ? 90 : 0);
     const csx = sx * cs * (c && c.sx ? c.sx : 1), csy = sy * cs * (c && c.sy ? c.sy : 1);
     const gcol = (!ghostPass && c && c.color) || col;
-    if (env.studioGlyph) {
+    if (env.studioGlyph && !displayDeleted) {
       const studioCharacterMatrix = ctx.getTransform();
       ctx.save(); ctx.translate(gx, gy); if (crot) ctx.rotate(crot * J.DEG); ctx.scale(csx, csy);
       env.studioGlyph(g, ctx.getTransform(), {line:studioLineMatrix,character:studioCharacterMatrix}); ctx.restore();
     }
     boxes.push({ x: gx, y: gy, w: g.w * sx * cs / (g.fs || 1), h: g.h * sy * cs / (g.fs || 1) });
     // モーフ: record where each glyph ends up (device space) / leave the glyphs out while the morph draws them
-    if (env.glyphLog && !ghostPass) {
+    if (env.glyphLog && !ghostPass && !displayDeleted) {
       ctx.save(); ctx.translate(gx, gy); if (crot) ctx.rotate(crot * J.DEG); if (csx !== 1 || csy !== 1) ctx.scale(csx, csy);
       const T = ctx.getTransform(); ctx.restore();
       env.glyphLog.push({ ch, m: [T.a, T.b, T.c, T.d, T.e, T.f], font: ctx.font, px: size, color: typeof gcol === 'string' ? gcol : (it.color || '#fff'), a: a * (fill ? fillA : 1),
         stroke: it.stroke > 0 ? it.stroke : 0, strokeColor: typeof sCol === 'string' ? sCol : null, fill: fill && !(c && c.outline) });
     }
-    if (env.hideText) continue;
+    if (env.hideText || displayDeleted) continue;
     // ---- piece mode ----
     if (it.pieceFn && fill && !(c && c.ch) && !it.gradient && dash == null && !(c && (c.clipY || c.clipX || c.outline))) {
       if (drawPieces(env, it, g, ch, gx, gy, crot, csx, csy, gcol, a, pxScale * cs)) continue;

@@ -83,7 +83,7 @@ function boot(){
   for(const event of ['pointerup','pointercancel','lostpointercapture'])view.addEventListener(event,()=>{drag=null;});
   mode.addEventListener('change',()=>{drag=null;sync();J.ui.need=true;});
   const oldSync=J.syncLayerUI;J.syncLayerUI=()=>{oldSync();sync();};
-  J.subtitleGroupUI={sync,drawOverlay};sync();
+  J.subtitleGroupUI={sync,drawOverlay,target:line,clear:()=>{selected=null;drag=null;sync();}};sync();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();
