@@ -1,8 +1,10 @@
 # SYNTHIA Layer Studio v1.9.0 User Manual
 
-## v1.9.0 Instrumental FX
+## Instrumental FX v1.1 (development version)
 
-Integrated studio tools → enable Instrumental FX → detect / review sections → accept → generate all → enable Auto. Enable Manual and add individual FX. Numeric, preview and timeline editing, locks, presets, Undo and JSON/autosave are available. OFF retains all FX data.
+Integrated studio tools → Instrumental FX defaults to Easy mode. Import SRT/audio and click Add instrumental effects automatically once for detection, analysis, generation and preview activation. Automatic / Cyber / Pop / Simple styles and Subtle / Normal / Bold strengths work with defaults. Add manually uses the exact playhead and up to three seconds, enables parent/Manual and selects the new effect. Outside-section positions are explained without relocation. Basic editing shows strength/color/duration; preview dragging, timeline resizing, delete and duplicate remain available.
+
+Open advanced settings retains every original control; Easy returns without changing data or rendering. Saved sections, locked Auto and all Manual effects are protected; replacing existing Auto asks for confirmation. Parent/Auto/Manual default OFF and OFF retains data. Presets, Undo/Redo, JSON/autosave, Music Auto and video analysis remain intact.
 
 [Detailed Instrumental FX guide](docs/INSTRUMENTAL_FX.en.html) covers section editing/splitting/merging, safe re-detection, six FX types, regeneration, people avoidance and fallback, exporting and troubleshooting. Completed/simple MP4 includes FX; lyric-only front/matte and transparent PNG excludes them.
 

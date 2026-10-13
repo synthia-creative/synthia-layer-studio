@@ -1,4 +1,18 @@
-# Instrumental FX Engine v1.0
+# Instrumental FX Engine v1.1
+
+## Easy mode (default)
+
+1. Import SRT with **Import SRT**, then load audio.
+2. Click **Add instrumental effects automatically** once. The default Automatic style and Normal strength work immediately.
+3. Detection, existing music analysis when needed, generation, parent/Auto/preview activation run together. Preview seeks to a generated interlude. Manual visibility is retained.
+
+Styles Automatic / Cyber / Pop / Simple map to existing Auto / Cyber / Pop / Minimal. Subtle / Normal / Bold map to 25 / 50 / 85 percent. Switching modes never changes the pattern or advanced values. Other saved styles and strengths display **Using advanced value** and remain intact.
+
+All saved sections, including exclusions and adjusted boundaries, are retained; only non-overlapping detections are added. Replacing existing unlocked Auto effects requires confirmation. Cancel leaves data and switches intact. Locked Auto and all Manual effects survive regeneration. Missing SRT/audio produces import guidance without generation. Audio-free detection/generation remains available in Advanced mode.
+
+Choose **Add manually**, set the playhead, choose an icon-labelled effect, and click **Add at this playhead**. It adds up to three seconds without exceeding the song end, using existing preset defaults. Parent/Manual/preview are enabled and the new effect is selected; Auto visibility is unchanged. Outside-section positions remain exact, with a short explanation.
+
+The initial editor contains only strength, color and duration. Drag in preview to move, resize clip edges in the FX timeline, or select from the list to delete/duplicate. **Detailed editing** / **Open advanced settings** exposes every original control; **Easy** returns. Both modes share data and engine. Switching modes preserves JSON, rendering and Undo history. Initial OFF defaults and saved switches are retained.
 
 ## Getting started
 
@@ -20,7 +34,7 @@ Enable Auto to display the result. Identical sections, settings, seed and analys
 
 ## 3. Add Manual FX
 
-Select a section and one of Particle Burst, Light Flash, Geometry Motion, Audio Pulse, Light Trails or Transition Accent. Add Manual FX and enable Manual. Audio is optional; use the playhead and numeric times.
+Set the playhead and choose Particle Burst, Light Flash, Geometry Motion, Audio Pulse, Light Trails or Transition Accent. Add Manual FX adds up to three seconds at that exact position and enables parent/Manual/preview. A selected section never relocates the addition. Audio is optional; use the playhead and numeric times.
 
 ## 4. Edit individual effects
 

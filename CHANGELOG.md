@@ -1,3 +1,11 @@
+## Unreleased — Instrumental FX Engine v1.1 UI — 2026-10-13
+
+- かんたん／詳細モードを追加。同一のv1データ・エンジンを使い、モード切替は設定や出力を変更しません。詳細スタイル・強度の保存値も保持。
+- ワンクリックでSRTの前奏・間奏・アウトロ検出、既存楽曲解析、FX生成、親機能・Auto・プレビューON。保存済み区間を保護し、既存Autoの再生成だけ確認。手動FX・ロックFX・Manualの表示状態を保持。
+- アイコン付き手動追加は正確な再生位置へ最長3秒、曲末で短縮。親機能・Manual・プレビューON、自動選択・ドラッグ移動。強さ・色・表示時間、削除・複製を前面に、その他は詳細編集へ。
+- 初期OFF、Music Auto、映像解析、字幕、Undo/Redo、JSON、自動保存、完成MP4・字幕専用出力、静的Webアプリ構成を維持。日英UI・README・操作ガイドと回帰／実ブラウザ検証を更新。
+- Added Easy/Advanced modes, one-click Auto and exact-playhead Manual addition. Retained v1 data/rendering, saved sections, locks, independent gates and all advanced controls. Updated Japanese/English documentation and browser/regression tests. Not yet published.
+
 ## Unreleased — selected-object display deletion
 
 - Added display-only deletion of glyph clusters, lines, subtitle groups, cuts, existing internal parts, decorations, text treatment, and explicitly selected Instrumental FX.
