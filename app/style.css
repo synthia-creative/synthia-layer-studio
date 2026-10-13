@@ -667,6 +667,16 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #ifxDetectionProposal { max-height:220px; overflow:auto; font-size:12px; }
 .ifx-overlay { position:absolute; z-index:4; pointer-events:none; }
 .ifx-overlay[hidden] { display:none; }
+.ifx-mode { display:flex; gap:6px; margin-top:10px; }
+.ifx-mode button[aria-pressed=true] { border-color:var(--cyan); font-weight:700; }
+.ifx-main-switch { margin:16px 0; }
+.ifx-main-switch label { display:flex; flex-direction:row-reverse; justify-content:flex-end; align-items:center; gap:10px; font-weight:700; }
+.ifx-main-switch input { width:22px; height:22px; accent-color:var(--cyan); }
+#studio-instrumentalFx .ifx-primary { display:block; width:100%; min-height:46px; margin:10px 0; font-weight:700; white-space:normal; }
+#ifxEasyEffect { width:100%; font-size:12px; }
+#ifxEasy p { font-size:12px; line-height:1.6; }
+#ifxEasyEditor .ifx-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
+#ifxEasy[hidden], #ifxAdvanced[hidden], #ifxEasyAuto[hidden], #ifxEasyManual[hidden], #ifxEasyEditor[hidden] { display:none; }
 @media(max-width:420px){ .ifx-fields { grid-template-columns:minmax(0,1fr); } }
 
 #studioDeletionPanel select { width:100%; max-width:100%; margin:6px 0; }

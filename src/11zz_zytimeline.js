@@ -65,8 +65,9 @@
                 if (layer.type === 'Lyrics') hooks?.afterLyrics?.();
                 continue;
             }
-            const p = layer.transform;
+            const reactive = J.instrumentalLayerResponse?.(project, layer, t), p = reactive?.transform || layer.transform;
             ctx.save();
+            if (reactive?.glow) { ctx.shadowColor = reactive.color; ctx.shadowBlur = Math.min(24, h * reactive.glow * .05); }
             ctx.globalAlpha = p.opacity;
             ctx.globalCompositeOperation = layer.blend;
             ctx.translate(w / 2 + p.x * k, h / 2 + p.y * k);

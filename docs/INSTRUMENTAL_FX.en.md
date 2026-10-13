@@ -1,4 +1,54 @@
-# Instrumental FX Engine v1.0
+# Instrumental FX Engine v2.0
+
+## v2.0 audio-reactive effects
+
+1. Import SRT and audio; choose Song mood and Effect strength (defaults work).
+2. Choose EQ, waveform and video effects, then click Create audio-reactive effects automatically once.
+3. Section detection, real audio analysis, generation and parent/Auto/preview activation run together. Manual visibility is retained.
+
+Ballad / Rock / EDM / Pop / Cinematic / Lo-Fi use deliberate combinations, palettes, response envelopes and music triggers, normally at most three effects per region. Switches retain data. Parent/Auto/Manual retain their initial OFF and saved states.
+
+### Audio renderers and detailed editing
+
+- **Audio Spectrum**: horizontal, mirrored or circular EQ; bass/mid/treble selection, 8–64 bars, color, gain, smoothing and glow. Low quality caps bars at 24.
+- **Audio Waveform**: signed PCM samples drawn as smooth straight/circular curves, with height, line width, color, glow and onset-driven jitter.
+- **Audio Reactive Transform**: apply volume scale/opacity/glow and onset-supported beat rotation/movement to a shape, existing FX or an additional image layer. Saved target geometry is never rewritten. Existing flash brightness limits are retained. Enable extra tracks and load image media first. Missing targets suspend the reaction without retargeting.
+
+Advanced settings retains Manual addition, object selection, effect-type replacement, section/timeline editing, presets and Undo/Redo. Analyze audio features also prepares Manual FX without SRT. The v1.1 simple editor remains available inside Advanced mode.
+
+### Real analysis, seeking and JSON
+
+The original 64-bar FFT uses a shared AudioBuffer cache; RMS/Peak/Onset/Beat come from the existing Music Auto analysis. Physical bands are 20–250 Hz, 250–4000 Hz and 4000 Hz–Nyquist. Waveform uses real signed audio samples. Periodic animation does not stand in for music response.
+
+Attack/release, smoothing, peak hold and band gains are precomputed from frame zero. Preview, arbitrary seeks and completed MP4 interpolate the same timestamped data. Silence produces no fake music response. Refresh analysis after changing audio.
+
+Packed features are included in version-1 JSON and autosave. Resolution is 30 Hz through five minutes, then decreases to keep at most 9,000 frames; Advanced mode shows the actual rate. Media files are still reloaded separately. Saved real features can render without loaded audio; a different loaded soundtrack requires refreshed analysis.
+
+### Video effects, cost and safety
+
+RGB Glitch/chromatic aberration, Glow, Motion Blur, Radial Blur, Light Rays, Zoom Pulse, Mirror, Kaleidoscope and Film Grain respond to RMS/Peak/Onset/Beat or individual frequency bands. They run after the shared background/lyrics/layers/FX composition. New foreground EQ/waveform can render above image layers.
+
+At most two video processors run together. Low/standard/high cap scratch resolution at 480/960/1280 pixels and blur samples at 3/5/8. Disable Video effects to stop them. Existing flash limits and reduced-motion settings remain active.
+
+If editing becomes slow, choose low quality and restore your preferred quality before exporting. Processing finishes inside the bounded scratch canvas before compositing, but high-resolution rays and blur may run slower than real time on some devices. Quality changes retain audio features, timing and saved FX settings.
+
+Motion Blur is spatial directional blur, not temporal frame accumulation. Radial Blur uses zoom samples from the same timestamp. This keeps seeking and exports reproducible.
+
+Old FX, lyrics, Music Auto, Video Analysis and the original native spectrum remain intact. Video analysis is not automatically started. Completed MP4 includes v2 effects; lyric-only front/matte and transparent PNG retain their exclusion policy. These features are included in app v1.10.0.
+
+## v1.1 simple editing (inside Advanced mode)
+
+1. Import SRT with **Import SRT**, then load audio.
+2. Click **Add instrumental effects automatically** once. The default Automatic style and Normal strength work immediately.
+3. Detection, existing music analysis when needed, generation, parent/Auto/preview activation run together. Preview seeks to a generated interlude. Manual visibility is retained.
+
+Styles Automatic / Cyber / Pop / Simple map to existing Auto / Cyber / Pop / Minimal. Subtle / Normal / Bold map to 25 / 50 / 85 percent. Switching modes never changes the pattern or advanced values. Other saved styles and strengths display **Using advanced value** and remain intact.
+
+All saved sections, including exclusions and adjusted boundaries, are retained; only non-overlapping detections are added. Replacing existing unlocked Auto effects requires confirmation. Cancel leaves data and switches intact. Locked Auto and all Manual effects survive regeneration. Missing SRT/audio produces import guidance without generation. Audio-free detection/generation remains available in Advanced mode.
+
+Choose **Add manually**, set the playhead, choose an icon-labelled effect, and click **Add at this playhead**. It adds up to three seconds without exceeding the song end, using existing preset defaults. Parent/Manual/preview are enabled and the new effect is selected; Auto visibility is unchanged. Outside-section positions remain exact, with a short explanation.
+
+The initial editor contains only strength, color and duration. Drag in preview to move, resize clip edges in the FX timeline, or select from the list to delete/duplicate. **Detailed editing** / **Open advanced settings** exposes every original control; **Easy** returns. Both modes share data and engine. Switching modes preserves JSON, rendering and Undo history. Initial OFF defaults and saved switches are retained.
 
 ## Getting started
 
@@ -20,7 +70,7 @@ Enable Auto to display the result. Identical sections, settings, seed and analys
 
 ## 3. Add Manual FX
 
-Select a section and one of Particle Burst, Light Flash, Geometry Motion, Audio Pulse, Light Trails or Transition Accent. Add Manual FX and enable Manual. Audio is optional; use the playhead and numeric times.
+Set the playhead and choose Particle Burst, Light Flash, Geometry Motion, Audio Pulse, Light Trails or Transition Accent. Add Manual FX adds up to three seconds at that exact position and enables parent/Manual/preview. A selected section never relocates the addition. Audio is optional; use the playhead and numeric times.
 
 ## 4. Edit individual effects
 

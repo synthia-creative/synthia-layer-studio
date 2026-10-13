@@ -686,6 +686,16 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #ifxDetectionProposal { max-height:220px; overflow:auto; font-size:12px; }
 .ifx-overlay { position:absolute; z-index:4; pointer-events:none; }
 .ifx-overlay[hidden] { display:none; }
+.ifx-mode { display:flex; gap:6px; margin-top:10px; }
+.ifx-mode button[aria-pressed=true] { border-color:var(--cyan); font-weight:700; }
+.ifx-main-switch { margin:16px 0; }
+.ifx-main-switch label { display:flex; flex-direction:row-reverse; justify-content:flex-end; align-items:center; gap:10px; font-weight:700; }
+.ifx-main-switch input { width:22px; height:22px; accent-color:var(--cyan); }
+#studio-instrumentalFx .ifx-primary { display:block; width:100%; min-height:46px; margin:10px 0; font-weight:700; white-space:normal; }
+#ifxEasyEffect { width:100%; font-size:12px; }
+#ifxEasy p { font-size:12px; line-height:1.6; }
+#ifxEasyEditor .ifx-fields { grid-template-columns:repeat(3,minmax(0,1fr)); }
+#ifxEasy[hidden], #ifxAdvanced[hidden], #ifxEasyAuto[hidden], #ifxEasyManual[hidden], #ifxEasyEditor[hidden] { display:none; }
 @media(max-width:420px){ .ifx-fields { grid-template-columns:minmax(0,1fr); } }
 
 #studioDeletionPanel select { width:100%; max-width:100%; margin:6px 0; }
@@ -707,7 +717,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 </div>
 <div id="app">
   <header class="bar">
-    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.9.0</span></div>
+    <div class="brand"><span class="mark" aria-hidden="true">S</span><span class="word">SYNTHIA Layer Studio</span><span class="tag">SYNTHIA</span><span class="ver">v1.10.0</span></div>
     <div class="proj">
       <input id="songTitle" type="text" placeholder="Song title (shown on title cards and HUD)" aria-label="Song title">
       <input id="songArtist" type="text" placeholder="Artist" aria-label="Artist">
@@ -988,7 +998,7 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 <dialog id="termsDlg" class="terms publication-dialog" aria-labelledby="termsTitle">
   <form method="dialog">
     <h2 id="termsTitle" tabindex="-1">About / rights</h2>
-    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.9.0</p></div>
+    <div class="terms-main"><p class="terms-big">SYNTHIA Layer Studio</p><p>SYNTHIA · v1.10.0</p></div>
     <p>SYNTHIA Layer Studio is an independent customized derivative based on JIZURA by hakoniwa and JIZURA Layer Studio modifications by cityedge. The original authors do not maintain this edition. Original and third-party copyrights and licenses remain with their respective owners.</p>
     <p><a href="https://github.com/852wa/JIZURA" target="_blank" rel="noopener">Original JIZURA — hakoniwa</a></p>
     <p><a href="https://github.com/cityedge/jizura_layer_studio" target="_blank" rel="noopener">JIZURA Layer Studio — cityedge</a></p>
@@ -1499,12 +1509,12 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
   <form method="dialog">
     <h2 id="guideTitle" tabindex="-1">SYNTHIA Layer Studio user guide</h2>
     <p>Create animated lyrics and export a finished video with background/audio, or front/matte layers for a video editor.</p>
-    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.9.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
+    <p><a class="full-manual" href="user_guide.en.md" target="_blank" rel="noopener">v1.10.0 Full user manual (Markdown)</a> covers individual settings, compositing and saved data in detail.</p>
     <h3>Delete only the selected display object</h3>
     <p>Enable Character editing, choose an editing mode, pause, and click the preview. Use “🗑 Delete”, Delete, or Backspace. Source SRT text, timing, and remaining glyph positions are retained. Ctrl+Z undoes; Ctrl+Y / Ctrl+Shift+Z redoes. Input fields, Tap Sync, and dialogs prevent accidental deletion.</p>
     <p>The Display deletion / object list supports overlapping objects and multiple selection. Remove character effects only retains the text. Use Cut / Part for tapes, labels, panels, and individual decorations; use Instrumental FX for intro / interlude / outro FX. Styles without internal part subdivision support whole-cut or individual-decoration selection. Project JSON, autosave, and corresponding outputs retain deletion.</p>
     <h3>Animate lyric-free sections (Instrumental FX)</h3>
-    <p>Enable Instrumental FX in Integrated studio tools. Detect / review sections → accept candidates → generate all → enable Auto. Enable Manual to add and individually edit six FX types. OFF retains editing data; Ctrl+Z undoes changes. Detection uses lyric timings, not vocal recognition.</p>
+    <p>Instrumental FX v2.0: choose mood, strength and EQ/wave/video switches, then Create audio-reactive effects automatically. Real analyzed audio drives rendering; seeking and completed MP4 use the same features. Advanced mode provides manual addition, image targets, replacement and editing. Legacy simple editing remains there.</p>
     <p>Completed/simple MP4 includes FX. Subtitle front/matte and transparent lyric PNG excludes FX. <a href="../docs/INSTRUMENTAL_FX.en.html" target="_blank" rel="noopener">Detection, editing, saving and export guide</a></p>
     <h3>Make your first video</h3>
     <ol class="guide-steps">
@@ -1572,7 +1582,7 @@ Exhibit B - &quot;Incompatible With Secondary Licenses&quot; Notice
     <p><strong>Reset project</strong> clears current lyrics, fillers, parts, effects, locks, loaded media, spectrum/opacity/export/title settings, playhead and histories. Temporary export links are removed and autosave becomes the blank project. This cannot be undone after confirmation.</p>
     <p><strong>Shared libraries are kept.</strong> User themes and other cross-project data, interface language, display mode and preview volume remain. Original media, saved JSON and exported files on your PC are not deleted. Delete shared items in their own management screens.</p>
     <p>About / rights is at the bottom of the right pane, with license and material-handling information.</p>
-    <div class="terms-foot"><span class="muted">SYNTHIA · v1.9.0</span><button value="close" class="primary" autofocus>Close</button></div>
+    <div class="terms-foot"><span class="muted">SYNTHIA · v1.10.0</span><button value="close" class="primary" autofocus>Close</button></div>
   </form>
 </dialog>
 
@@ -4599,7 +4609,7 @@ J.plan = (project, audio) => {
   const zoneOf = () => (zones ? Object.assign({}, zones[0]) : null);
   if (zones && en.bg) en.bg.bigChar = false;               // the one background that draws the lyric itself (big, centred)
   const plan = {
-    version: 1, generator: 'JIZURA', appVersion: '1.9.0', title, artist, W, H, fps: project.fps || 30,
+    version: 1, generator: 'JIZURA', appVersion: '1.10.0', title, artist, W, H, fps: project.fps || 30,
     duration: tm.duration, styleKey: project.style, style: st, fx, seed: project.seed,
     lines: [], cuts: [], events: [], beats: audio && audio.beats ? audio.beats.slice() : [],
     hud: fx.hud === 'on' ? true : fx.hud === 'off' ? false : !!st.hud,
@@ -38001,7 +38011,7 @@ J.nativeMotionKey = p => { const c = J.normalizeNativeSpectrum(p.nativeSpectrum)
 // Self-contained so exactly this implementation also runs in a Blob worker.
 function analyzePCM(samples, sampleRate, progress) {
   const rate = 60, bars = 64, size = sampleRate > 60000 ? 4096 : 2048;
-  const frames = Math.ceil(samples.length / sampleRate * rate), raw = new Float32Array(frames * bars);
+  const frames = Math.ceil(samples.length / sampleRate * rate), raw = new Float32Array(frames * bars), reactiveBands = new Float32Array(frames * 3);
   const real = new Float64Array(size), imag = new Float64Array(size), win = new Float64Array(size), reverse = new Uint32Array(size);
   let sum = 0; const bits = Math.log2(size);
   for (let i = 0; i < size; i++) {
@@ -38061,6 +38071,11 @@ function analyzePCM(samples, sampleRate, progress) {
   progress?.(.15);
   for (let f = 0; f < frames; f++) {
     fftAt(Math.round(f * sampleRate / rate) - size / 2);
+    for (let band = 0; band < 3; band++) {
+      const bounds = [[20,250],[250,4000],[4000,sampleRate/2]][band];
+      let power = 0; for (let k = Math.max(1,Math.ceil(bounds[0]/binHz)); k < Math.min(size/2+1,Math.ceil(bounds[1]/binHz)); k++) power += real[k] ** 2 + imag[k] ** 2;
+      reactiveBands[f*3+band] = Math.sqrt(power) * 2 / sum;
+    }
     for (let b = 0; b < bars; b++) {
       let power = 0; for (let k = edges[b]; k < edges[b + 1]; k++) power += real[k] ** 2 + imag[k] ** 2;
       const amplitude = Math.sqrt(power / Math.max(1, edges[b + 1] - edges[b])) * 2 / sum;
@@ -38068,7 +38083,7 @@ function analyzePCM(samples, sampleRate, progress) {
     }
     if (f % 120 === 0) progress?.(.15 + .85 * f / frames);
   }
-  return { raw, rate, bars, frames, duration: samples.length / sampleRate,
+  return { raw, reactiveBands, rate, bars, frames, duration: samples.length / sampleRate,
     frequencyRange: { low, high, fallback }, fftSize: size, bandEdges: Array.from(edges), scanFrames };
 }
 J.analyzeNativePCM = analyzePCM;
@@ -38083,7 +38098,7 @@ J.analyzeNativeAudio = async (buffer, signal, progress) => {
     progress?.(.05 * end / mono.length); await tick();
   }
   aborted(signal);
-  const script = `const analyze = ${analyzePCM.toString()}; onmessage = e => { try { const r = analyze(e.data.samples, e.data.sampleRate, p => postMessage({progress:p})); postMessage({result:r}, [r.raw.buffer]); } catch(e) { postMessage({error:e.message}); } };`;
+  const script = `const analyze = ${analyzePCM.toString()}; onmessage = e => { try { const r = analyze(e.data.samples, e.data.sampleRate, p => postMessage({progress:p})); postMessage({result:r}, [r.raw.buffer, r.reactiveBands.buffer]); } catch(e) { postMessage({error:e.message}); } };`;
   const url = URL.createObjectURL(new Blob([script], { type: 'text/javascript' }));
   let worker, stop;
   try {
@@ -38095,6 +38110,28 @@ J.analyzeNativeAudio = async (buffer, signal, progress) => {
       worker.postMessage({ samples: mono, sampleRate: buffer.sampleRate }, [mono.buffer]);
     });
   } finally { signal?.removeEventListener('abort', stop); worker?.terminate(); URL.revokeObjectURL(url); }
+};
+// One FFT per AudioBuffer, shared by the original spectrum and Instrumental FX.
+// Cancelling one consumer only cancels the worker when no consumers remain.
+const fftCache = new WeakMap();
+J.sharedAudioFFT = async (buffer, signal, progress) => {
+  aborted(signal); let entry = fftCache.get(buffer);
+  if (!entry) {
+    entry = { controller:new AbortController(), users:0, listeners:new Set(), data:null };
+    fftCache.set(buffer, entry);
+    entry.promise = J.analyzeNativeAudio(buffer, entry.controller.signal, p => entry.listeners.forEach(fn=>fn?.(p))).then(data=>{ entry.data=data; return data; }).catch(e=>{if(fftCache.get(buffer)===entry)fftCache.delete(buffer);throw e;});
+  }
+  entry.users++; entry.listeners.add(progress); let stop;
+  try {
+    return await new Promise((resolve,reject)=>{
+      stop=()=>reject(new DOMException('Cancelled','AbortError'));
+      signal?.addEventListener('abort',stop,{once:true});
+      entry.promise.then(resolve,reject); if(signal?.aborted)stop();
+    });
+  } finally {
+    signal?.removeEventListener('abort',stop);entry.listeners.delete(progress);entry.users--;
+    if(!entry.users&&!entry.data){entry.controller.abort();if(fftCache.get(buffer)===entry)fftCache.delete(buffer);}
+  }
 };
 J.shapeNativeSpectrum = async (analysis, settings, signal) => {
   const c = J.normalizeNativeSpectrum(settings), { raw, frames, bars, rate } = analysis;
@@ -40018,8 +40055,9 @@ V.Controller = class {
                 if (layer.type === 'Lyrics') hooks?.afterLyrics?.();
                 continue;
             }
-            const p = layer.transform;
+            const reactive = J.instrumentalLayerResponse?.(project, layer, t), p = reactive?.transform || layer.transform;
             ctx.save();
+            if (reactive?.glow) { ctx.shadowColor = reactive.color; ctx.shadowBlur = Math.min(24, h * reactive.glow * .05); }
             ctx.globalAlpha = p.opacity;
             ctx.globalCompositeOperation = layer.blend;
             ctx.translate(w / 2 + p.x * k, h / 2 + p.y * k);
@@ -40893,6 +40931,170 @@ const ensure=J.studioEnsureCues,duplicate=J.studioDuplicateCue,remove=J.deleteLa
 J.studioEnsureCues=project=>{const old=Array.isArray(project.subtitleCues)?null:J.plan(project,J.ui?.audio).lines.map(J.subtitleGroupKey),cues=ensure(project);if(old)for(const r of Object.values(project.studio.deletedObjects||{})){const i=old.indexOf(r.owner);if(i>=0)r.owner='cue-'+cues[i].id;}return cues;};
 J.studioDuplicateCue=(project,index)=>{J.studioEnsureCues(project);const owner='cue-'+project.subtitleCues[index]?.id,id=duplicate(project,index);for(const r of Object.values(project.studio.deletedObjects||{}))if(r.owner===owner)project.studio.deletedObjects['deleted-'+crypto.randomUUID()]={...structuredClone(r),owner:'cue-'+id};return id;};
 J.deleteLayerCue=(project,index)=>{const owner='cue-'+project.subtitleCues?.[index]?.id;remove(project,index);for(const [id,r] of Object.entries(project.studio.deletedObjects||{}))if(r.owner===owner)delete project.studio.deletedObjects[id];};
+})();
+
+/* UI adapters only. v1 data, generation and rendering remain owned by InstrumentalFX. */
+(() => {
+'use strict';
+const F=J.InstrumentalFX,E=J.InstrumentalEasy={};
+E.styles=['Auto','Cyber','Pop','Minimal'];
+E.strengths=[25,50,85];
+E.reviewTime=(state,effect)=>{
+  // Seek to a visible phase of existing flashes rather than changing their renderer.
+  const flash=effect.type==='Light Flash'||effect.type==='Transition Accent'&&effect.params.accent==='flash';
+  if(!flash)return effect.start+Math.min(.5,(effect.end-effect.start)/2);
+  let best=null,level=0;
+  for(let t=effect.start+.05;t<Math.min(effect.end,effect.start+8);t+=.05){const event=F.flashEvent(state,effect,t),phase=t-event;if(event<effect.start||phase<=0||phase>=effect.params.duration)continue;const fade=Math.min(1,(t-effect.start)/.3,(effect.end-t)/Math.min(effect.params.fade,(effect.end-effect.start)/2)),value=Math.sin(Math.PI*phase/effect.params.duration)**2*fade;if(value>level){level=value;best=t;}}
+  return best;
+};
+E.prepare=(state,cues,audio)=>{
+  if(!Array.isArray(cues)||!cues.length)throw new Error(J.layerText('「SRTを読み込む」から字幕を読み込んでください。字幕の時刻から間奏を見つけます。','Use Import SRT first. Subtitle timings identify the instrumental sections.'));
+  if(!audio?.buffer||!(audio.duration>0))throw new Error(J.layerText('音源を読み込んでから自動で追加してください。音源なしの区間設定は詳細設定で行えます。','Load audio before adding automatically. Advanced settings also support sections without audio.'));
+  const detected=F.detect(cues,audio.duration,state.minGap,state.boundary);
+  // Preserve every saved section, including exclusions and manually adjusted boundaries.
+  const regions=[...state.regions,...detected.filter(r=>!state.regions.some(k=>k.id===r.id||k.start<r.end&&k.end>r.start))].sort((a,b)=>a.start-b.start);
+  if(!regions.some(r=>r.auto))throw new Error(J.layerText('追加できる間奏区間がありません。SRTの時刻か詳細設定の対象区間を確認してください。','No instrumental section is available. Check SRT timings or target sections in Advanced settings.'));
+  return {regions,detectionKey:F.detectionKey(cues,audio.duration,state.minGap,state.boundary)};
+};
+E.manual=(state,type,time,duration)=>{
+  if(!Number.isFinite(time)||time<0||!(duration>0)||time>=duration||duration-time<.01)throw new Error(J.layerText('曲末です。エフェクトを置きたい位置へ再生位置を戻してください。','The playhead is at the song end. Seek back to the position where you want the effect.'));
+  const region=state.regions.find(r=>time>=r.start&&time<r.end);
+  return {effect:F.effect({type,start:time,end:Math.min(time+3,duration),regionId:region?.id,seed:state.seed}),outside:!region};
+};
+})();
+
+/* Instrumental FX v2 adapters: real PCM features, deterministic reactions and composition. */
+(() => {
+'use strict';
+const F=J.InstrumentalFX,R=J.AudioReactive={version:2},clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),num=(v,d,a,b)=>Number.isFinite(v)?clamp(v,a,b):d;
+R.audioTypes=['Audio Spectrum','Audio Waveform','Audio Reactive Transform'];
+R.videoTypes=['RGB Glitch','Glow','Motion Blur','Radial Blur','Light Rays','Zoom Pulse','Mirror','Kaleidoscope','Film Grain'];
+R.types=[...R.audioTypes,...R.videoTypes];F.types.push(...R.types);
+R.settings=v=>({layout:['bars','mirror','circle','line'].includes(v?.layout)?v.layout:'bars',band:['all','low','mid','high'].includes(v?.band)?v.band:'all',bars:Math.round(num(v?.bars,48,8,64)),sensitivity:num(v?.sensitivity,1,0,4),bassGain:num(v?.bassGain,1,0,4),midGain:num(v?.midGain,1,0,4),trebleGain:num(v?.trebleGain,1,0,4),attackMs:num(v?.attackMs,20,5,500),releaseMs:num(v?.releaseMs,220,20,2000),smoothing:num(v?.smoothing,.25,0,.95),peakHoldMs:num(v?.peakHoldMs,100,0,2000),glow:num(v?.glow,.25,0,1),height:num(v?.height,.22,.01,.8),jitter:num(v?.jitter,0,0,.5),scaleAmount:num(v?.scaleAmount,.4,0,2),rotationAmount:num(v?.rotationAmount,12,-90,90),moveAmount:num(v?.moveAmount,.025,-.5,.5),opacityAmount:num(v?.opacityAmount,.25,0,1),trigger:['rms','peak','onset','beat','low','mid','high'].includes(v?.trigger)?v.trigger:'rms',targetId:typeof v?.targetId==='string'&&/^(?:fx|layer):[-\w]{1,100}$/.test(v.targetId)?v.targetId:''});
+R.presets={
+ Ballad:{color:'#a7c5df',layout:'bars',bars:24,releaseMs:480,glow:.12,height:.12,scaleAmount:.15,rotationAmount:2,moveAmount:.008,video:'Light Rays',trigger:'rms'},
+ Rock:{color:'#ff8866',layout:'mirror',bars:48,releaseMs:140,glow:.3,height:.25,scaleAmount:.45,rotationAmount:18,moveAmount:.035,video:'RGB Glitch',trigger:'onset'},
+ EDM:{color:'#65cfff',layout:'circle',bars:64,releaseMs:110,glow:.5,height:.3,scaleAmount:.65,rotationAmount:30,moveAmount:.04,video:'Zoom Pulse',trigger:'beat'},
+ Pop:{color:'#ff7da9',layout:'bars',bars:40,releaseMs:200,glow:.25,height:.2,scaleAmount:.35,rotationAmount:10,moveAmount:.025,video:'Glow',trigger:'rms'},
+ Cinematic:{color:'#e7cda3',layout:'mirror',bars:32,releaseMs:550,glow:.18,height:.13,scaleAmount:.2,rotationAmount:3,moveAmount:.01,video:'Light Rays',trigger:'low'},
+ 'Lo-Fi':{color:'#b9d3b0',layout:'line',bars:24,releaseMs:380,glow:.05,height:.14,scaleAmount:.12,rotationAmount:2,moveAmount:.005,video:'Film Grain',trigger:'rms'}
+};
+const stride=134,maxFrames=9000,byteCache=new WeakMap(),shapeCache=new WeakMap(),keyCache=new WeakMap();
+R.audioKey=audio=>{const b=audio?.buffer;if(!b)return '';let key=keyCache.get(b);if(key)return key;let h=2166136261,g=2246822507;for(let c=0;c<b.numberOfChannels;c++){const samples=b.getChannelData(c);for(let i=0;i<4096;i++){const index=Math.floor(F.random(7919+c,i)*samples.length),value=Math.round((samples[index]||0)*1e6);h=Math.imul(h^value,16777619);g=Math.imul(g^value,3266489909);}}key='ar2-'+F.hash([b.length,b.sampleRate,b.numberOfChannels,h>>>0,g>>>0]);keyCache.set(b,key);return key;};
+R.pack=bytes=>{let s='';for(let i=0;i<bytes.length;i+=8192)s+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(s);};
+R.featureData=v=>{
+ if(!v||v.version!==1||typeof v.key!=='string'||!Number.isFinite(v.duration)||v.duration<=0||v.duration>86400||!Number.isFinite(v.rate)||v.rate<=0||v.rate>30||!Number.isInteger(v.frames)||v.frames<1||v.frames>maxFrames||v.stride!==stride||typeof v.packed!=='string'||v.packed.length!==4*Math.ceil(v.frames*stride/3)||!/^[A-Za-z0-9+/]*={0,2}$/.test(v.packed))return null;
+ if(Math.abs(v.frames-Math.ceil(v.duration*v.rate))>1)return null;
+ return {version:1,key:v.key.slice(0,100),duration:num(v.duration,1,.01,86400),rate:v.rate,frames:v.frames,stride,packed:v.packed,frequencies:Array.isArray(v.frequencies)&&v.frequencies.length===64?v.frequencies.map(x=>num(x,0,0,192000)):Array.from({length:64},(_,i)=>80*Math.pow(150,i/63)),beats:(Array.isArray(v.beats)?v.beats:[]).slice(0,100000).filter(t=>Number.isFinite(t)&&t>=0&&t<v.duration).sort((a,b)=>a-b)};
+};
+R.unpack=features=>{let bytes=byteCache.get(features);if(bytes)return bytes;try{const s=atob(features.packed);if(s.length!==features.frames*stride)return null;bytes=Uint8Array.from(s,c=>c.charCodeAt(0));byteCache.set(features,bytes);return bytes;}catch{return null;}};
+R.state=v=>({preset:Object.hasOwn(R.presets,v?.preset)?v.preset:'Pop',spectrum:v?.spectrum!==false,waveform:v?.waveform===true,video:v?.video!==false,settings:R.settings(v?.settings),features:R.featureData(v?.features),beforeFeatures:R.featureData(v?.beforeFeatures),beforeFeatureKey:String(v?.beforeFeatureKey||'').slice(0,100)});
+const effect=F.effect,normalize=F.normalize;
+F.effect=(v={},source='manual')=>{const e=effect(v,source);if(R.types.includes(e.type)){e.reactive=R.settings(v.reactive);if(e.type==='Audio Spectrum'&&e.reactive.layout==='line')e.reactive.layout='bars';if(e.type==='Audio Waveform'&&e.reactive.layout!=='circle')e.reactive.layout='line';}return e;};
+F.normalize=v=>({...normalize(v),reactive:R.state(v?.reactive)});
+const sample=(array,t,rate)=>{const i=Math.max(0,Math.min(array.length-1,Math.round(t*rate)));return array[i]||0;};
+R.buildFeatures=async(audio,fft,signal)=>{
+ const a=J.studioAnalyze(audio),buffer=audio.buffer,rate=Math.min(30,maxFrames/audio.duration),frames=Math.min(maxFrames,Math.ceil(audio.duration*rate)),bytes=new Uint8Array(frames*stride),channels=Array.from({length:buffer.numberOfChannels},(_,i)=>buffer.getChannelData(i));
+ const rmsSamples=Array.from(a.rms).filter((_,i)=>i%Math.max(1,Math.ceil(a.rms.length/20000))===0).sort((x,y)=>x-y),rmsReference=Math.max(.0001,rmsSamples[Math.floor(rmsSamples.length*.95)]||0);
+ const beats=[];for(const beat of a.beats){let best=0,time=beat;for(let i=Math.max(0,Math.floor((beat-.12)*a.rate));i<Math.min(a.onset.length,Math.ceil((beat+.12)*a.rate));i++)if(a.onset[i]>best){best=a.onset[i];time=i/a.rate;}if(best>.08&&sample(a.rms,time,a.rate)>.0001&&(!beats.length||time-beats.at(-1)>=.08))beats.push(time);}
+ for(let f=0;f<frames;f++){
+  if(f%128===0){if(signal?.aborted)throw new DOMException('Cancelled','AbortError');await new Promise(ok=>setTimeout(ok,0));}
+  const t=f/rate,ff=Math.min(fft.frames-1,Math.round(t*fft.rate)),offset=f*stride;
+  for(let b=0;b<64;b++)bytes[offset+b]=Math.round(clamp((fft.raw[ff*64+b]+78)/64,0,1)*255);
+  const center=Math.round(t*buffer.sampleRate),window=Math.round(buffer.sampleRate*.025);
+  for(let p=0;p<64;p++){const i=center+Math.round((p/63-.5)*window);let value=0;for(const c of channels)value+=(c[i]||0)/channels.length;bytes[offset+64+p]=Math.round(clamp(value,-1,1)*127+128);}
+  for(let band=0;band<3;band++)bytes[offset+128+band]=Math.round(clamp((fft.reactiveBands?.[ff*3+band]||0)/rmsReference,0,1)*255);
+  bytes[offset+131]=Math.round(clamp(sample(a.rms,t,a.rate)/rmsReference,0,1)*255);
+  bytes[offset+132]=Math.round(clamp(sample(a.peak,t,a.rate),0,1)*255);
+  bytes[offset+133]=Math.round(clamp(sample(a.onset,t,a.rate)/2,0,1)*255);
+ }
+ if(signal?.aborted)throw new DOMException('Cancelled','AbortError');
+ return R.featureData({version:1,key:R.audioKey(audio),duration:audio.duration,rate,frames,stride,packed:R.pack(bytes),frequencies:Array.from({length:64},(_,i)=>(fft.bandEdges[i]+fft.bandEdges[i+1])/2*buffer.sampleRate/fft.fftSize),beats});
+};
+R.prepare=async(audio,previous,signal)=>{if(!audio?.buffer)throw new Error(J.layerText('音源を読み込んでください。音楽連動には実際の音声解析が必要です。','Load audio. Audio reactions require real audio analysis.'));if(previous?.key===R.audioKey(audio))return previous;return R.buildFeatures(audio,await J.sharedAudioFFT(audio.buffer,signal),signal);};
+R.shape=(features,settings)=>{
+ const c=R.settings(settings),key=JSON.stringify([c.attackMs,c.releaseMs,c.smoothing,c.peakHoldMs,c.sensitivity,c.bassGain,c.midGain,c.trebleGain]),bytes=R.unpack(features);if(!bytes)return null;
+ let cache=shapeCache.get(features);if(!cache){cache=new Map();shapeCache.set(features,cache);}if(cache.has(key))return cache.get(key);
+ const columns=70,values=new Float32Array(features.frames*columns),current=new Float32Array(columns),hold=new Float32Array(columns),attack=1-Math.exp(-1000/(features.rate*c.attackMs)),release=1-Math.exp(-1000/(features.rate*c.releaseMs));
+ for(let f=0;f<features.frames;f++)for(let k=0;k<columns;k++){
+  const index=k<64?k:128+k-64,hz=features.frequencies[k],gain=k<64?(hz<250?c.bassGain:hz<4000?c.midGain:c.trebleGain):k===64?c.bassGain:k===65?c.midGain:k===66?c.trebleGain:1,target=clamp(bytes[f*stride+index]/255*c.sensitivity*gain,0,1);
+  if(target>=current[k]){current[k]+=(target-current[k])*attack*(1-c.smoothing*.8);hold[k]=Math.ceil(c.peakHoldMs*features.rate/1000);}
+  else if(hold[k]>0)hold[k]--;else current[k]+=(target-current[k])*release*(1-c.smoothing*.8);
+  if(current[k]<.001)current[k]=0;values[f*columns+k]=current[k];
+ }
+ const shaped={values,columns};if(cache.size>=4)cache.delete(cache.keys().next().value);cache.set(key,shaped);return shaped;
+};
+R.frame=(features,t,settings={})=>{
+ const spectrum=new Float32Array(64),wave=new Float32Array(64),out={spectrum,wave,low:0,mid:0,high:0,rms:0,peak:0,onset:0,beat:0};if(!features||t<0||t>=features.duration)return out;
+ const data=R.shape(features,settings),bytes=R.unpack(features);if(!data||!bytes)return out;
+ const pos=t*features.rate,a=Math.min(features.frames-1,Math.floor(pos)),b=Math.min(features.frames-1,a+1),mix=pos-Math.floor(pos),value=k=>data.values[a*70+k]*(1-mix)+data.values[b*70+k]*mix;
+ for(let k=0;k<64;k++){spectrum[k]=value(k);wave[k]=((bytes[a*stride+64+k]-128)*(1-mix)+(bytes[b*stride+64+k]-128)*mix)/127;}
+ ['low','mid','high','rms','peak','onset'].forEach((k,i)=>out[k]=value(64+i));
+ const beat=F.lastBeat(features.beats,t),last=beat>=0?features.beats[beat]:-Infinity;out.beat=Math.exp(-Math.max(0,t-last)/.16)*Math.min(1,out.rms*2);return out;
+};
+R.featuresFor=project=>{const features=project.studio?.instrumentalFx?.reactive?.features;if(project===J.ui?.project&&J.ui.audio?.buffer&&features?.key!==R.audioKey(J.ui.audio))return null;return features;};
+R.allowed=(s,e)=>e.type==='Audio Spectrum'?s.reactive?.spectrum!==false:e.type==='Audio Waveform'?s.reactive?.waveform!==false:R.videoTypes.includes(e.type)?s.reactive?.video!==false:true;
+R.visible=(s,t,preview)=>[...F.active(s,t,'back',preview),...F.active(s,t,'front',preview)].filter(e=>R.allowed(s,e));
+R.response=(s,e,t,features)=>{const c=R.settings(e.reactive),frame=R.frame(features,t,c);if(!e.beat||e.source==='auto'&&!s.beat)frame.beat=0;const amount=frame[c.trigger]*e.intensity,beat=frame.beat*e.intensity,motion=(globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true)? .25:1;return {frame,amount,scale:1+c.scaleAmount*amount*motion,rotation:c.rotationAmount*beat*motion,x:c.moveAmount*beat*motion,y:-c.moveAmount*beat*motion,opacity:1-c.opacityAmount*(1-amount),glow:c.glow*amount};};
+R.targetEffect=(s,e,t,preview=false)=>{const features=s.reactive?.features,controller=R.visible(s,t,preview).find(c=>c.type==='Audio Reactive Transform'&&c.reactive.targetId==='fx:'+e.id);if(!features||!controller)return e;const r=R.response(s,controller,t,features),next={...e,x:clamp(e.x+r.x+controller.x-.5,-2,3),y:clamp(e.y+r.y+controller.y-.5,-2,3),scale:clamp(e.scale*r.scale*controller.scale,.05,10),rotation:e.rotation+r.rotation+controller.rotation,opacity:e.opacity*r.opacity};if(R.audioTypes.includes(e.type))next.reactive={...e.reactive,glow:Math.min(1,e.reactive.glow+r.glow)};else{next.reactionGlow=r.glow;next.reactionColor=controller.color;}return next;};
+R.generate=(state,regions)=>{
+ const s=state.reactive,preset=R.presets[s.preset],out=[],strength=state.strength/100;if(!strength)return out;
+ for(const region of regions.filter(r=>r.auto)){
+  const types=[];if(s.spectrum)types.push('Audio Spectrum');if(s.waveform)types.push('Audio Waveform');if(types.length===1)types.push('Audio Reactive Transform');if(s.video)types.push(preset.video);
+  for(const type of types.slice(0,3)){const e=F.effect({id:'reactive-'+F.hash([state.seed,region.id,type]),type,start:region.start,end:region.end,regionId:region.id,seed:F.hash([state.seed,region.id,type]),color:preset.color,intensity:strength,opacity:.85,plane:type==='Audio Spectrum'||type==='Audio Waveform'?'front':'back',x:.5,y:type==='Audio Spectrum'&&preset.layout!=='circle'?.8:.5,params:{count:1,range:.22,lineWidth:.004,shape:s.preset==='Rock'?'triangle':'circle'},reactive:{...s.settings,...preset,layout:type==='Audio Waveform'?'line':preset.layout}},'auto');if(!out.some(x=>x.id===e.id))out.push(e);}
+  if(out.length>512)throw new Error(J.layerText('自動FXは512件までです。対象区間を減らしてください。','Auto FX limit: 512. Reduce target sections.'));
+ }
+ return out;
+};
+function drawAudio(ctx,project,e,t){
+ const features=R.featuresFor(project);if(!features)return;const s=project.studio.instrumentalFx,c=R.settings(e.reactive),response=R.response(s,e,t,features),a=response.frame,w=ctx.canvas.width,h=ctx.canvas.height,short=Math.min(w,h),fade=Math.min(1,(t-e.start)/.2,(e.end-t)/.2),reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+ if(e.type==='Audio Reactive Transform'&&c.targetId)return;
+ ctx.save();ctx.translate(e.x*w,e.y*h);ctx.rotate((e.rotation+(e.type==='Audio Reactive Transform'?response.rotation:0))*J.DEG);ctx.scale(e.scale,e.scale);ctx.globalCompositeOperation=e.blend;ctx.globalAlpha=e.opacity*fade*e.intensity;ctx.fillStyle=ctx.strokeStyle=e.color;ctx.lineWidth=short*e.params.lineWidth;ctx.shadowColor=e.color;ctx.shadowBlur=Math.min(24,short*c.glow*.05*a.rms);ctx.lineJoin='round';ctx.lineCap='round';
+ if(e.type==='Audio Spectrum'){
+  const indices=Array.from({length:64},(_,i)=>i).filter(i=>c.band==='all'||c.band==='low'&&features.frequencies[i]<250||c.band==='mid'&&features.frequencies[i]>=250&&features.frequencies[i]<4000||c.band==='high'&&features.frequencies[i]>=4000),count=Math.min(c.bars,s.quality==='low'?24:64),width=short*.9,cell=width/count,level=i=>(a.spectrum[indices[Math.min(indices.length-1,Math.floor(i/count*indices.length))]]||0)*c.height*short;
+  for(let i=0;i<count;i++){const v=level(i);if(v<.1)continue;if(c.layout==='circle'){const angle=i/count*J.TAU,radius=short*e.params.range;ctx.save();ctx.rotate(angle);ctx.fillRect(radius,-cell*.22,v,cell*.44);ctx.restore();}else ctx.fillRect(-width/2+cell*(i+.15),c.layout==='mirror'?-v/2:-v,cell*.7,c.layout==='mirror'?v:v);}
+ }else if(e.type==='Audio Waveform'){
+  if(a.rms>0){const points=[];for(let i=0;i<64;i++){const jitter=reduced?0:c.jitter*a.onset*(F.random(e.seed,Math.floor(t*features.rate)+i)-.5)*short,value=a.wave[i]*c.height*short+jitter;if(c.layout==='circle'){const angle=i/63*J.TAU,radius=short*e.params.range+value;points.push([Math.cos(angle)*radius,Math.sin(angle)*radius]);}else points.push([(i/63-.5)*short*.95,value]);}ctx.beginPath();ctx.moveTo(...points[0]);for(let i=1;i<points.length;i++){const previous=points[i-1],next=points[i];ctx.quadraticCurveTo(...previous,(previous[0]+next[0])/2,(previous[1]+next[1])/2);}ctx.lineTo(...points.at(-1));if(c.layout==='circle')ctx.closePath();ctx.stroke();}
+ }else{
+  const size=short*e.params.range*response.scale;ctx.globalAlpha*=response.opacity;ctx.translate(response.x*w,response.y*h);ctx.beginPath();if(e.params.shape==='square')ctx.rect(-size,-size,size*2,size*2);else if(e.params.shape==='triangle'){ctx.moveTo(0,-size);ctx.lineTo(size,size);ctx.lineTo(-size,size);ctx.closePath();}else if(e.params.shape==='line'){ctx.moveTo(-size,0);ctx.lineTo(size,0);}else ctx.arc(0,0,size,0,J.TAU);ctx.stroke();
+ }ctx.restore();
+}
+const legacyDraw=F.draw;
+F.draw=(ctx,project,t,plane='back',preview=false)=>{
+ const s=project.studio?.instrumentalFx;if(!s)return;const active=R.visible(s,t,preview),features=R.featuresFor(project),react=e=>features?R.targetEffect(s,e,t,preview):e;
+ let effective=s;
+ if(active.some(e=>R.types.includes(e.type))){effective={...s};const ids=new Set(active.map(e=>e.id));for(const key of ['autoEffects','manualEffects'])effective[key]=s[key].filter(e=>ids.has(e.id)&&!R.types.includes(e.type)).map(react);}
+ legacyDraw(ctx,effective===s?project:{...project,studio:{...project.studio,instrumentalFx:effective}},t,plane,preview);
+ for(const e of [...effective.autoEffects,...effective.manualEffects].filter(e=>e.plane===plane&&e.reactionGlow>0&&e.type!=='Light Flash'&&!(e.type==='Transition Accent'&&e.params.accent==='flash'))){ctx.save();ctx.shadowColor=e.reactionColor;ctx.shadowBlur=Math.min(20,Math.min(ctx.canvas.width,ctx.canvas.height)*e.reactionGlow*.04);const glow={...e,opacity:e.opacity*e.reactionGlow*.2},gs={...effective,autoEffects:e.source==='auto'?[glow]:[],manualEffects:e.source==='manual'?[glow]:[]};legacyDraw(ctx,{...project,studio:{...project.studio,instrumentalFx:gs}},t,plane,preview);ctx.restore();}
+ if(plane!=='front'||!J.studioOn(project,'timeline'))for(const e of active.filter(e=>e.plane===plane&&R.audioTypes.includes(e.type)))drawAudio(ctx,project,react(e),t);
+};
+let compositionPreview=false;
+J.instrumentalLayerResponse=(project,layer,t)=>{
+ const s=project.studio?.instrumentalFx,features=R.featuresFor(project);if(layer.type==='Lyrics'||!s||!features)return null;const effect=R.visible(s,t,compositionPreview).find(e=>e.type==='Audio Reactive Transform'&&e.reactive.targetId==='layer:'+layer.id);if(!effect)return null;
+ const r=R.response(s,effect,t,features),p=layer.transform,design=J.designSize(project.aspect);return {transform:{...p,x:p.x+(r.x+effect.x-.5)*design[0],y:p.y+(r.y+effect.y-.5)*design[1],scale:clamp(p.scale*r.scale*effect.scale,.05,10),rotation:p.rotation+r.rotation+effect.rotation,opacity:p.opacity*r.opacity},glow:r.glow,color:effect.color};
+};
+// Reused scratch buffers; the renderer never uses a previous frame as history.
+const scratch=new WeakMap();
+R.post=(ctx,project,t,preview=false)=>{
+ const s=project.studio?.instrumentalFx;if(!s)return;const features=R.featuresFor(project);if(!features)return;const effects=R.visible(s,t,preview).filter(e=>R.videoTypes.includes(e.type)).slice(0,2);if(!effects.length)return;
+ const target=ctx,fullWidth=ctx.canvas.width,fullHeight=ctx.canvas.height,limit=s.quality==='low'?480:s.quality==='high'?1280:960,ratio=Math.min(1,limit/Math.max(fullWidth,fullHeight)),sw=Math.max(1,Math.round(fullWidth*ratio)),sh=Math.max(1,Math.round(fullHeight*ratio)),w=sw,h=sh;let buffers=scratch.get(target.canvas);if(!buffers){buffers={source:J.layerCanvas(sw,sh),output:J.layerCanvas(sw,sh)};scratch.set(target.canvas,buffers);}for(const canvas of Object.values(buffers))if(canvas.width!==sw||canvas.height!==sh){canvas.width=sw;canvas.height=sh;}const cv=buffers.source,x=cv.getContext('2d');ctx=buffers.output.getContext('2d');const reduced=globalThis.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches===true;
+ for(const e of effects){const response=R.response(s,e,t,features),amount=Math.min(s.safeFlash?.45:1,response.amount)*(reduced?.3:1)*Math.min(1,(t-e.start)/.2,(e.end-t)/.2);if(amount<.001)continue;x.clearRect(0,0,sw,sh);x.drawImage(target.canvas,0,0,sw,sh);ctx.clearRect(0,0,sw,sh);ctx.save();ctx.globalAlpha=amount;
+  if(e.type==='Zoom Pulse'){const zoom=1+amount*.12;ctx.globalAlpha=1;ctx.drawImage(cv,-w*(zoom-1)/2,-h*(zoom-1)/2,w*zoom,h*zoom);}
+  else if(e.type==='Mirror'){for(let i=0;i<2;i++){ctx.save();ctx.beginPath();ctx.rect(i*w/2,0,w/2,h);ctx.clip();ctx.translate(i?w:0,0);ctx.scale(i?-1:1,1);ctx.drawImage(cv,0,0,w,h);ctx.restore();}}
+  else if(e.type==='Kaleidoscope'){const parts=s.quality==='low'?4:s.quality==='high'?8:6,radius=Math.hypot(w,h);ctx.translate(w/2,h/2);for(let i=0;i<parts;i++){const start=i/parts*J.TAU,end=(i+1)/parts*J.TAU;ctx.save();ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,radius,start,end);ctx.closePath();ctx.clip();ctx.rotate(start);if(i%2)ctx.scale(1,-1);ctx.drawImage(cv,-w/2,-h/2,w,h);ctx.restore();}}
+  else if(e.type==='RGB Glitch'){const pixels=x.getImageData(0,0,sw,sh),src=new Uint8ClampedArray(pixels.data),shift=Math.max(1,Math.round(amount*sw*.018));for(let y=0;y<sh;y++){const offset=Math.round((F.random(e.seed,Math.floor(t*30)+y%12)-.5)*shift);for(let col=0;col<sw;col++){const i=(y*sw+col)*4;pixels.data[i]=src[(y*sw+clamp(col+shift+offset,0,sw-1))*4];pixels.data[i+2]=src[(y*sw+clamp(col-shift+offset,0,sw-1))*4+2];}}x.putImageData(pixels,0,0);ctx.drawImage(cv,0,0,w,h);}
+  else if(e.type==='Film Grain'){const count=s.quality==='low'?100:350;ctx.globalAlpha=amount*.14;for(let i=0;i<count;i++){const random=F.random(e.seed,Math.floor(t*30)*count+i);ctx.fillStyle=random>.5?'#fff':'#000';ctx.fillRect(random*w,F.random(e.seed,i+Math.floor(t*30)*count+123)*h,2,2);}}
+  else if(e.type==='Glow'){ctx.globalCompositeOperation='screen';ctx.globalAlpha=amount*.35;ctx.filter='blur('+Math.min(12,amount*12)+'px)';ctx.drawImage(cv,0,0,w,h);}
+  else {const count=s.quality==='low'?3:s.quality==='high'?8:5;ctx.globalAlpha=amount/(count+1)*(e.type==='Light Rays'?.4:1);if(e.type==='Light Rays')ctx.globalCompositeOperation='screen';for(let i=1;i<=count;i++){if(e.type==='Motion Blur')ctx.drawImage(cv,amount*i*2,amount*i,w,h);else{const z=1+amount*i*.015;ctx.drawImage(cv,-w*(z-1)/2,-h*(z-1)/2,w*z,h*z);}}}
+  ctx.restore();target.save();target.globalCompositeOperation=e.type==='Glow'||e.type==='Light Rays'?'screen':'source-over';target.drawImage(buffers.output,0,0,fullWidth,fullHeight);target.restore();
+ }
+};
+const compose=J.composeInstrumentalStudio;
+J.composeInstrumentalStudio=(ctx,project,t,lyrics,assets,preview=false)=>{const previous=compositionPreview;compositionPreview=preview;try{compose(ctx,project,t,lyrics,assets,preview);if(J.studioOn(project,'timeline'))for(const e of R.visible(project.studio.instrumentalFx,t,preview).filter(e=>e.plane==='front'&&R.audioTypes.includes(e.type)))drawAudio(ctx,project,R.featuresFor(project)?R.targetEffect(project.studio.instrumentalFx,e,t,preview):e,t);R.post(ctx,project,t,preview);}finally{compositionPreview=previous;}};
+const exportVideo=J.exportSimpleVideo;
+J.exportSimpleVideo=async options=>{const s=options.project.studio?.instrumentalFx;if(s?.enabled&&[...(s.auto?s.autoEffects:[]),...(s.manual?s.manualEffects:[])].some(e=>e.visible&&R.types.includes(e.type))){if(!s.reactive?.features||options.audio?.buffer&&R.audioKey(options.audio)!==s.reactive.features.key)throw new Error(J.layerText('音源を読み込み、自動作成で音楽連動の解析を更新してください。','Load audio and use automatic creation to refresh the audio reactions.'));}return exportVideo(options);};
+const planProject=J.plan;
+J.plan=(project,audio)=>{const plan=planProject(project,audio),s=plan.studio?.instrumentalFx;if(s?.enabled&&s.reactive?.features&&[...(s.auto?s.autoEffects:[]),...(s.manual?s.manualEffects:[])].some(e=>R.types.includes(e.type)))plan.duration=Math.max(plan.duration,s.reactive.features.duration);return plan;};
 })();
 
 /* English labels are applied after all expression packs register, before the editor starts.
@@ -43022,7 +43224,7 @@ function bind() {
   };
   document.querySelectorAll('.terms-open').forEach(b => b.addEventListener('click', openTerms));
   dlg.addEventListener('click', e => { if (e.target === dlg) dlg.close ? dlg.close() : dlg.removeAttribute('open'); });   // click on the backdrop
-  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.9.0' }), null, 1)));
+  $('btnSave').addEventListener('click', () => J.saveFile(baseName() + '_project.json', JSON.stringify(Object.assign({}, S.project, { appVersion: '1.10.0' }), null, 1)));
   audioNameDefault = $('audioName').textContent;
   $('btnClearLyrics').addEventListener('click', clearLyrics);
   $('btnReset').addEventListener('click', () => {
@@ -43972,7 +44174,7 @@ async function prepare(buffer, key) {
   const settings = { ...J.ui.project.nativeSpectrum };
   showProgress();
   try {
-    const raw = state.raw || await J.analyzeNativeAudio(buffer, controller.signal, p => { if (state.controller === controller) { state.progress = p * .9; showProgress(); } });
+    const raw = state.raw || await J.sharedAudioFFT(buffer, controller.signal, p => { if (state.controller === controller) { state.progress = p * .9; showProgress(); } });
     if (controller.signal.aborted) return;
     state.raw = raw; state.progress = .9; showProgress();
     const data = await J.shapeNativeSpectrum(raw, settings, controller.signal);
@@ -46101,7 +46303,7 @@ if (document.readyState === 'loading') document.addEventListener('DOMContentLoad
 (() => {
 'use strict';
 function boot(){
-  const F=J.InstrumentalFX,el=J.studioElement,tr=J.layerText,root=J.studioSection('instrumentalFx','間奏演出 / Instrumental FX','Instrumental FX'),fields={},regionFields={},settings={},paramFields={};
+  const F=J.InstrumentalFX,E=J.InstrumentalEasy,R=J.AudioReactive,el=J.studioElement,tr=J.layerText,root=J.studioSection('instrumentalFx','間奏演出','Instrumental FX'),fields={},regionFields={},settings={},paramFields={},reactiveFields={};
   let selectedRegion='',selectedEffect='',selectionActive=false,pending=null,proposalKey='',job=null,drag=null,previewDrag=null,direct=false;
   const state=()=>J.ui.project.studio.instrumentalFx,all=()=>[...state().autoEffects,...state().manualEffects],current=()=>all().find(e=>e.id===selectedEffect),region=()=>state().regions.find(r=>r.id===selectedRegion);
   const busy=()=>!!J.ui.exporting||J.layerSession.busy||!!job;
@@ -46115,10 +46317,16 @@ function boot(){
     i.setAttribute('aria-label',tr(ja,en));label.append(i);parent.append(label);return i;
   }
   function check(parent,id,ja,en,key){const i=input(parent,id,ja,en,'checkbox');settings[key]=i;i.addEventListener('change',()=>{if(key==='enabled'&&job){job.ac.abort();J.uiApi.pushEdit();state()[key]=i.checked;J.studioChanged();}else mutate(()=>{state()[key]=i.checked;});});return i;}
-  const switches=grid(root);
-  for(const [key,ja,en] of [['enabled','間奏演出 ON / OFF','Enable Instrumental FX'],['auto','自動エフェクト ON / OFF','Auto FX'],['manual','手動エフェクト ON / OFF','Manual FX'],['preview','プレビュー表示','Show in preview']])check(switches,key,ja,en,key);
-  root.append(status,el('p',tr('歌詞タイミングの空白を検出します。歌声の有無は判定しません。OFFでも編集データを保持します。','Detect gaps in lyric timings; this does not identify vocal absence. OFF retains all editing data.')));
-  const controls=el('fieldset',null,'ifxControls');root.append(controls);const config=grid(controls);
+  let mode='easy';
+  const modeBar=el('div');modeBar.className='ifx-mode';root.append(modeBar);
+  const easyMode=button('EasyMode','かんたん','Easy',()=>setMode('easy'),modeBar),advancedMode=button('AdvancedMode','詳細設定を開く','Open advanced settings',()=>setMode('advanced'),modeBar);
+  const mainSwitch=grid(root);mainSwitch.className='ifx-main-switch';check(mainSwitch,'enabled','間奏エフェクト ON / OFF','Instrumental effects ON / OFF','enabled');
+  const easy=el('div',null,'ifxEasy'),advanced=el('div',null,'ifxAdvanced');root.append(status,easy,advanced);
+  function setMode(next){mode=next;easy.hidden=mode!=='easy';advanced.hidden=mode!=='advanced';easyMode.setAttribute('aria-pressed',String(mode==='easy'));advancedMode.setAttribute('aria-pressed',String(mode==='advanced'));advancedMode.textContent=mode==='advanced'?tr('詳細モード','Advanced mode'):tr('詳細設定を開く','Open advanced settings');sync();}
+  const switches=grid(advanced);
+  for(const [key,ja,en] of [['auto','自動エフェクト ON / OFF','Auto FX'],['manual','手動エフェクト ON / OFF','Manual FX'],['preview','プレビュー表示','Show in preview']])check(switches,key,ja,en,key);
+  advanced.append(el('p',tr('歌詞タイミングの空白を検出します。歌声の有無は判定しません。OFFでも編集データを保持します。','Detect gaps in lyric timings; this does not identify vocal absence. OFF retains all editing data.')));
+  const controls=el('fieldset',null,'ifxControls');advanced.append(controls);const config=grid(controls);
   for(const [key,ja,en] of [['strength','自動生成強度（%）','Generation strength (%)'],['minGap','最小区間（秒）','Minimum gap (s)'],['boundary','字幕境界の余白（秒）','Lyric boundary padding (s)'],['seed','生成シード','Generation seed']]){
     const i=input(config,key,ja,en);settings[key]=i;i.max=key==='strength'?'100':key==='seed'?'4294967295':key==='boundary'?'1':'120';i.min=key==='minGap'?'.1':'0';i.step=key==='seed'?'1':'.1';i.addEventListener('change',()=>{if(!i.checkValidity()||!Number.isFinite(i.valueAsNumber)){sync();return;}mutate(()=>state()[key]=i.valueAsNumber);});
   }
@@ -46146,22 +46354,30 @@ function boot(){
   button('SeekRegion','区間へシーク','Seek to section',()=>{if(region())J.uiApi.seek(region().start);},sectionPanel);
   controls.append(actions);
   async function generate(scope){
-    if(busy())return;const project=J.ui.project,epoch=J.projectSessionEpoch,audio=J.ui.audio,key=F.audioKey(audio),before=JSON.stringify(state()),ac=new AbortController();job={ac,project,epoch,key};notice=tr('解析・生成中…','Analyzing / generating…');sync();
+    if(busy())return;
+    const reactive=scope==='reactive',quick=scope==='easy'||reactive,project=J.ui.project,epoch=J.projectSessionEpoch,audio=J.ui.audio,key=F.audioKey(audio),before=JSON.stringify(state()),cues=F.timelineInput(project,J.ui.plan),cueKey=F.detectionKey(cues,length(),state().minGap,state().boundary);
+    let prepared;
+    if(quick){try{prepared=E.prepare(state(),project.subtitleCues,audio);}catch(e){notice=e.message;sync();return;}}
+    if(state().autoEffects.some(e=>!e.locked&&(quick||scope==='all'||scope==='region'&&e.regionId===selectedRegion||scope==='effect'&&e.id===selectedEffect))&&!confirm(tr('既存の自動エフェクトを再生成しますか？ロックしたエフェクト・手動エフェクト・保存済み区間は保持します。','Regenerate existing Auto effects? Locked effects, Manual effects and saved sections are retained.')))return;
+    const ac=new AbortController();job={ac,project,epoch,key,startedEnabled:state().enabled};notice=tr('解析・生成中…','Analyzing / generating…');sync();
     try{
       if(scope==='effect'&&(!current()||current().source!=='auto'||current().locked))throw new Error(tr('ロックされていない自動FXを選択してください。','Select an unlocked Auto FX.'));
       const snapshot=F.normalize(copyState()),target=current()&&{...current()};
       const analysis=audio?.buffer?(snapshot.analysis?.key===key?snapshot.analysis:await F.compactAnalysis(audio,ac.signal)):snapshot.analysis;
-      const regions=snapshot.regions.length?snapshot.regions:F.detect(F.timelineInput(project,J.ui.plan),length(),snapshot.minGap,snapshot.boundary);
-      const subset=scope==='all'?regions:scope==='region'?regions.filter(r=>r.id===selectedRegion):[{id:target.regionId||target.id,start:target.start,end:target.end,auto:true}];
+      const features=reactive?await R.prepare(audio,snapshot.reactive.features,ac.signal):snapshot.reactive.features;
+      const regions=quick?prepared.regions:snapshot.regions.length?snapshot.regions:F.detect(cues,length(),snapshot.minGap,snapshot.boundary);
+      const subset=quick||scope==='all'?regions:scope==='region'?regions.filter(r=>r.id===selectedRegion):[{id:target.regionId||target.id,start:target.start,end:target.end,auto:true}];
       if(!subset.length)throw new Error(tr('対象区間がありません。区間を追加・選択してください。','No target section. Add or select a section.'));
-      let result=await F.generate(snapshot,subset,analysis,project,J.videoAnalysisUI,ac.signal);
-      if(ac.signal.aborted||project!==J.ui.project||epoch!==J.projectSessionEpoch||key!==F.audioKey(J.ui.audio)||before!==JSON.stringify(state()))return;
+      let result=reactive?R.generate(snapshot,subset):await F.generate(snapshot,subset,analysis,project,J.videoAnalysisUI,ac.signal);
+      if(ac.signal.aborted||project!==J.ui.project||epoch!==J.projectSessionEpoch||key!==F.audioKey(J.ui.audio)||before!==JSON.stringify(state())||cueKey!==F.detectionKey(F.timelineInput(project,J.ui.plan),length(),state().minGap,state().boundary))return;
       const s=state();let next;
       if(scope==='effect'){if(result[0])result=[F.effect({...result[0],id:target.id,start:target.start,end:target.end,regionId:target.regionId},'auto')];next=s.autoEffects.flatMap(e=>e.id===target.id?result.slice(0,1):[e]);}
       else{const ids=new Set(subset.map(r=>r.id)),lockedIds=new Set(s.autoEffects.filter(e=>e.locked).map(e=>e.id));next=[...s.autoEffects.filter(e=>e.locked||scope==='region'&&!ids.has(e.regionId)),...result.filter(e=>!lockedIds.has(e.id))];}
       if(next.length>512)throw new Error(tr('保持するFXを含めて512件を超えます。区間を短くしてください。','The result plus retained FX exceeds 512. Use shorter sections.'));
-      J.uiApi.pushEdit();s.beforeGeneration=s.autoEffects.map(e=>({...e,params:{...e.params}}));s.analysis=analysis;s.regions=regions;s.autoEffects=next;
-      notice=tr('生成完了：','Generated: ')+result.length+tr('件。AutoをONにして確認してください。',' FX. Enable Auto to review.');J.studioChanged();
+      J.uiApi.pushEdit();s.beforeGeneration=s.autoEffects.map(e=>({...e,params:{...e.params}}));s.reactive.beforeFeatureKey=s.reactive.features?.key||'';s.reactive.beforeFeatures=s.reactive.features?.key===features?.key?null:s.reactive.features;s.reactive.features=features;s.analysis=analysis;s.regions=regions;s.autoEffects=next;
+      if(quick){s.enabled=true;s.auto=true;s.preview=true;s.duration=audio.duration;s.detectionKey=prepared.detectionKey;pending=null;syncProposal();}
+      notice=tr('生成完了：','Generated: ')+result.length+(quick?tr('件。プレビューに反映しました。',' effects. Ready in preview.'):tr('件。AutoをONにして確認してください。',' FX. Enable Auto to review.'));J.studioChanged();
+      if(quick&&result.length){const interlude=result.filter(e=>regions.find(r=>r.id===e.regionId)?.type==='Interlude'),preferred=[...interlude.filter(e=>!['Light Flash','Transition Accent'].includes(e.type)),...interlude,...result],fx=preferred.find(e=>E.reviewTime(s,e)!==null)||result[0];selectedEffect=fx.id;selectionActive=true;J.uiApi.pause();J.uiApi.seek(E.reviewTime(s,fx)??fx.start+Math.min(.5,(fx.end-fx.start)/2));}
     }catch(e){notice=e.name==='AbortError'?tr('中止しました。編集結果は保持しています。','Cancelled; edits retained.'):e.message;}finally{if(job?.ac===ac)job=null;sync();}
   }
   const copyState=()=>JSON.parse(JSON.stringify(state()));
@@ -46171,23 +46387,34 @@ function boot(){
   button('RegenerateRegion','選択区間を再生成','Regenerate selected section',()=>generate('region'),actions);
   button('RegenerateEffect','選択FXを再生成','Regenerate selected FX',()=>generate('effect'),actions);
   const cancel=button('Cancel','解析・生成を中止','Cancel analysis / generation',()=>{job?.ac.abort();},actions);
-  button('ResetAuto','自動演出をリセット','Reset Auto FX',()=>mutate(()=>{state().beforeGeneration=state().autoEffects;state().autoEffects=state().autoEffects.filter(e=>e.locked);}),actions);
-  button('RestoreGeneration','生成前へ戻す','Restore before generation',()=>{if(state().beforeGeneration)mutate(()=>{state().autoEffects=state().beforeGeneration;state().beforeGeneration=null;});},actions);
+  button('ResetAuto','自動演出をリセット','Reset Auto FX',()=>mutate(()=>{state().beforeGeneration=state().autoEffects;state().reactive.beforeFeatureKey=state().reactive.features?.key||'';state().reactive.beforeFeatures=null;state().autoEffects=state().autoEffects.filter(e=>e.locked);}),actions);
+  button('RestoreGeneration','生成前へ戻す','Restore before generation',()=>{if(state().beforeGeneration)mutate(()=>{const r=state().reactive;state().autoEffects=state().beforeGeneration;state().beforeGeneration=null;if(r.beforeFeatureKey!==r.features?.key)r.features=r.beforeFeatures;r.beforeFeatures=null;r.beforeFeatureKey='';});},actions);
   const editor=el('details');editor.open=true;editor.append(el('summary',tr('エフェクト追加・個別編集','Add / edit individual FX')));controls.append(editor);
   const kind=input(editor,'Type','追加するエフェクト','Effect to add','text',F.types);
-  button('AddEffect','手動エフェクト追加','Add Manual FX',()=>mutate(()=>{if(state().manualEffects.length>=512)throw new Error('Manual FX limit: 512');const r=region(),start=r?.start??Math.min(86397,J.ui.t),e=F.effect({type:kind.value,start,end:r?.end??start+3,regionId:r?.id,seed:state().seed});state().manualEffects.push(e);selectedEffect=e.id;}),editor);
+  function selectEffect(id){selectedEffect=id;selectionActive=true;characterMode.value='instrumental';characterMode.dispatchEvent(new Event('change'));sync();J.deletionUI?.sync();J.ui.need=true;}
+  function addManual(type){if(busy())return;try{if(R.types.includes(type)&&!R.featuresFor(J.ui.project))throw new Error(tr('音源を読み込み「音声特徴量を解析」、または「自動作成」を先に押してください。','Load audio and use Analyze audio features or Create automatically first.'));if(state().manualEffects.length>=512)throw new Error(tr('手動エフェクトは512件までです。','Manual effect limit: 512.'));const {effect:e,outside}=E.manual(state(),type,J.ui.t,length());mutate(()=>{const s=state();s.manualEffects.push(e);s.enabled=true;s.manual=true;s.preview=true;selectedEffect=e.id;selectionActive=true;notice=outside?tr('現在位置は間奏区間外です。この位置に追加しました。再生位置を変えて追加できます。','The playhead is outside an instrumental section. Added at this exact position; seek elsewhere to add another.'):tr('追加しました。プレビューでドラッグして移動できます。','Added. Drag in the preview to move it.');});J.uiApi.pause();selectEffect(e.id);}catch(e){notice=e.message;sync();}}
+  button('AddEffect','手動エフェクト追加','Add Manual FX',()=>addManual(kind.value),editor);
   const effectList=input(editor,'Effect','対象エフェクト','Target FX','text',[]);effectList.addEventListener('change',()=>{selectedEffect=effectList.value;selectionActive=true;characterMode.value='instrumental';characterMode.dispatchEvent(new Event('change'));sync();J.deletionUI?.sync();J.ui.need=true;});
   const eg=grid(editor);
-  const common=[['name','名前','Name','text'],['start','開始（秒）','Start (s)','number'],['end','終了（秒）','End (s)','number'],['duration','表示時間（秒）','Duration (s)','number'],['x','X（%）','X (%)','number'],['y','Y（%）','Y (%)','number'],['scale','拡大率（%）','Scale (%)','number'],['rotation','回転（°）','Rotation (°)','number'],['opacity','不透明度（%）','Opacity (%)','number'],['color','カラー','Color','color'],['blend','ブレンド','Blend','text',J.STUDIO_BLENDS],['speed','演出速度','Speed','number'],['intensity','演出強度（%）','Intensity (%)','number'],['beat','ビート連動','Beat response','checkbox'],['plane','歌詞との重なり','Relative to lyrics','text',['back','front']],['visible','個別表示','Visible','checkbox'],['locked','個別ロック','Locked','checkbox']];
+  const common=[['name','名前','Name','text'],['type','エフェクトを差し替え','Replace effect type','text',F.types],['start','開始（秒）','Start (s)','number'],['end','終了（秒）','End (s)','number'],['duration','表示時間（秒）','Duration (s)','number'],['x','X（%）','X (%)','number'],['y','Y（%）','Y (%)','number'],['scale','拡大率（%）','Scale (%)','number'],['rotation','回転（°）','Rotation (°)','number'],['opacity','不透明度（%）','Opacity (%)','number'],['color','カラー','Color','color'],['blend','ブレンド','Blend','text',J.STUDIO_BLENDS],['speed','演出速度','Speed','number'],['intensity','演出強度（%）','Intensity (%)','number'],['beat','ビート連動','Beat response','checkbox'],['plane','歌詞との重なり','Relative to lyrics','text',['back','front']],['visible','個別表示','Visible','checkbox'],['locked','個別ロック','Locked','checkbox']];
   const percents=['x','y','scale','opacity','intensity'];
   for(const [key,ja,en,type,options] of common){const i=input(eg,'Effect-'+key,ja,en,type,options);fields[key]=i;if(['x','y','rotation'].includes(key))i.min=key==='rotation'?'-360':'-200';if(key==='scale'){i.min='5';i.max='1000';}if(['opacity','intensity'].includes(key))i.max='100';
     i.addEventListener('change',()=>{const e=current();if(!e)return;let value=type==='checkbox'?i.checked:type==='number'?i.valueAsNumber:i.value;if(type==='number'&&(!Number.isFinite(value)||!i.checkValidity())){sync();return;}if(percents.includes(key))value/=100;const patch=key==='duration'?{end:e.start+value}:{[key]:value};const next={...e,...patch};if(next.end<=next.start||next.end>86400){notice=tr('終了は開始より後にしてください。','End must follow start.');sync();return;}mutate(()=>F.updateEffect(state(),e.id,patch));});}
   const specific=el('details');specific.append(el('summary',tr('エフェクト固有の設定','Type-specific settings')));editor.append(specific);const pg=grid(specific);
   const paramLabels={count:['粒子・図形・軌跡の数','Count'],velocity:['速度','Velocity'],size:['サイズ（画面短辺比）','Size (fraction of short edge)'],lifetime:['粒子の寿命（秒）','Particle lifetime (s)'],direction:['移動・拡散方向（°）','Direction (degrees)'],spread:['拡散角度（°）','Spread (degrees)'],beatResponse:['ビート反応強度','Beat response'],brightness:['明るさ','Brightness'],duration:['発光・アクセント時間（秒）','Flash / accent duration (s)'],fade:['フェード（秒）','Fade (s)'],range:['演出範囲（短辺比）','Range (short edge fraction)'],sensitivity:['音量反応感度','Audio sensitivity'],lineWidth:['線幅（短辺比）','Line width'],rotationSpeed:['回転速度（°/秒）','Rotation speed (degrees/s)'],travel:['移動量','Travel'],zoom:['拡大縮小・脈動倍率','Zoom / pulse scale'],pulse:['パルス強度','Pulse strength'],length:['軌跡の長さ','Trail length'],glow:['発光強度','Glow'],shape:['図形タイプ','Shape'],accent:['アクセント種類','Accent type']};
   const typeParams={ 'Particle Burst':['count','velocity','size','lifetime','direction','spread','beatResponse'], 'Light Flash':['brightness','duration','fade','range','sensitivity'], 'Geometry Motion':['shape','count','size','lineWidth','rotationSpeed','direction','travel','zoom'], 'Audio Pulse':['pulse','zoom','sensitivity','fade','range'], 'Light Trails':['length','count','velocity','direction','glow','fade'], 'Transition Accent':['accent','duration','range','count','fade'] };
+  Object.assign(typeParams,{'Audio Spectrum':['range','lineWidth'],'Audio Waveform':['range','lineWidth'],'Audio Reactive Transform':['shape','range','lineWidth']});
   for(const [key,[ja,en]] of Object.entries(paramLabels)){const options=key==='shape'?['circle','square','triangle','line']:key==='accent'?['flash','converge','gather','diffuse']:null,i=input(pg,'Param-'+key,ja,en,'number',options);paramFields[key]=i;if(F.paramSpecs[key]){const [,lo,hi]=F.paramSpecs[key];i.min=String(lo);i.max=String(hi);i.step=key==='count'?'1':'.001';}i.addEventListener('change',()=>{const e=current();if(!e)return;const value=options?i.value:i.valueAsNumber;if(!options&&(!Number.isFinite(value)||!i.checkValidity())){sync();return;}mutate(()=>F.updateEffect(state(),e.id,{params:{[key]:value}}));});}
+  const reactivePanel=el('details',null,'ifxReactiveEditor');reactivePanel.open=true;reactivePanel.append(el('summary',tr('音楽連動・EQ・波形の詳細','Audio reaction / EQ / waveform details')));editor.append(reactivePanel);const reactionGrid=grid(reactivePanel);
+  const reactionLabels={layout:['表示形式','Layout'],band:['反応する音域','Frequency band'],bars:['バー数','Bar count'],sensitivity:['感度','Sensitivity'],bassGain:['低音の感度','Bass sensitivity'],midGain:['中音の感度','Mid sensitivity'],trebleGain:['高音の感度','Treble sensitivity'],attackMs:['立ち上がり（ms）','Attack (ms)'],releaseMs:['戻り（ms）','Release (ms)'],smoothing:['滑らかさ','Smoothing'],peakHoldMs:['ピーク保持（ms）','Peak hold (ms)'],glow:['発光','Glow'],height:['波形・バーの高さ','Wave / bar height'],jitter:['音に合わせた揺れ','Audio-driven jitter'],scaleAmount:['音量による拡大','Audio scale'],rotationAmount:['ビート回転（度）','Beat rotation (degrees)'],moveAmount:['ビート移動量','Beat movement'],opacityAmount:['音量による透明度変化','Audio opacity'],trigger:['反応のきっかけ','Reaction source'],targetId:['反応させる図形・画像','Target shape / image']};
+  const options={layout:['bars','mirror','circle','line'],band:['all','low','mid','high'],trigger:['rms','peak','onset','beat','low','mid','high'],targetId:[]},bounds={bars:[8,64,1],sensitivity:[0,4,.01],bassGain:[0,4,.01],midGain:[0,4,.01],trebleGain:[0,4,.01],attackMs:[5,500,1],releaseMs:[20,2000,1],smoothing:[0,.95,.01],peakHoldMs:[0,2000,1],glow:[0,1,.01],height:[.01,.8,.01],jitter:[0,.5,.01],scaleAmount:[0,2,.01],rotationAmount:[-90,90,1],moveAmount:[-.5,.5,.001],opacityAmount:[0,1,.01]};
+  for(const [key,[ja,en]] of Object.entries(reactionLabels)){const i=input(reactionGrid,'Reactive-'+key,ja,en,options[key]?'text':'number',options[key]);reactiveFields[key]=i;if(bounds[key]){const [min,max,step]=bounds[key];Object.assign(i,{min:String(min),max:String(max),step:String(step)});}i.addEventListener('change',()=>{const e=current();if(!e||!R.types.includes(e.type))return;const value=options[key]?i.value:i.valueAsNumber;if(!options[key]&&(!Number.isFinite(value)||!i.checkValidity())){sync();return;}mutate(()=>F.updateEffect(state(),e.id,{reactive:{...e.reactive,[key]:value}}));});}
+  reactivePanel.append(el('p',tr('画像は追加トラックをONにして素材を読み込んでください。対象がない場合は別の対象へ変更せず反応を停止します。音源の変更後は解析を更新してください。','For images, enable extra tracks and load the image. Missing targets suspend the reaction without retargeting. Refresh analysis after changing audio.')));
+  async function analyzeReactive(){if(busy())return;const project=J.ui.project,epoch=J.projectSessionEpoch,audio=J.ui.audio,key=F.audioKey(audio),ac=new AbortController();job={project,epoch,key,ac,startedEnabled:state().enabled};notice=tr('音声特徴量を解析中…','Analyzing audio features…');sync();try{const features=await R.prepare(audio,state().reactive.features,ac.signal);if(ac.signal.aborted||project!==J.ui.project||epoch!==J.projectSessionEpoch||audio!==J.ui.audio)return;J.uiApi.pushEdit();state().reactive.features=features;notice=tr('音楽連動の解析を更新しました。','Audio reaction features updated.');J.studioChanged();}catch(e){notice=e.name==='AbortError'?tr('解析を中止しました。','Analysis cancelled.'):e.message;}finally{if(job?.ac===ac)job=null;sync();}}
+  const analyzeButton=button('AnalyzeReactive','音声特徴量を解析','Analyze audio features',analyzeReactive,advanced),featureStatus=el('p',null,'ifxFeatureStatus');advanced.append(featureStatus);
   function deleteEffect(){const e=current();if(!e||e.locked)return;mutate(()=>{const key=e.source==='auto'?'autoEffects':'manualEffects';state()[key]=state()[key].filter(x=>x.id!==e.id);selectedEffect='';selectionActive=false;});}
-  button('Duplicate','選択FXを複製','Duplicate selected FX',()=>{const e=current();if(!e)return;mutate(()=>{if(state().manualEffects.length>=512)throw new Error('Manual FX limit: 512');const next=F.effect({...e,id:F.id(),locked:false});state().manualEffects.push(next);selectedEffect=next.id;});},editor);
+  function duplicateEffect(){const e=current();if(!e||busy())return;mutate(()=>{if(state().manualEffects.length>=512)throw new Error('Manual FX limit: 512');const next=F.effect({...e,id:F.id(),locked:false});state().manualEffects.push(next);state().enabled=true;state().manual=true;state().preview=true;selectedEffect=next.id;selectionActive=true;});selectEffect(selectedEffect);}
+  button('Duplicate','選択FXを複製','Duplicate selected FX',duplicateEffect,editor);
   button('Delete','選択FXを削除','Delete selected FX',deleteEffect,editor);
   for(const [suffix,ja,en,delta] of [['Down','描画順を下へ','Lower in track',-1],['Up','描画順を上へ','Raise in track',1]])button(suffix,ja,en,()=>{const e=current();if(!e||e.locked)return;const key=e.source==='auto'?'autoEffects':'manualEffects',rows=state()[key],i=rows.findIndex(x=>x.id===e.id),next=i+delta;if(next<0||next>=rows.length)return;mutate(()=>[rows[i],rows[next]]=[rows[next],rows[i]]);},editor);
   button('Convert','選択Auto FXを手動へ変換','Convert selected Auto FX to Manual',()=>{const e=current();if(!e||e.source!=='auto'||e.locked)return;mutate(()=>{if(state().manualEffects.length>=512)throw new Error('Manual FX limit: 512');const next=F.effect({...e,id:F.id()});state().manualEffects.push(next);state().autoEffects=state().autoEffects.filter(x=>x.id!==e.id);selectedEffect=next.id;});},editor);
@@ -46197,6 +46424,39 @@ function boot(){
   directInput.addEventListener('change',()=>{direct=directInput.checked;if(direct){characterMode.value='instrumental';characterMode.dispatchEvent(new Event('change'));}drawOverlay();});
   characterMode.addEventListener('change',()=>{direct=characterMode.value==='instrumental';directInput.checked=direct;drawOverlay();});
   editor.append(el('p',tr('直接編集時はFX中心をクリックして移動。四隅で拡大、上の丸で回転。個別選択・ロック・Undoに対応します。','Direct editing: click an FX center and drag to move; corners scale, top circle rotates. Selection, locks and Undo are per object.')));
+  easy.append(el('p',tr('SRTと音源を読み込んだら、ボタン1つで間奏を演出できます。OFFでも追加した演出は残ります。','Load SRT and audio, then add instrumental effects with one click. Turning OFF keeps your effects.')));
+  const easyGrid=grid(easy),method=input(easyGrid,'Method','追加方法','Add effects','text',[]);
+  for(const [value,ja,en] of [['auto','おまかせ','Automatic'],['manual','手動で追加','Add manually']]){const o=el('option',tr(ja,en));o.value=value;method.append(o);}
+  const easyStyle=input(easyGrid,'EasyStyle','演出スタイル','Effect style','text',[]),easyStrength=input(easyGrid,'EasyStrength','演出の強さ','Effect strength','text',[]);
+  for(const [value,ja,en] of [['Auto','おまかせ','Automatic'],['Cyber','サイバー','Cyber'],['Pop','ポップ','Pop'],['Minimal','シンプル','Simple']]){const o=el('option',tr(ja,en));o.value=value;easyStyle.append(o);}
+  for(const [value,ja,en] of [[25,'ひかえめ','Subtle'],[50,'ふつう','Normal'],[85,'派手','Bold']]){const o=el('option',tr(ja,en));o.value=String(value);easyStrength.append(o);}
+  easyStyle.addEventListener('change',()=>{if(E.styles.includes(easyStyle.value))mutate(()=>state().style=easyStyle.value);});
+  easyStrength.addEventListener('change',()=>{if(E.strengths.includes(Number(easyStrength.value)))mutate(()=>state().strength=Number(easyStrength.value));});
+  const autoPanel=el('div',null,'ifxEasyAuto'),manualPanel=el('div',null,'ifxEasyManual');easy.append(autoPanel,manualPanel);
+  const autoAdd=button('AutoAdd','✨ 間奏エフェクトを自動で追加','✨ Add instrumental effects automatically',()=>generate('easy'),autoPanel);autoAdd.className='ifx-primary';
+  const easyCancel=button('EasyCancel','追加を中止','Cancel adding',()=>job?.ac.abort(),autoPanel);
+  const typeLabels=[['✦ 粒子の広がり','✦ Particle burst'],['☀ 光のアクセント','☀ Light flash'],['◇ 動く図形','◇ Moving shapes'],['◎ 音に合わせた波紋','◎ Audio pulse'],['〰 光の軌跡','〰 Light trails'],['↗ 切り替えアクセント','↗ Transition accent'],['▥ 音のスペクトラム','▥ Audio spectrum'],['∿ 音の波形','∿ Audio waveform'],['◇ 音に反応する変形','◇ Audio reactive transform'],['▧ RGBグリッチ','▧ RGB glitch'],['☀ 発光','☀ Glow'],['↗ 動きのブラー','↗ Motion blur'],['◎ 放射状ブラー','◎ Radial blur'],['✧ 光の筋','✧ Light rays'],['↔ ズーム反応','↔ Zoom pulse'],['◧ ミラー','◧ Mirror'],['❖ 万華鏡','❖ Kaleidoscope'],['▦ フィルムノイズ','▦ Film grain']];
+  const easyKind=input(manualPanel,'EasyType','エフェクトの種類','Effect type','text',[]);
+  F.types.forEach((value,i)=>{const o=el('option',tr(...typeLabels[i]));o.value=value;easyKind.append(o);});
+  const playhead=el('p',null,'ifxPlayhead');manualPanel.append(playhead);
+  const manualAdd=button('ManualAdd','＋ この再生位置に追加','＋ Add at this playhead',()=>addManual(easyKind.value),manualPanel);manualAdd.className='ifx-primary';
+  method.addEventListener('change',()=>{autoPanel.hidden=method.value!=='auto';manualPanel.hidden=method.value!=='manual';easyStyle.parentElement.hidden=easyStrength.parentElement.hidden=method.value!=='auto';});
+  autoPanel.hidden=false;manualPanel.hidden=true;
+  const easyList=input(easy,'EasyEffect','追加済みエフェクト','Added effects','text',[]);easyList.size=4;
+  easyList.addEventListener('change',()=>{selectEffect(easyList.value);const e=current();if(e){J.uiApi.pause();J.uiApi.seek(E.reviewTime(state(),e)??e.start+Math.min(.5,(e.end-e.start)/2));}});
+  const emptyList=el('p',tr('まだ演出はありません。おまかせ、または手動で追加してください。','No effects yet. Add automatically or manually.'));easy.append(emptyList);
+  const easyEditor=el('div',null,'ifxEasyEditor'),basic=grid(easyEditor),basicFields={};easy.append(easyEditor);
+  for(const [key,ja,en,type] of [['intensity','強さ（%）','Strength (%)','number'],['color','色','Color','color'],['duration','表示時間（秒）','Duration (s)','number']]){
+    const i=input(basic,'Easy-'+key,ja,en,type);basicFields[key]=i;i.min=key==='duration'?'.01':'0';i.max=key==='intensity'?'100':'86400';if(key==='duration')i.step='.001';
+    i.addEventListener('change',()=>{const e=current();if(!e||e.locked||busy())return;const value=type==='number'?i.valueAsNumber:i.value;
+      if(type==='number'&&(!Number.isFinite(value)||!i.checkValidity())){sync();return;}
+      const patch=key==='duration'?{end:e.start+value}:key==='intensity'?{intensity:value/100}:{color:value};
+      if(key==='duration'&&patch.end>length()){notice=tr('表示時間は曲末までにしてください。','Set duration within the song end.');sync();return;}mutate(()=>F.updateEffect(state(),e.id,patch));
+    });
+  }
+  const easyDuplicate=button('EasyDuplicate','複製','Duplicate',duplicateEffect,easyEditor),easyDelete=button('EasyDelete','削除','Delete',deleteEffect,easyEditor);
+  button('DetailedEdit','詳細編集','Detailed editing',()=>{setMode('advanced');editor.open=true;editor.scrollIntoView({block:'nearest'});},easyEditor);
+  easyEditor.append(el('p',tr('位置はプレビューでドラッグ。表示時間は下のタイムラインでも変更できます。','Drag in the preview to move. You can also resize the duration in the timeline below.')));
   const presetPanel=el('details');presetPanel.append(el('summary',tr('FXプリセット','FX presets')));controls.append(presetPanel);
   const presetName=input(presetPanel,'PresetName','プリセット名','Preset name','text'),presetList=input(presetPanel,'Preset','プリセット','Preset','text',[]);let selectedPreset='';presetList.addEventListener('change',()=>{selectedPreset=presetList.value;presetName.value=state().presets.find(p=>p.id===selectedPreset)?.name||'';});
   button('SavePreset','選択FXをプリセット保存','Save selected FX as preset',()=>{if(!current())return;mutate(()=>{if(state().presets.length>=100)throw new Error('Preset limit: 100');const p={id:F.id(),name:presetName.value||current().name,effect:F.effect(current())};state().presets.push(p);selectedPreset=p.id;});},presetPanel);
@@ -46207,8 +46467,8 @@ function boot(){
   const track=el('canvas',null,'ifxTracks');track.width=720;track.height=90;track.style.width='100%';track.style.touchAction='none';track.setAttribute('aria-label',tr('間奏FXタイムライン（数値入力でも編集可能）','Instrumental FX timeline (numeric editing also available)'));
   const trackPanel=el('div',null,'ifxTrackPanel');trackPanel.append(el('h3','Instrumental Auto FX / Manual FX'),track,el('p',tr('クリップをドラッグで移動、左右端で長さ変更。SRTの時刻は変更しません。','Drag a clip to move; drag either edge to resize. SRT timings stay unchanged.')));document.getElementById('studio-timeline').append(trackPanel);
   const span=()=>Math.max(1,length(),...all().map(e=>e.end)),point=e=>{const r=track.getBoundingClientRect();return{x:(e.clientX-r.left)*720/r.width,y:(e.clientY-r.top)*90/r.height};};
-  function drawTracks(){trackPanel.hidden=!state().enabled;const ctx=track.getContext('2d'),dur=span();ctx.clearRect(0,0,720,90);ctx.font='14px sans-serif';for(const [row,key,label,col] of [[0,'autoEffects','Auto FX','#547fb8'],[1,'manualEffects','Manual FX','#98754e']]){ctx.fillStyle='#242936';ctx.fillRect(105,12+row*34,610,28);ctx.fillStyle='#ddd';ctx.fillText(label,4,32+row*34);for(const e of state()[key]){const x=105+e.start/dur*610,w=Math.max(4,(e.end-e.start)/dur*610);ctx.globalAlpha=e.visible?1:.4;ctx.fillStyle=e.id===selectedEffect?'#79d9ae':col;ctx.fillRect(x,14+row*34,w,24);ctx.globalAlpha=1;ctx.save();ctx.beginPath();ctx.rect(x,14+row*34,w,24);ctx.clip();ctx.fillStyle='#fff';ctx.fillText((e.locked?'🔒 ':'')+e.name,x+3,31+row*34);ctx.restore();}}ctx.fillStyle='#e4bb72';ctx.fillRect(105+J.ui.t/dur*610,10,1,65);}
-  track.addEventListener('pointerdown',e=>{if(e.button!==0||busy()||!state().enabled)return;const p=point(e),dur=span(),row=p.y>=46?1:0,time=(p.x-105)/610*dur,list=state()[row?'manualEffects':'autoEffects'],hits=list.filter(x=>time>=x.start&&time<=x.end),fx=hits.find(x=>x.id===selectedEffect)||hits.at(-1);if(!fx){J.uiApi.seek(Math.max(0,time));return;}selectedEffect=fx.id;selectionActive=true;characterMode.value='instrumental';characterMode.dispatchEvent(new Event('change'));sync();J.deletionUI?.sync();if(fx.locked)return;J.uiApi.pause();drag={effect:{...fx},point:p,time,dur,mode:Math.abs(p.x-(105+fx.start/dur*610))<9?'start':Math.abs(p.x-(105+fx.end/dur*610))<9?'end':'move',changed:false};track.setPointerCapture(e.pointerId);e.preventDefault();});
+  function drawTracks(){playhead.textContent=tr('現在の再生位置：','Current playhead: ')+J.ui.t.toFixed(2)+tr('秒（最長3秒で追加）',' s (adds up to 3 seconds)');trackPanel.hidden=!state().enabled;trackPanel.querySelector('h3').textContent=mode==='easy'?tr('演出のタイムライン','Effect timeline'):'Instrumental Auto FX / Manual FX';const ctx=track.getContext('2d'),dur=span();ctx.clearRect(0,0,720,90);ctx.font='14px sans-serif';for(const [row,key,label,col] of [[0,'autoEffects',mode==='easy'?tr('自動','Auto'):'Auto FX','#547fb8'],[1,'manualEffects',mode==='easy'?tr('手動','Manual'):'Manual FX','#98754e']]){ctx.fillStyle='#242936';ctx.fillRect(105,12+row*34,610,28);ctx.fillStyle='#ddd';ctx.fillText(label,4,32+row*34);for(const e of state()[key]){const x=105+e.start/dur*610,w=Math.max(4,(e.end-e.start)/dur*610);ctx.globalAlpha=e.visible?1:.4;ctx.fillStyle=e.id===selectedEffect?'#79d9ae':col;ctx.fillRect(x,14+row*34,w,24);ctx.globalAlpha=1;ctx.save();ctx.beginPath();ctx.rect(x,14+row*34,w,24);ctx.clip();ctx.fillStyle='#fff';ctx.fillText((e.locked?'🔒 ':'')+(mode==='easy'?tr(...typeLabels[F.types.indexOf(e.type)]):e.name),x+3,31+row*34);ctx.restore();}}ctx.fillStyle='#e4bb72';ctx.fillRect(105+J.ui.t/dur*610,10,1,65);}
+  track.addEventListener('pointerdown',e=>{if(e.button!==0||busy()||!state().enabled)return;const p=point(e),dur=span(),row=p.y>=46?1:0,time=(p.x-105)/610*dur,tolerance=9/610*dur,list=state()[row?'manualEffects':'autoEffects'],hits=list.filter(x=>time>=x.start-tolerance&&time<=x.end+tolerance),fx=hits.find(x=>x.id===selectedEffect)||hits.at(-1);if(!fx){J.uiApi.seek(Math.max(0,time));return;}selectedEffect=fx.id;selectionActive=true;characterMode.value='instrumental';characterMode.dispatchEvent(new Event('change'));sync();J.deletionUI?.sync();if(fx.locked)return;J.uiApi.pause();drag={effect:{...fx},point:p,time,dur,mode:Math.abs(p.x-(105+fx.start/dur*610))<9?'start':Math.abs(p.x-(105+fx.end/dur*610))<9?'end':'move',changed:false};track.setPointerCapture(e.pointerId);e.preventDefault();});
   track.addEventListener('pointermove',e=>{if(!drag||busy())return;const delta=(point(e).x-drag.point.x)/610*drag.dur,fx=drag.effect;let start=fx.start,end=fx.end;if(drag.mode==='move'){start=F.snapTime(Math.max(0,fx.start+delta),state().analysis,state().snap);end=start+fx.end-fx.start;}else if(drag.mode==='start')start=Math.min(end-.01,F.snapTime(Math.max(0,fx.start+delta),state().analysis,state().snap));else end=Math.max(start+.01,F.snapTime(fx.end+delta,state().analysis,state().snap));if(end>86400)return;if(!drag.changed){J.uiApi.pushEdit();drag.changed=true;}F.updateEffect(state(),fx.id,{start,end});J.ui.need=true;drawTracks();updateEffectFields();});
   const endDrag=()=>{if(drag?.changed)J.studioChanged();drag=null;};for(const event of ['pointerup','pointercancel','lostpointercapture'])track.addEventListener(event,endDrag);
   const view=document.getElementById('view'),overlay=el('canvas',null,'ifxOverlay');overlay.className='ifx-overlay';document.getElementById('viewport').append(overlay);let handles=[];
@@ -46219,10 +46479,11 @@ function boot(){
   view.addEventListener('pointermove',e=>{if(!previewDrag||busy())return;e.preventDefault();e.stopImmediatePropagation();const d=previewDrag,p=vpoint(e),fx=d.effect,dx=p.x-d.point.x,dy=p.y-d.point.y;if(!d.changed&&Math.hypot(dx,dy)<1)return;if(!d.changed){J.uiApi.pushEdit();d.changed=true;}const patch={};if(d.mode==='move'){patch.x=fx.x+dx/view.width;patch.y=fx.y+dy/view.height;}else{const x=fx.x*view.width,y=fx.y*view.height;if(d.mode==='scale')patch.scale=fx.scale*Math.hypot(p.x-x,p.y-y)/Math.max(1,Math.hypot(d.point.x-x,d.point.y-y));else patch.rotation=fx.rotation+(Math.atan2(p.y-y,p.x-x)-Math.atan2(d.point.y-y,d.point.x-x))/J.DEG;}F.updateEffect(state(),fx.id,patch);J.ui.need=true;updateEffectFields();drawOverlay();},true);
   for(const event of ['pointerup','pointercancel','lostpointercapture'])view.addEventListener(event,()=>{if(previewDrag?.changed)J.studioChanged();previewDrag=null;});
   const preview=J.drawLayerPreview;J.drawLayerPreview=(ctx,plan,t,opt)=>{const r=preview(ctx,plan,t,opt);if(ctx.canvas.id==='view'){drawOverlay();drawTracks();}return r;};
-  function updateEffectFields(){const e=current();for(const [key,i] of Object.entries(fields)){i.disabled=!e||e.locked&&key!=='locked'||busy();if(!e)continue;if(i.type==='checkbox')i.checked=e[key];else i.value=String(key==='duration'?e.end-e.start:percents.includes(key)?Math.round(e[key]*10000)/100:e[key]);}for(const [key,i] of Object.entries(paramFields)){i.parentElement.hidden=!e||!typeParams[e.type].includes(key);i.disabled=!e||e.locked||busy();if(e)i.value=String(e.params[key]);}}
+  function updateEffectFields(){const e=current();for(const [key,i] of Object.entries(fields)){i.disabled=!e||e.locked&&key!=='locked'||busy();if(!e)continue;if(i.type==='checkbox')i.checked=e[key];else i.value=String(key==='duration'?e.end-e.start:percents.includes(key)?Math.round(e[key]*10000)/100:e[key]);}for(const [key,i] of Object.entries(paramFields)){i.parentElement.hidden=!e||!(typeParams[e.type]||[]).includes(key);i.disabled=!e||e.locked||busy();if(e)i.value=String(e.params[key]);}updateReactiveFields();}
+  function updateReactiveFields(){const e=current(),reactive=e&&R.types.includes(e.type);reactivePanel.hidden=!reactive;if(!reactive)return;const target=reactiveFields.targetId,choices=[['',tr('この図形を反応させる','React this shape')],...all().filter(x=>x.id!==e.id&&x.type!=='Audio Reactive Transform'&&!R.videoTypes.includes(x.type)).map(x=>['fx:'+x.id,x.name]),...J.ui.project.studio.layers.filter(x=>x.type!=='Lyrics').map(x=>['layer:'+x.id,x.name])];if(e.reactive.targetId&&!choices.some(([id])=>id===e.reactive.targetId))choices.push([e.reactive.targetId,tr('対象なし（反応を停止）','Missing target (reaction suspended)')]);target.replaceChildren(...choices.map(([value,name])=>{const o=el('option',name);o.value=value;return o;}));for(const [key,i] of Object.entries(reactiveFields)){i.disabled=e.locked||busy();i.value=String(e.reactive[key]);i.parentElement.hidden=key==='bars'&&e.type!=='Audio Spectrum'||key==='jitter'&&e.type!=='Audio Waveform'||key==='targetId'&&e.type!=='Audio Reactive Transform';}}
   let lastProject=null,lastCueKey='';
   function sync(){const s=state();if(!s)return;
-    if(job&&(job.project!==J.ui.project||job.epoch!==J.projectSessionEpoch||job.key!==F.audioKey(J.ui.audio)||!s.enabled)){job.ac.abort();}
+    if(job&&(job.project!==J.ui.project||job.epoch!==J.projectSessionEpoch||job.key!==F.audioKey(J.ui.audio)||job.startedEnabled&&!s.enabled)){job.ac.abort();}
     if(lastProject!==J.ui.project){lastProject=J.ui.project;selectionActive=false;pending=null;selectedEffect='';selectedRegion='';notice='';lastCueKey='';proposalKey='';syncProposal();}
     const key=F.detectionKey(F.timelineInput(J.ui.project,J.ui.plan),length(),s.minGap,s.boundary);
     if(lastCueKey&&key!==lastCueKey&&s.regions.length){detect();notice=tr('歌詞・全長が変わりました。再検出候補を確認してください。編集区間は保持しています。','Lyrics / duration changed. Review new candidates; edited sections are retained.');}lastCueKey=key;
@@ -46234,15 +46495,37 @@ function boot(){
     if(!all().some(e=>e.id===selectedEffect)){selectedEffect=all()[0]?.id||'';selectionActive=false;}effectList.replaceChildren(...all().map(e=>{const o=el('option',`${e.source==='auto'?'Auto':'Manual'}: ${e.name}${e.locked?' 🔒':''}`);o.value=e.id;return o;}));effectList.value=selectedEffect;
     presetList.replaceChildren(...s.presets.map(p=>{const o=el('option',p.name);o.value=p.id;return o;}));if(!s.presets.some(p=>p.id===selectedPreset))selectedPreset=s.presets[0]?.id||'';presetList.value=selectedPreset;
     const valid=!!J.videoAnalysisUI?.valid&&!!J.ui.project.videoAnalysis?.result;
-    status.textContent=(s.enabled?tr('間奏演出ON','Instrumental FX ON'):tr('間奏演出OFF（データ保持）','Instrumental FX OFF (data retained)'))+' · '+tr('自動 ','Auto ')+s.autoEffects.length+' / '+tr('手動 ','Manual ')+s.manualEffects.length+'\n'+(s.avoidPeople?(valid?tr('一致する映像解析結果で配置候補を評価します。回避は推定です。','Matching video results are used for placement; avoidance is heuristic.'):tr('有効な映像解析なし：通常配置。人物回避は未適用。','No valid matching video analysis: normal placement; people avoidance unavailable.')):'')+'\n'+notice;
+    status.textContent=(s.enabled?tr('間奏演出ON','Instrumental FX ON'):tr('間奏演出OFF（データ保持）','Instrumental FX OFF (data retained)'))+' · '+tr('自動 ','Auto ')+s.autoEffects.length+(s.auto?' ON':' OFF')+' / '+tr('手動 ','Manual ')+s.manualEffects.length+(s.manual?' ON':' OFF')+'\n'+(mode==='advanced'&&s.avoidPeople?(valid?tr('一致する映像解析結果で配置候補を評価します。回避は推定です。','Matching video results are used for placement; avoidance is heuristic.'):tr('有効な映像解析なし：通常配置。人物回避は未適用。','No valid matching video analysis: normal placement; people avoidance unavailable.')):'')+'\n'+notice;
+    for(const [i,value,values] of [[easyStyle,s.style,E.styles],[easyStrength,String(s.strength),E.strengths.map(String)]]){
+      i.querySelector('[data-custom]')?.remove();if(!values.includes(value)){const o=el('option',tr('詳細設定の値を使用','Using advanced value'));o.value=value;o.dataset.custom='true';i.append(o);}i.value=value;i.disabled=busy();
+    }
+    autoAdd.disabled=manualAdd.disabled=easyKind.disabled=method.disabled=busy();easyCancel.hidden=!job;easyCancel.disabled=!job;
+    mood.value=s.reactive.preset;reactiveStrength.querySelector('[data-custom]')?.remove();if(!E.strengths.includes(s.strength)){const o=el('option',tr('詳細設定の値を使用','Using advanced value'));o.value=String(s.strength);o.dataset.custom='true';reactiveStrength.append(o);}reactiveStrength.value=String(s.strength);mood.disabled=reactiveStrength.disabled=createReactive.disabled=analyzeButton.disabled=busy();cancelReactive.hidden=!job;cancelReactive.disabled=!job;
+    for(const [key,i] of Object.entries(reactiveSwitches)){i.checked=s.reactive[key];i.disabled=busy();}
+    const features=s.reactive.features;featureStatus.textContent=features?tr('保存済み音声特徴量：','Saved audio features: ')+features.rate.toFixed(1)+' Hz / '+features.duration.toFixed(2)+tr('秒。',' s. ')+(R.featuresFor(J.ui.project)?tr('同じ解析をプレビューとMP4に使用します。','Preview and MP4 use the same analysis.'):tr('音源が異なります。解析を更新してください。','Audio differs; refresh analysis.')):tr('音声特徴量は未解析です。音源を読み込み解析してください。','Audio features are not analyzed. Load audio and analyze it.');
+    if(features&&!R.featuresFor(J.ui.project))status.textContent+='\n'+tr('音源が変わりました。「自動作成」で解析を更新してください。','Audio changed. Use Create automatically to refresh analysis.');
+    playhead.textContent=tr('現在の再生位置：','Current playhead: ')+J.ui.t.toFixed(2)+tr('秒（最長3秒で追加）',' s (adds up to 3 seconds)');
+    easyList.replaceChildren(...all().map(e=>{const index=F.types.indexOf(e.type),o=el('option',`${e.source==='auto'?tr('自動','Auto'):tr('手動','Manual')} · ${tr(...typeLabels[index])} · ${e.start.toFixed(2)}–${e.end.toFixed(2)}s${e.locked?' 🔒':''}`);o.value=e.id;return o;}));easyList.value=selectedEffect;easyList.disabled=busy()||!all().length;emptyList.hidden=!!all().length;
+    const effect=current();easyEditor.hidden=!effect;for(const [key,i] of Object.entries(basicFields)){i.disabled=!effect||effect.locked||busy();if(effect)i.value=String(key==='duration'?Math.round((effect.end-effect.start)*1000)/1000:key==='intensity'?Math.round(effect.intensity*10000)/100:effect.color);}
+    easyDelete.disabled=!effect||effect.locked||busy();easyDuplicate.disabled=!effect||busy();
+    exportNote.textContent=mode==='easy'?tr('完成MP4にも演出が反映されます。','Your effects also appear in completed MP4.'):tr('完成MP4・簡易動画に間奏FXを含みます。字幕フロント／マット・PNG連番は歌詞専用で、間奏FXを含みません。','Completed / simple MP4 includes Instrumental FX. Subtitle front / matte and PNG sequences remain lyric-only and exclude FX.');
     updateEffectFields();drawTracks();drawOverlay();
     // FX tracks remain accessible when the additional-layer extension is OFF.
     if(!J.studioOn(J.ui.project,'timeline'))controls.append(trackPanel);else document.getElementById('studio-timeline').append(trackPanel);
   }
   duration.addEventListener('change',()=>{if(!duration.checkValidity()||!Number.isFinite(duration.valueAsNumber)){sync();return;}mutate(()=>state().duration=duration.valueAsNumber);detect();sync();});
-  const guide=el('a',tr('間奏演出の操作ガイド','Instrumental FX guide'));guide.href=document.documentElement.lang==='en'?'../docs/INSTRUMENTAL_FX.en.html':'docs/INSTRUMENTAL_FX.html';guide.target='_blank';guide.rel='noopener';root.append(guide,el('p',tr('完成MP4・簡易動画に間奏FXを含みます。字幕フロント／マット・PNG連番は歌詞専用で、間奏FXを含みません。','Completed / simple MP4 includes Instrumental FX. Subtitle front / matte and PNG sequences remain lyric-only and exclude FX.')));
+  const guide=el('a',tr('間奏演出の操作ガイド','Instrumental FX guide')),exportNote=el('p');guide.href=document.documentElement.lang==='en'?'../docs/INSTRUMENTAL_FX.en.html':'docs/INSTRUMENTAL_FX.html';guide.target='_blank';guide.rel='noopener';root.append(guide,exportNote);
+  // Keep the complete v1.1 simple editor available inside Advanced mode.
+  const legacyPanel=el('details',null,'ifxLegacySimple');legacyPanel.append(el('summary',tr('従来のかんたん個別操作（v1.1）','Legacy simple editing (v1.1)')));while(easy.firstChild)legacyPanel.append(easy.firstChild);advanced.append(legacyPanel);
+  easy.append(el('p',tr('SRTと音源を読み込み、曲の雰囲気を選んで「自動作成」。音の変化に合わせて演出します。','Import SRT and audio, choose the mood, then Create automatically. Effects follow the actual audio.')));
+  const simpleGrid=grid(easy),mood=input(simpleGrid,'Mood','曲の雰囲気','Song mood','text',[]),reactiveStrength=input(simpleGrid,'ReactiveStrength','演出の強さ','Effect strength','text',[]),reactiveSwitches={};
+  for(const [value,ja,en] of [['Ballad','バラード','Ballad'],['Rock','ロック','Rock'],['EDM','EDM','EDM'],['Pop','ポップ','Pop'],['Cinematic','シネマティック','Cinematic'],['Lo-Fi','Lo-Fi','Lo-Fi']]){const o=el('option',tr(ja,en));o.value=value;mood.append(o);}mood.addEventListener('change',()=>mutate(()=>state().reactive.preset=mood.value));
+  for(const [value,ja,en] of [[25,'ひかえめ','Subtle'],[50,'ふつう','Normal'],[85,'派手','Bold']]){const o=el('option',tr(ja,en));o.value=String(value);reactiveStrength.append(o);}reactiveStrength.addEventListener('change',()=>{if(E.strengths.includes(Number(reactiveStrength.value)))mutate(()=>state().strength=Number(reactiveStrength.value));});
+  for(const [key,id,ja,en] of [['spectrum','EQ','EQを表示','Show EQ'],['waveform','Wave','波形を表示','Show waveform'],['video','Video','映像エフェクト','Video effects']]){const i=input(simpleGrid,id,ja,en,'checkbox');reactiveSwitches[key]=i;i.addEventListener('change',()=>mutate(()=>state().reactive[key]=i.checked));}
+  const createReactive=button('CreateReactive','✨ 音楽連動エフェクトを自動作成','✨ Create audio-reactive effects automatically',()=>generate('reactive'),easy);createReactive.className='ifx-primary';
+  const cancelReactive=button('CancelReactive','作成を中止','Cancel creation',()=>job?.ac.abort(),easy);
   J.instrumentalFXUI={target:()=>selectionActive?current():null,busy,clear:()=>{selectionActive=false;previewDrag=null;drag=null;drawOverlay();}};
-  const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};sync();J.syncLayerUI();
+  const old=J.syncLayerUI;J.syncLayerUI=()=>{old();sync();};setMode('easy');J.syncLayerUI();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
 })();

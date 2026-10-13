@@ -2,6 +2,8 @@
 
 ブラウザ上で字幕演出・字幕レイヤー・リリックビデオ制作を行えるWebアプリです。PC版 Chrome / Edge 推奨。
 
+v1.10.0のInstrumental FX Engine v2.0は、実音声に反応するEQ・波形・図形／画像の変形と9種類の映像効果に対応します。6つの曲調を選んで自動作成し、詳細モードで差し替え・個別調整できます。既存64バー・Music Auto・Video Analysis・旧FX・JSON・初期OFFを維持。[v2.0操作ガイド](docs/INSTRUMENTAL_FX.md)。
+
 v1.9.0に「Instrumental FX Engine v1.0」を追加しました。歌詞のない前奏・間奏・アウトロを検出し、6種類の自動／手動FXを独立編集できます。初期OFF、既存の歌詞・保存・Undoと共存。完成MP4に反映します。[操作ガイド](docs/INSTRUMENTAL_FX.html) · [詳細仕様](docs/INSTRUMENTAL_FX.md)。字幕専用フロント／マット・透過PNGはFXを除外します。
 
 ## Credits
@@ -33,7 +35,7 @@ Forkではないため、参考元の更新は自動同期されません。必�
 
 **字幕レイヤー制作ツール · SYNTHIA customization · v1.8.0**
 
-「映像自動解析」で動画・静止画の顔／人物・動き・シーン・明暗とSafe Zoneを確認できます。解析と表示は独立し、明示開始・位置適用・Undo・JSON復元に対応します。人物解析にはHTTP起動と同梱`vendor/vision/`が必要です。[起動・操作・既知の制限](docs/VIDEO_ANALYSIS.html)。公開アプリのリンクは従来版を指しており、この開発版の公開操作は行っていません。
+「映像自動解析」で動画・静止画の顔／人物・動き・シーン・明暗とSafe Zoneを確認できます。解析と表示は独立し、明示開始・位置適用・Undo・JSON復元に対応します。人物解析にはHTTP起動と同梱`vendor/vision/`が必要です。[起動・操作・既知の制限](docs/VIDEO_ANALYSIS.html)。
 
 「統合制作ツール」から必要な拡張だけを有効にできます。Tap Sync、SRT/LRC、文字単位編集、フォントファイル、段階別モーション、楽曲解析、Music/Full Auto、追加レイヤー、PNG連番、自動保存・復元を追加しました。[拡張機能の使い方と制約](docs/INTEGRATED_STUDIO.md)。既存プロジェクトの拡張は初期状態でOFFです。
 

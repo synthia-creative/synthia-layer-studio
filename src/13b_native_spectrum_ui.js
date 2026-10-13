@@ -32,7 +32,7 @@ async function prepare(buffer, key) {
   const settings = { ...J.ui.project.nativeSpectrum };
   showProgress();
   try {
-    const raw = state.raw || await J.analyzeNativeAudio(buffer, controller.signal, p => { if (state.controller === controller) { state.progress = p * .9; showProgress(); } });
+    const raw = state.raw || await J.sharedAudioFFT(buffer, controller.signal, p => { if (state.controller === controller) { state.progress = p * .9; showProgress(); } });
     if (controller.signal.aborted) return;
     state.raw = raw; state.progress = .9; showProgress();
     const data = await J.shapeNativeSpectrum(raw, settings, controller.signal);
