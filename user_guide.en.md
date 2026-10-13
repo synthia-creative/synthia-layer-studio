@@ -1,6 +1,6 @@
-# SYNTHIA Layer Studio v1.9.0 User Manual
+# SYNTHIA Layer Studio v1.10.0 User Manual
 
-## Instrumental FX v2.0 (development version)
+## Instrumental FX v2.0
 
 Import SRT/audio, choose mood/strength and EQ/wave/video switches, then Create audio-reactive effects automatically. Real precomputed audio drives spectrum, waveform, shape/image transforms and video processing. Advanced mode retains individual addition, targets, effect replacement, timeline and Undo; v1.1 editing remains available there. [v2.0 workflow, analysis, quality and limits](docs/INSTRUMENTAL_FX.en.md).
 

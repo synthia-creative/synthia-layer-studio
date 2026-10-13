@@ -1,6 +1,6 @@
 # Instrumental FX Engine v2.0
 
-## v2.0 audio-reactive effects (development version)
+## v2.0 audio-reactive effects
 
 1. Import SRT and audio; choose Song mood and Effect strength (defaults work).
 2. Choose EQ, waveform and video effects, then click Create audio-reactive effects automatically once.
@@ -34,7 +34,7 @@ If editing becomes slow, choose low quality and restore your preferred quality b
 
 Motion Blur is spatial directional blur, not temporal frame accumulation. Radial Blur uses zoom samples from the same timestamp. This keeps seeking and exports reproducible.
 
-Old FX, lyrics, Music Auto, Video Analysis and the original native spectrum remain intact. Video analysis is not automatically started. Completed MP4 includes v2 effects; lyric-only front/matte and transparent PNG retain their exclusion policy. Publishing is a separate step.
+Old FX, lyrics, Music Auto, Video Analysis and the original native spectrum remain intact. Video analysis is not automatically started. Completed MP4 includes v2 effects; lyric-only front/matte and transparent PNG retain their exclusion policy. These features are included in app v1.10.0.
 
 ## v1.1 simple editing (inside Advanced mode)
 
