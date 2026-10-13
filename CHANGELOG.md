@@ -1,3 +1,12 @@
+## Unreleased — Instrumental FX Engine v2.0 — 2026-10-13
+
+- 既存FFTを共通キャッシュ化し、64バーの値を保ったまま低／中／高域を追加。Music AutoのRMS・Peak・Onset・Beatと実PCM波形を再利用し、Attack/Release・スムージング・ピーク保持を時刻から再現。特徴量を圧縮保存。
+- Audio Spectrum（横型／上下対称／円形）、Audio Waveform（直線／円形）、Audio Reactive Transform（図形・FX・画像対象）を追加。元の変形データは非破壊で、対象不在／音源不一致は停止。
+- バラード・ロック・EDM・ポップ・シネマティック・Lo-Fiの意図的な組み合わせ、最大3FX／区間と簡単UI。手動・タイプ差し替え・詳細編集・旧v1.1操作・タイムライン・Auto/Manual独立・Undoを維持。
+- RGB Glitch、Glow、空間Motion Blur、Radial Blur、Light Rays、Zoom Pulse、Mirror、Kaleidoscope、Film Grainを共通合成点に追加。品質別の作業解像度・サンプル数、最大2映像処理、安全制限とreduced motionを適用。
+- Version-1 JSON、旧FX、Music Auto、Video Analysis、歌詞、内蔵スペアナと字幕専用出力を維持。新描画とMP4・旧機能の実ブラウザ／回帰テスト、日英ガイドを追加。未公開。
+- Added PCM-based audio reactions, deliberate genre presets and nine bounded video processors, retaining legacy rendering and project compatibility. Spatial blur is used instead of temporal accumulation for deterministic seeks and exports.
+
 ## Unreleased — Instrumental FX Engine v1.1 UI — 2026-10-13
 
 - かんたん／詳細モードを追加。同一のv1データ・エンジンを使い、モード切替は設定や出力を変更しません。詳細スタイル・強度の保存値も保持。

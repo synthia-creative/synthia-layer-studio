@@ -2,7 +2,7 @@
 
 ブラウザ上で字幕演出・字幕レイヤー・リリックビデオ制作を行えるWebアプリです。PC版 Chrome / Edge 推奨。
 
-開発版のInstrumental FX Engine v1.1は「かんたん」が初期表示です。SRTと音源の読込後、「間奏エフェクトを自動で追加」1回で検出・解析・生成・表示まで行います。手動追加は再生位置に最長3秒、基本編集は強さ・色・表示時間だけ。「詳細設定を開く」でv1.0の全機能を使えます。既存エンジン・JSON・初期OFFを維持し、既存区間・ロックFX・手動FXを保護します。公開版への反映は別途公開作業が必要です。[v1.1操作ガイド](docs/INSTRUMENTAL_FX.md)。
+開発版のInstrumental FX Engine v2.0は、実音声に反応するEQ・波形・図形／画像の変形と9種類の映像効果に対応します。6つの曲調を選んで自動作成し、詳細モードで差し替え・個別調整できます。既存64バー・Music Auto・Video Analysis・旧FX・JSON・初期OFFを維持。未公開の開発ブランチです。[v2.0操作ガイド](docs/INSTRUMENTAL_FX.md)。
 
 v1.9.0に「Instrumental FX Engine v1.0」を追加しました。歌詞のない前奏・間奏・アウトロを検出し、6種類の自動／手動FXを独立編集できます。初期OFF、既存の歌詞・保存・Undoと共存。完成MP4に反映します。[操作ガイド](docs/INSTRUMENTAL_FX.html) · [詳細仕様](docs/INSTRUMENTAL_FX.md)。字幕専用フロント／マット・透過PNGはFXを除外します。
 

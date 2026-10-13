@@ -24,7 +24,7 @@ J.nativeMotionKey = p => { const c = J.normalizeNativeSpectrum(p.nativeSpectrum)
 // Self-contained so exactly this implementation also runs in a Blob worker.
 function analyzePCM(samples, sampleRate, progress) {
   const rate = 60, bars = 64, size = sampleRate > 60000 ? 4096 : 2048;
-  const frames = Math.ceil(samples.length / sampleRate * rate), raw = new Float32Array(frames * bars);
+  const frames = Math.ceil(samples.length / sampleRate * rate), raw = new Float32Array(frames * bars), reactiveBands = new Float32Array(frames * 3);
   const real = new Float64Array(size), imag = new Float64Array(size), win = new Float64Array(size), reverse = new Uint32Array(size);
   let sum = 0; const bits = Math.log2(size);
   for (let i = 0; i < size; i++) {
@@ -84,6 +84,11 @@ function analyzePCM(samples, sampleRate, progress) {
   progress?.(.15);
   for (let f = 0; f < frames; f++) {
     fftAt(Math.round(f * sampleRate / rate) - size / 2);
+    for (let band = 0; band < 3; band++) {
+      const bounds = [[20,250],[250,4000],[4000,sampleRate/2]][band];
+      let power = 0; for (let k = Math.max(1,Math.ceil(bounds[0]/binHz)); k < Math.min(size/2+1,Math.ceil(bounds[1]/binHz)); k++) power += real[k] ** 2 + imag[k] ** 2;
+      reactiveBands[f*3+band] = Math.sqrt(power) * 2 / sum;
+    }
     for (let b = 0; b < bars; b++) {
       let power = 0; for (let k = edges[b]; k < edges[b + 1]; k++) power += real[k] ** 2 + imag[k] ** 2;
       const amplitude = Math.sqrt(power / Math.max(1, edges[b + 1] - edges[b])) * 2 / sum;
@@ -91,7 +96,7 @@ function analyzePCM(samples, sampleRate, progress) {
     }
     if (f % 120 === 0) progress?.(.15 + .85 * f / frames);
   }
-  return { raw, rate, bars, frames, duration: samples.length / sampleRate,
+  return { raw, reactiveBands, rate, bars, frames, duration: samples.length / sampleRate,
     frequencyRange: { low, high, fallback }, fftSize: size, bandEdges: Array.from(edges), scanFrames };
 }
 J.analyzeNativePCM = analyzePCM;
@@ -106,7 +111,7 @@ J.analyzeNativeAudio = async (buffer, signal, progress) => {
     progress?.(.05 * end / mono.length); await tick();
   }
   aborted(signal);
-  const script = `const analyze = ${analyzePCM.toString()}; onmessage = e => { try { const r = analyze(e.data.samples, e.data.sampleRate, p => postMessage({progress:p})); postMessage({result:r}, [r.raw.buffer]); } catch(e) { postMessage({error:e.message}); } };`;
+  const script = `const analyze = ${analyzePCM.toString()}; onmessage = e => { try { const r = analyze(e.data.samples, e.data.sampleRate, p => postMessage({progress:p})); postMessage({result:r}, [r.raw.buffer, r.reactiveBands.buffer]); } catch(e) { postMessage({error:e.message}); } };`;
   const url = URL.createObjectURL(new Blob([script], { type: 'text/javascript' }));
   let worker, stop;
   try {
@@ -118,6 +123,28 @@ J.analyzeNativeAudio = async (buffer, signal, progress) => {
       worker.postMessage({ samples: mono, sampleRate: buffer.sampleRate }, [mono.buffer]);
     });
   } finally { signal?.removeEventListener('abort', stop); worker?.terminate(); URL.revokeObjectURL(url); }
+};
+// One FFT per AudioBuffer, shared by the original spectrum and Instrumental FX.
+// Cancelling one consumer only cancels the worker when no consumers remain.
+const fftCache = new WeakMap();
+J.sharedAudioFFT = async (buffer, signal, progress) => {
+  aborted(signal); let entry = fftCache.get(buffer);
+  if (!entry) {
+    entry = { controller:new AbortController(), users:0, listeners:new Set(), data:null };
+    fftCache.set(buffer, entry);
+    entry.promise = J.analyzeNativeAudio(buffer, entry.controller.signal, p => entry.listeners.forEach(fn=>fn?.(p))).then(data=>{ entry.data=data; return data; }).catch(e=>{if(fftCache.get(buffer)===entry)fftCache.delete(buffer);throw e;});
+  }
+  entry.users++; entry.listeners.add(progress); let stop;
+  try {
+    return await new Promise((resolve,reject)=>{
+      stop=()=>reject(new DOMException('Cancelled','AbortError'));
+      signal?.addEventListener('abort',stop,{once:true});
+      entry.promise.then(resolve,reject); if(signal?.aborted)stop();
+    });
+  } finally {
+    signal?.removeEventListener('abort',stop);entry.listeners.delete(progress);entry.users--;
+    if(!entry.users&&!entry.data){entry.controller.abort();if(fftCache.get(buffer)===entry)fftCache.delete(buffer);}
+  }
 };
 J.shapeNativeSpectrum = async (analysis, settings, signal) => {
   const c = J.normalizeNativeSpectrum(settings), { raw, frames, bars, rate } = analysis;

@@ -1,8 +1,12 @@
 # SYNTHIA Layer Studio v1.9.0 User Manual
 
-## Instrumental FX v1.1 (development version)
+## Instrumental FX v2.0 (development version)
 
-Integrated studio tools → Instrumental FX defaults to Easy mode. Import SRT/audio and click Add instrumental effects automatically once for detection, analysis, generation and preview activation. Automatic / Cyber / Pop / Simple styles and Subtle / Normal / Bold strengths work with defaults. Add manually uses the exact playhead and up to three seconds, enables parent/Manual and selects the new effect. Outside-section positions are explained without relocation. Basic editing shows strength/color/duration; preview dragging, timeline resizing, delete and duplicate remain available.
+Import SRT/audio, choose mood/strength and EQ/wave/video switches, then Create audio-reactive effects automatically. Real precomputed audio drives spectrum, waveform, shape/image transforms and video processing. Advanced mode retains individual addition, targets, effect replacement, timeline and Undo; v1.1 editing remains available there. [v2.0 workflow, analysis, quality and limits](docs/INSTRUMENTAL_FX.en.md).
+
+## Instrumental FX v1.1 individual controls (inside Advanced mode)
+
+Integrated studio tools → Instrumental FX → Open advanced settings retains v1.1 individual controls. Import SRT/audio and click Add instrumental effects automatically once for detection, analysis, generation and preview activation. Automatic / Cyber / Pop / Simple styles and Subtle / Normal / Bold strengths work with defaults. Add manually uses the exact playhead and up to three seconds, enables parent/Manual and selects the new effect. Outside-section positions are explained without relocation. Basic editing shows strength/color/duration; preview dragging, timeline resizing, delete and duplicate remain available.
 
 Open advanced settings retains every original control; Easy returns without changing data or rendering. Saved sections, locked Auto and all Manual effects are protected; replacing existing Auto asks for confirmation. Parent/Auto/Manual default OFF and OFF retains data. Presets, Undo/Redo, JSON/autosave, Music Auto and video analysis remain intact.
 
