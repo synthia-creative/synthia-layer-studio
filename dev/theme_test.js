@@ -48,7 +48,11 @@ test('2 and 3 keep their invariants; themed 0/5 remain independent and manual dr
   assert.equal(rule.lookTheme,'horror');assert.equal(rule.horror,true);assert.equal(p.horror,false);assert.deepEqual(copy(updated.renderLook.style.schemes),copy(oldStyle.schemes));
   if(mode==='style')assert.equal(rule.mood,oldMood);else{assert.equal(rule.mood,'horror');assert.equal(updated.layout,first.layout);assert.deepEqual(copy(updated.renderLook.style.fonts),copy(oldStyle.fonts));}
  }
- for(const mode of ['color','random']){const a=fixture(),b=copy(a);a.theme='horror';b.theme='ballad';const ra=J.prepareCueReroll(a,J.plan(a),1,null,mode),rb=J.prepareCueReroll(b,J.plan(b),1,null,mode);assert.deepEqual(copy(ra.overrides),copy(rb.overrides));assert.deepEqual(copy(J.plan(ra).cuts),copy(J.plan(rb).cuts));}
+ // Color-only draws retain genre independence. v1 BME explicitly constrains motion/random draws under ballad.
+ for(const mode of ['color']){const a=fixture(),b=copy(a);a.theme='horror';b.theme='ballad';const ra=J.prepareCueReroll(a,J.plan(a),1,null,mode),rb=J.prepareCueReroll(b,J.plan(b),1,null,mode);assert.deepEqual(copy(ra.overrides),copy(rb.overrides));assert.deepEqual(copy(J.plan(ra).cuts),copy(J.plan(rb).cuts));}
+ const b=fixture(),before=J.plan(b),rb=J.prepareCueReroll(b,before,1,null,'random'),after=J.plan(rb);
+ for(const cut of after.cuts.filter(c=>c.line===1))for(const g of ['layout','enter','hold','exit','cam'])assert(J.BalladMotionEngine.allowlists[g].includes(cut[g]));
+ assert.deepEqual(copy(J.lineSnapshot(after,0)),copy(J.lineSnapshot(before,0)));
 });
 test('local candidates really bypass disabled global sets after changing the draw seed',()=>{
  let p=fixture();p.theme='horror';p=J.prepareCueReroll(p,J.plan(p),1,null,'all');

@@ -373,6 +373,9 @@ J.plan = (project, audio) => {
       units = autoSpecs.map(c => ({ text: c.utext, w: c.fraction ?? ([...c.utext].length + 1.6), recap: !!c.recap }));
     if (project._cueUnits?.[li]?.length)
       units = project._cueUnits[li].map(c => ({ text: c.utext, w: c.fraction, recap: !!c.recap }));
+    const balladUnits = J.ballad?.dataOf(project)?.units?.[J.ballad.unitKey({ index: li, cueId: ln.cueId })];
+    if (!ov.lock && balladUnits?.text === ln.text && balladUnits.signature === J.ballad.unitSignature(ov) && balladUnits.cuts?.length)
+      units = balladUnits.cuts.map(c => ({ ...c }));
     const unitTotal = units.reduce((a, u) => a + u.w, 0);
     const lockSpecs = (validAuto ? autoSpecs : null) || (validLocked && ov.lockedCuts.length === units.length
       && ov.lockedCuts.every((c, k2) => c && c.utext === units[k2].text && J.LAYOUTS[c.layout]) ? ov.lockedCuts : null);
@@ -550,6 +553,7 @@ J.plan = (project, audio) => {
         treat, treatP, bg, bgP: techBgP || (bg === lineBg ? lineBgP : {}), cam, camP, trans, transP, transDur, zone: Z, utext: u.text });
       if (LS?.stagger != null) cut.stagger = LS.stagger;
       if (LS?.renderLook || renderLook) cut.renderLook = LS?.renderLook || renderLook;
+      if (LS?.ballad) cut.ballad = LS.ballad;
       if (kime || (LS && LS.kime)) cut.kime = true;
       if (weightGrow) cut.weightGrow = true;
       if (morph) cut.morph = morph;
@@ -772,7 +776,7 @@ J.lineSnapshot = (plan, li) => {
   const cuts = plan.cuts.filter(c => c.line === li && c.utext != null);
   if (!cuts.length) return null;
   const S = JSON.parse(JSON.stringify(cuts.map(c => ({ utext: c.utext, fraction: c.end - c.start, stagger: c.stagger, renderLook: c.renderLook, layout: c.layout, enter: c.enter, exit: c.exit, hold: c.hold, inDur: c.inDur, outDur: c.outDur,
-    params: c.params, decor: c.decor, treat: c.treat, treatP: c.treatP, bg: c.bg, bgP: c.bgP, cam: c.cam, camP: c.camP, scheme: c.scheme, seed: c.seed,
+    ballad: c.ballad, params: c.params, decor: c.decor, treat: c.treat, treatP: c.treatP, bg: c.bg, bgP: c.bgP, cam: c.cam, camP: c.camP, scheme: c.scheme, seed: c.seed,
     trans: c.trans, transP: c.transP, transDur: c.transDur, morph: c.morph || null, weightGrow: !!c.weightGrow, kime: !!c.kime, recap: !!c.recap, twinParams: c.companion ? c.companion.params : null, events: [] }))));
   // each accent belongs to the cut it plays in (the ones just before a cut start belong to that cut)
   for (const e of plan.events) {

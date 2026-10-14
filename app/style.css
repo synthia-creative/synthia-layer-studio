@@ -683,3 +683,11 @@ dialog.motion-library { box-sizing: border-box; width: min(980px, calc(100vw - 2
 #studioDeleteTargets { min-height:140px; }
 #studioDeleteStatus { font-size:12px; overflow-wrap:anywhere; }
 #studioDeleteSelected { white-space:nowrap; }
+
+.ballad-settings { display:grid; gap:8px; margin:8px 0 14px; padding:12px; border:1px solid var(--line, #555); border-radius:6px; max-width:100%; }
+.ballad-settings[hidden] { display:none; }
+.ballad-settings label { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+.ballad-settings input[type="range"] { flex:1; min-width:90px; max-width:100%; }
+.ballad-settings select { width:100%; }
+.ballad-settings p { font-size:11px; margin:0; opacity:.75; }
+.ballad-settings details label { margin-top:8px; }

@@ -1,5 +1,7 @@
 # SYNTHIA Layer Studio
 
+v1.11.0 adds Ballad Motion Engine v1.0: three presets, motion strength, Soft Fade / Gentle Float / Light Trace / Emotional Bloom, deterministic saves and safe rerolls. Music Auto uses existing energy data without starting analysis or retiming subtitles. [Guide](docs/BALLAD_MOTION.md).
+
 Browser-based subtitle animations, subtitle layers and lyric videos. Desktop Chrome / Edge recommended.
 
 v1.10.0 includes Instrumental FX Engine v2.0 with real audio-driven EQ, waveform and shape/image transforms plus nine video effects. Choose one of six song moods and create automatically, then replace/edit in Advanced mode. Original 64 bars, Music Auto, Video Analysis, old FX, JSON and initial OFF remain intact. [v2.0 guide](docs/INSTRUMENTAL_FX.en.md).

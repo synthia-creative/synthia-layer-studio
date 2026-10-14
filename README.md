@@ -1,5 +1,7 @@
 # SYNTHIA Layer Studio
 
+v1.11.0にBallad Motion Engine v1.0を追加しました。バラードの3プリセット、強さ・楽曲追従、Design / Music / Full Autoに対応します。[操作と保存](docs/BALLAD_MOTION.md)。
+
 ブラウザ上で字幕演出・字幕レイヤー・リリックビデオ制作を行えるWebアプリです。PC版 Chrome / Edge 推奨。
 
 v1.10.0のInstrumental FX Engine v2.0は、実音声に反応するEQ・波形・図形／画像の変形と9種類の映像効果に対応します。6つの曲調を選んで自動作成し、詳細モードで差し替え・個別調整できます。既存64バー・Music Auto・Video Analysis・旧FX・JSON・初期OFFを維持。[v2.0操作ガイド](docs/INSTRUMENTAL_FX.md)。
