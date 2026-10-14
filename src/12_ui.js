@@ -615,6 +615,11 @@ function pickEnabledTech(g, opts) {
 }
 function rerollCurrentCut(kind) {
   if (S.exporting || S.tap) return;
+  if (J.ballad?.themeOf(S.project) === 'ballad') {
+    const cut = J.cutAt(S.plan, S.t);
+    if (!cut || cut.utext == null || S.project.overrides?.[cut.line]?.lock) return;
+    balladReroll(J.ballad.keyOf(S.plan, cut)); return;
+  }
   const cut = J.cutAt(S.plan, S.t);
   const k = lyricCutK(cut);
   if (!cut || k < 0) { toast('この位置のカットは抽選できません'); return; }
@@ -880,7 +885,7 @@ function editLine(li, ln) {
 /* ---------------- 編集の取り消し（Ctrl+Z） ---------------- */
 // Global look changes and cue edits must share chronological undo. Otherwise
 // old per-cue snapshots can undo a later global palette/font change piecemeal.
-const HKEYS = ['style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
+const HKEYS = ['studio', 'style', 'mood', 'seed', 'fx', 'enabled', 'fonts', 'colors', 'overrides', 'locks', 'localLooks', 'globalLook', 'theme', 'lookTheme', 'extra', 'wa', 'horror', 'typo', 'kinetic', 'motionRecipeVersion', 'lang', 'unify', 'typeset'];
 const ED = { undo: [], redo: [] };
 const edSnap = () => JSON.stringify({ look: Object.fromEntries(HKEYS.filter(k => k !== 'localLooks' && k !== 'overrides').map(k => [k, S.project[k] ?? null])), studio: S.project.studio || null, videoAnalysisEdits: { regions: S.project.videoAnalysis?.regions || [], placements: S.project.videoAnalysis?.placements || {} }, lyrics: S.project.lyrics, subtitleCues: S.project.subtitleCues || null, fillerSettings: S.project.fillerSettings, localLooks: S.project.localLooks || null, lineTimes: S.project.timing.lineTimes || {}, ov: S.project.overrides, range: S.project.exportRange || null });
 function pushEdit() { const s = edSnap(); if (ED.undo[ED.undo.length - 1] !== s) ED.undo.push(s); if (ED.undo.length > 60) ED.undo.shift(); ED.redo = []; updateEditBtns(); }
@@ -1272,10 +1277,12 @@ function rerollPart(part) {
     const keepE = lockedEnabled(), keepP = lockedParams();
     const r = J.omakase(P, Math.random, { style: P.style });
     Object.assign(P, J.themeDrawSwitches(r), { mood: r.mood, fx: r.fx, enabled: r.enabled, lookTheme: r.lookTheme });
+    if (r.studio?.balladMotion) P.studio.balladMotion = r.studio.balladMotion;
     if (r.themeSnapshots) P.themeSnapshots = r.themeSnapshots;
     restoreEnabled(keepE); restoreParams(keepP);
     msg = `雰囲気：${J.MOODS[r.mood].name}`;
   } else if (part === 'cut') {
+    if (J.ballad?.themeOf(P) === 'ballad') { balladReroll(); return; }
     P.seed = (Math.random() * 1e9) | 0;
     msg = '構成：レイアウトと動きを再抽選';
   }
@@ -1691,6 +1698,7 @@ function updateTap() {
 
 /* ---------------- sync all inputs from project ---------------- */
 function syncUI() {
+  J.syncBalladUI?.();
   syncOmakaseThemes();
   $('songTitle').value = S.project.title || ''; $('songArtist').value = S.project.artist || '';
   $('lyrics').value = S.project.lyrics;
@@ -1746,7 +1754,7 @@ function bind() {
     S.loop = LOOP_CYCLE[(i < 0 ? 0 : i + 1) % LOOP_CYCLE.length];
     syncLoopBtn(); S.need = true;
   });
-  $('btnShuffle').addEventListener('click', () => { remember(); S.project.seed = (Math.random() * 1e9) | 0; $('seed').value = S.project.seed; replan(); commit(); restartPreview(); });
+  $('btnShuffle').addEventListener('click', () => { if (J.ballad?.themeOf(S.project) === 'ballad') { balladReroll(); return; } remember(); S.project.seed = (Math.random() * 1e9) | 0; $('seed').value = S.project.seed; replan(); commit(); restartPreview(); });
   const sc = $('scrub');
   sc.addEventListener('input', () => { S.scrubbing = true; seek(sc.value / 10000 * S.plan.duration); });
   sc.addEventListener('change', () => { S.scrubbing = false; });
@@ -2065,9 +2073,20 @@ function boot() {
   requestAnimationFrame(tick);
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+
+function balladReroll(targetKey) {
+  if (S.exporting || S.tap) return;
+  remember();
+  const old = J.ballad.dataOf(S.project), settings = { ...J.BalladMotionEngine.settings(old), seed: Math.floor(Math.random() * 4294967296) };
+  if (!old && typeof matchMedia === 'function') settings.reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  S.project = J.ballad.generate(S.project, settings, targetKey ? 'cut' : 'design', S.plan, targetKey, audioLike());
+  fontKey = ''; syncUI(); replan(); commit(); flushSave();
+  toast(document.documentElement.lang === 'ja' ? 'バラード演出を再抽選しました' : 'Ballad motion rerolled');
+}
+
 J.ui = S;
 // Shared editor hooks used by the layer interface
-J.uiApi = { toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo, startTap, stopTap,
+J.uiApi = { balladReroll, balladRemember: remember, toast, replan, syncUI, syncOmakaseThemes, pause, play, seek, flushSave, loadAudioFile, restartPreview, exportRange, exportRangeLines, pushEdit, edGo, startTap, stopTap,
   audioLike, cueRerollTarget, resetAll,
   restoreProject(project) {
     if (S.exporting) return;

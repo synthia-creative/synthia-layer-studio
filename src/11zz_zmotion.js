@@ -3,7 +3,7 @@
     const clamp = (v, d, lo = 0, hi = 1) => Number.isFinite(v) ? Math.max(lo, Math.min(hi, v)) : d;
     J.STUDIO_PRESETS = { Minimal: ['blur', 'still', 'blur', .2], Pop: ['pop', 'breathe', 'shrink', .65], Rock: ['drop', 'jitter', 'scatter', .8], Cyber: ['type', 'glitchtick', 'blur', .65], Emotional: ['blur', 'drift', 'blur', .35], Elegant: ['wipe', 'still', 'blur', .25], Dark: ['blur', 'breathe', 'blur', .35], Impact: ['pop', 'jitter', 'scatter', .95], Glitch: ['scramble', 'glitchtick', 'flicker', .8], Cinematic: ['zoom', 'drift', 'shrink', .5] };
     J.STUDIO_CONTROLS = ['calm', 'impact', 'sharpness', 'speed', 'spread', 'shake', 'glitch'];
-    J.studioMotionRow = v => ({ enter: J.ENTER[v?.enter] ? v.enter : '', hold: J.HOLD[v?.hold] ? v.hold : '', exit: J.EXIT[v?.exit] ? v.exit : '', intensity: clamp(v?.intensity, .5) });
+    J.studioMotionRow = v => ({ enter: J.ENTER[v?.enter] ? v.enter : '', hold: J.HOLD[v?.hold] ? v.hold : '', exit: J.EXIT[v?.exit] ? v.exit : '', intensity: clamp(v?.intensity, .5), ...(v?.source === 'ballad-auto' ? { source: 'ballad-auto', inDuration: clamp(v.inDuration, .5, 0, 10), outDuration: clamp(v.outDuration, .5, 0, 10), seed: Number.isFinite(v.seed) ? v.seed >>> 0 : 0, reduceMotion: v.reduceMotion === true } : {}) });
     J.normalizeStudioMotion = v => {
         const controls = {};
         for (const key of J.STUDIO_CONTROLS)
@@ -25,7 +25,7 @@
             if (!line || line.interlude)
                 continue;
             const row = plan.studio.motion.rows[J.studioLineKey(line)];
-            if (!row)
+            if (!row || project.overrides?.[cut.line]?.lock)
                 continue;
             for (const [stage, table] of [['enter', J.ENTER], ['hold', J.HOLD], ['exit', J.EXIT]]) {
                 const def = table[row[stage]];
@@ -51,6 +51,7 @@
     };
     const draw = J.drawItem;
     J.drawItem = (env, it) => {
+        if (env.cut?.studioMotion?.source === 'ballad-auto') return draw(env, it);
         if (!env.cut?.studioMotion || !env.plan.studio?.flags.motionEditing || env.inLayer || it._studioMotion || !env.cut.text.includes(it.text))
             return draw(env, it);
         const c = env.plan.studio.motion.controls, a = env.studioAmount || 0, old = it.charFn, phase = Math.sin(env.t * (2 + c.speed / 10)), pulse = 1 + .035 * a * phase * c.impact / 100;

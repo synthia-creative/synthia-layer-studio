@@ -54,7 +54,7 @@ const canonical = value => Array.isArray(value) ? value.map(canonical) : value &
 // Missing candidate entries and explicit true both mean enabled. Import expands
 // sparse pools, so neither expansion nor object insertion order invalidates a draw.
 const poolContext = enabled => Object.fromEntries(Object.entries(enabled || {}).map(([g, items]) =>
-  [g, Object.fromEntries(Object.entries(items || {}).filter(([, value]) => value === false))]).filter(([, items]) => Object.keys(items).length));
+  [g, Object.fromEntries(Object.entries(items || {}).filter(([key, value]) => value === false && !key.startsWith('bme_')))]).filter(([, items]) => Object.keys(items).length));
 const normalizeLookContext = values => {
   if (!Array.isArray(values)) return values;
   const result = values.slice(); result[4] = poolContext(result[4]); return result;
